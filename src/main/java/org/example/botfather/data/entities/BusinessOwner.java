@@ -1,12 +1,20 @@
 package org.example.botfather.data.entities;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
+@Setter
 @Entity
 public class BusinessOwner {
+
+    @Setter(AccessLevel.NONE)
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -20,38 +28,15 @@ public class BusinessOwner {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @Column(nullable = false)
+    private String phoneNumber;
+
+    @Column
+    private String address;
+
+    @Column(nullable = false)
+    private String workingHours;
+
     @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Bot> bots = new ArrayList<>();
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
 }

@@ -1,10 +1,18 @@
 package org.example.botfather.data.entities;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 
+import java.util.List;
+
+@Setter
+@Getter
 @Entity
 public class Bot {
 
+    @Setter(AccessLevel.NONE)
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -15,30 +23,15 @@ public class Bot {
     @Column(nullable = false, unique = true)
     private String token;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getWelcomeMessage() {
-        return welcomeMessage;
-    }
-
-    public void setWelcomeMessage(String welcomeMessage) {
-        this.welcomeMessage = welcomeMessage;
-    }
-
     @Column(nullable = false)
     private String welcomeMessage;
+
+    @Column
+    private String description;
+
+    @Column
+    private String imageUrl;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    private List<Job> jobs;
 }

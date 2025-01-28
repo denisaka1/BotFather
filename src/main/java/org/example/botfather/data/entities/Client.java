@@ -8,7 +8,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-public class User {
+public class Client {
 
     @Setter(AccessLevel.NONE)
     @Id

@@ -8,8 +8,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class MyTelegramBot extends TelegramLongPollingBot {
 
+    private final MessageHandler messageHandler;
     private static final String BOT_USERNAME = "LidarAndDenisBot";
     private static final String BOT_TOKEN = "7601875212:AAFyrV-TyC2KZf7qwx1KKBsZ8ZQf6V27XQk";
+
+    public MyTelegramBot(MessageHandler messageHandler) {
+        this.messageHandler = messageHandler;
+    }
 
     @Override
     public String getBotUsername() {
@@ -27,17 +32,9 @@ public class MyTelegramBot extends TelegramLongPollingBot {
             String chatId = update.getMessage().getChatId().toString();
             String userMessage = update.getMessage().getText();
 
-            String response = processMessage(userMessage);
+            String response = messageHandler.processMessage(userMessage);
 
             sendMessage(chatId, response);
-        }
-    }
-
-    private String processMessage(String message) {
-        if (message.equalsIgnoreCase("/start")) {
-            return "Welcome to our bot!";
-        } else {
-            return "Got " + message;
         }
     }
 

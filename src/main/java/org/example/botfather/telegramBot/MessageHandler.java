@@ -5,10 +5,11 @@ import org.springframework.stereotype.Service;
 public class MessageHandler {
 
     public String processMessage(String message) {
-        if (message.equalsIgnoreCase("/start")) {
-            return "Welcome to our bot!";
-        } else {
-            return "Got " + message;
+        switch (message.toLowerCase()) {
+            case "/start":
+                return "Welcome to our bot!";
+            default:
+                return "Got " + message;
         }
     }
 }

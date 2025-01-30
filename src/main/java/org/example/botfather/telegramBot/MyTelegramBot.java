@@ -1,4 +1,5 @@
 package org.example.botfather.telegramBot;
+import org.example.botfather.config.ConfigLoader;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -9,21 +10,21 @@ import org.springframework.stereotype.Component;
 public class MyTelegramBot extends TelegramLongPollingBot {
 
     private final MessageHandler messageHandler;
-    private static final String BOT_USERNAME = "LidarAndDenisBot";
-    private static final String BOT_TOKEN = "7601875212:AAFyrV-TyC2KZf7qwx1KKBsZ8ZQf6V27XQk";
+    private final ConfigLoader configLoader;
 
-    public MyTelegramBot(MessageHandler messageHandler) {
+    public MyTelegramBot(MessageHandler messageHandler, ConfigLoader configLoader) {
         this.messageHandler = messageHandler;
+        this.configLoader = configLoader;
     }
 
     @Override
     public String getBotUsername() {
-        return BOT_USERNAME;
+        return configLoader.getUsername();
     }
 
     @Override
     public String getBotToken() {
-        return BOT_TOKEN;
+        return configLoader.getToken();
     }
 
     @Override

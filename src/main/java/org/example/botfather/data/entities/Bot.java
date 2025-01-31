@@ -24,6 +24,9 @@ public class Bot {
     private String token;
 
     @Column(nullable = false)
+    private String username;
+
+    @Column(nullable = false)
     private String welcomeMessage;
 
     @Column

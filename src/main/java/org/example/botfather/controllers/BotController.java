@@ -21,7 +21,7 @@ public class BotController {
     }
 
     @PostMapping
-    public ResponseEntity<Bot> createBrand(@RequestBody Bot bot) {
+    public ResponseEntity<Bot> createBot(@RequestBody Bot bot) {
         return ResponseEntity.ok(botService.saveBot(bot));
     }
 }

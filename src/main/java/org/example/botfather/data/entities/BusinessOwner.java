@@ -39,4 +39,12 @@ public class BusinessOwner {
 
     @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Bot> bots = new ArrayList<>();
+
+    public void addBot(Bot bot) {
+        bots.add(bot);
+    }
+
+    public void removeBot(Bot bot) {
+        bots.remove(bot);
+    }
 }

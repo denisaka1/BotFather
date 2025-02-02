@@ -1,8 +1,7 @@
 package org.example.botfather.telegrambot;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.example.botfather.data.entities.Bot;
-import org.example.botfather.data.repositories.BotRepository;
+import org.example.botfather.utils.ApiRequestHelper;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import java.util.List;
@@ -11,17 +10,24 @@ import java.util.List;
 @AllArgsConstructor
 public class DynamicBotsLoader implements CommandLineRunner {
     private final DynamicBotsRegistryService botManager;
-    private final BotRepository botRepository;
+    private final ApiRequestHelper apiRequestHelper;
 
     @Override
     public void run(String... args) {
 //        List<Bot> bots = botRepository.findAll();
-        List<Bot> bots = List.of(
-                new Bot("Lidar310225bot", "8011441952:AAGiV-aSOpv5LoE7PtEK3GvD-oGRVTIE3Nc")
-        );
+        Bot bot = createBot("Lidar310225bot", "8011441952:AAGiV-aSOpv5LoE7PtEK3GvD-oGRVTIE3Nc");
+        List<Bot> bots = List.of(bot);
         System.out.println("Found " + bots.size() + " bots");
-        for (Bot bot : bots) {
-            botManager.registerBot(bot.getUsername(), bot.getToken());
-        }
+//        for (Bot bot : bots) {
+            botManager.registerBot(bot.getName(), bot.getToken());
+//        }
+    }
+
+    public Bot createBot(String name, String token) {
+        Bot bot = Bot.builder()
+                .name(name)
+                .token(token)
+                .build();
+        return apiRequestHelper.post("http://localhost:8080/api/bots", bot, Bot.class);
     }
 }

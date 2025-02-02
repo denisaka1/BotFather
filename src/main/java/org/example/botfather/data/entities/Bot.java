@@ -1,15 +1,16 @@
 package org.example.botfather.data.entities;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.List;
 
 @Setter
 @Getter
 @Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Bot {
 
     @Setter(AccessLevel.NONE)
@@ -23,10 +24,7 @@ public class Bot {
     @Column(nullable = false, unique = true)
     private String token;
 
-    @Column(nullable = false)
-    private String username;
-
-    @Column(nullable = false)
+    @Column
     private String welcomeMessage;
 
     @Column
@@ -37,9 +35,4 @@ public class Bot {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<Job> jobs;
-
-    public Bot(String username, String token) {
-        this.username = username;
-        this.token = token;
-    }
 }

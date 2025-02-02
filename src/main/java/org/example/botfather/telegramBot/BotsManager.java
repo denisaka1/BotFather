@@ -7,12 +7,12 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TelegramBotFather extends TelegramLongPollingBot {
+public class BotsManager extends TelegramLongPollingBot {
 
     private final MessageHandler messageHandler;
     private final ConfigLoader configLoader;
 
-    public TelegramBotFather(MessageHandler messageHandler, ConfigLoader configLoader) {
+    public BotsManager(MessageHandler messageHandler, ConfigLoader configLoader) {
         this.messageHandler = messageHandler;
         this.configLoader = configLoader;
     }

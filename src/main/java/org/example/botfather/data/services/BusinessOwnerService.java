@@ -30,4 +30,9 @@ public class BusinessOwnerService {
 
         return bot;
     }
+
+    public List<Bot> findAllBots(Long id) {
+        BusinessOwner owner = businessOwnerRepository.findById(id).orElseThrow();
+        return owner.getBots();
+    }
 }

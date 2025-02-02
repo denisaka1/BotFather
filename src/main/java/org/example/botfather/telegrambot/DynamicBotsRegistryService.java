@@ -1,4 +1,4 @@
-package org.example.botfather.telegramBot;
+package org.example.botfather.telegrambot;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;

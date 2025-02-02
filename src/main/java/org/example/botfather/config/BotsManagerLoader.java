@@ -1,5 +1,5 @@
 package org.example.botfather.config;
-import org.example.botfather.telegramBot.BotsManager;
+import org.example.botfather.telegrambot.BotsManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.telegram.telegrambots.meta.TelegramBotsApi;

@@ -1,16 +1,13 @@
-package org.example.botfather.telegramBot;
+package org.example.botfather.telegrambot;
 
+import lombok.AllArgsConstructor;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
+@AllArgsConstructor
 public class DynamicBot extends TelegramLongPollingBot {
     private final String botUsername;
     private final String botToken;
-
-    public DynamicBot(String botUsername, String botToken) {
-        this.botUsername = botUsername;
-        this.botToken = botToken;
-    }
 
     @Override
     public String getBotUsername() {

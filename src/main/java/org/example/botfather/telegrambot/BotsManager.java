@@ -28,9 +28,8 @@ public class BotsManager extends TelegramLongPollingBot {
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
             String chatId = update.getMessage().getChatId().toString();
-            String userMessage = update.getMessage().getText();
 
-            String response = messageHandler.processMessage(userMessage);
+            String response = messageHandler.processMessage(update.getMessage());
 
             sendMessage(chatId, response);
         }

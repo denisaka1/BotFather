@@ -20,6 +20,9 @@ public class BusinessOwner {
     private Long id;
 
     @Column(nullable = false)
+    private String userTelegramId;
+
+    @Column(nullable = false)
     private String firstName;
 
     @Column(nullable = false)

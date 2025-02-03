@@ -19,23 +19,43 @@ public class MessageHandler {
         commands.put("/bots", botsCommand);
     }
 
+    public String renderMainMenu(Message message) {
+        String userFirstName = message.getFrom().getFirstName();
+        return String.format("""
+            Hello %s! 👋
+            🌟 Welcome to Our Bot! 🌟
+
+            🏠 Main Menu:
+            
+            🔹 /start - 🚀 Create a new user
+            🔹 /create - 🤖 Create a new bot
+            🔹 /bots - 📋 List all your bots
+
+            ℹ️ You can return to this menu anytime by typing /cancel. ❌
+            """, userFirstName);
+    }
+
     public String processMessage(Message message) {
         String userMessage = message.getText().toLowerCase();
         Long userId = message.getFrom().getId();
-        if (userCommands.containsKey(userId)) {
+        BotCommand currentUserCommand = userCommands.get(userId);
+        if (currentUserCommand != null) {
             if (userMessage.equals("/cancel")) {
                 userCommands.remove(userId);
-                return "Command cancelled";
+                return "❌ Command cancelled!" + "\n\n" + renderMainMenu(message);
             }
-            return userCommands.get(userId).execute(message);
+            if (currentUserCommand.isCompleted()) {
+                userCommands.remove(userId);
+                return renderMainMenu(message);
+            }
+            return currentUserCommand.execute(message);
         } else {
             BotCommand command = commands.get(userMessage);
             if (command != null) {
                 userCommands.put(userId, command);
                 return command.execute(message);
             } else {
-                // Display the main menu with all the commands
-                return "Unknown command: " + userMessage;
+                return renderMainMenu(message);
             }
         }
     }

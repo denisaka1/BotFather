@@ -8,5 +8,10 @@ public class BotsManagerCreateCommand implements BotCommand {
     public String execute(Message message) {
         return "Create new bot!";
     }
+
+    @Override
+    public boolean isCompleted() {
+        return false;
+    }
 }
 

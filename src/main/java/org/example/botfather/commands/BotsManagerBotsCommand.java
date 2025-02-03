@@ -8,5 +8,10 @@ public class BotsManagerBotsCommand implements BotCommand {
     public String execute(Message message) {
         return "Here are your bots!";
     }
+
+    @Override
+    public boolean isCompleted() {
+        return false;
+    }
 }
 

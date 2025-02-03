@@ -39,7 +39,7 @@ public class Validators {
 
     // ✅ Phone Number Validator (Basic check for digits)
     public static class PhoneNumberValidator implements Validator<String> {
-        private static final Pattern PHONE_PATTERN = Pattern.compile("^(?:\\+972|972|0)[2-9][0-9]{6,7}$\n");
+        private static final Pattern PHONE_PATTERN = Pattern.compile("^(\\+972|972|0)([2-9]\\d{7}|5\\d{8})$");
 
         @Override
         public boolean validate(String input) {

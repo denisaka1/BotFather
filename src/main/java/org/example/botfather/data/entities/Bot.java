@@ -33,6 +33,9 @@ public class Bot {
     @Column
     private String imageUrl;
 
+    @Column
+    private String workingHours;
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<Job> jobs;
 }

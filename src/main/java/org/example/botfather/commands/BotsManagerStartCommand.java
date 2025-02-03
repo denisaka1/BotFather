@@ -55,12 +55,12 @@ public class BotsManagerStartCommand implements BotCommand {
                     .email(userForm.getUserResponses().get("email"))
                     .address(userForm.getUserResponses().get("address"))
                     .build();
-//            BusinessOwner savedBusinessOwner = this.apiRequestHelper.post(
-//                    "http://localhost:8080/api/business_owner",
-//                    businessOwner,
-//                    BusinessOwner.class
-//            );
-            System.out.println(businessOwner.toString());
+            BusinessOwner savedBusinessOwner = this.apiRequestHelper.post(
+                    "http://localhost:8080/api/business_owner",
+                    businessOwner,
+                    BusinessOwner.class
+            );
+            System.out.println(savedBusinessOwner.toString());
         }
         return response;
     }

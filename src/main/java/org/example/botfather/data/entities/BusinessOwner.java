@@ -36,9 +36,6 @@ public class BusinessOwner {
     @Column
     private String address;
 
-    @Column(nullable = false)
-    private String workingHours;
-
     @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Bot> bots = new ArrayList<>();
 

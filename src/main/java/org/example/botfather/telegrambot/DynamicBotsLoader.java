@@ -19,13 +19,13 @@ public class DynamicBotsLoader implements CommandLineRunner {
         List<Bot> bots = List.of(bot);
         System.out.println("Found " + bots.size() + " bots");
 //        for (Bot bot : bots) {
-            botManager.registerBot(bot.getName(), bot.getToken());
+            botManager.registerBot(bot.getUsername(), bot.getToken());
 //        }
     }
 
     public Bot createBot(String name, String token) {
         Bot bot = Bot.builder()
-                .name(name)
+                .username(name)
                 .token(token)
                 .build();
         return apiRequestHelper.post("http://localhost:8080/api/bots", bot, Bot.class);

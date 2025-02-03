@@ -62,7 +62,7 @@ public class MessageHandler {
 
         return switch (command) {
             case "/start" -> new BotsManagerStartCommand(apiRequestHelper);
-            case "/create" -> new BotsManagerCreateCommand();
+            case "/create" -> new BotsManagerCreateCommand(apiRequestHelper);
             case "/bots" -> new BotsManagerBotsCommand();
             default -> null;
         };

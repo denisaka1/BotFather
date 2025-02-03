@@ -1,23 +1,20 @@
 package org.example.botfather.telegrambot;
+import lombok.AllArgsConstructor;
 import org.example.botfather.commands.BotCommand;
 import org.example.botfather.commands.BotsManagerBotsCommand;
 import org.example.botfather.commands.BotsManagerCreateCommand;
 import org.example.botfather.commands.BotsManagerStartCommand;
+import org.example.botfather.utils.ApiRequestHelper;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import java.util.HashMap;
 import java.util.Map;
 
 @Service
+@AllArgsConstructor
 public class MessageHandler {
-    private final Map<String, BotCommand> commands = new HashMap<>();
+    private final ApiRequestHelper apiRequestHelper;
     private final Map<Long, BotCommand> userCommands = new HashMap<>();
-
-    public MessageHandler(BotsManagerStartCommand startCommand, BotsManagerCreateCommand createCommand, BotsManagerBotsCommand botsCommand) {
-        commands.put("/start", startCommand);
-        commands.put("/create", createCommand);
-        commands.put("/bots", botsCommand);
-    }
 
     public String renderMainMenu(Message message) {
         String userFirstName = message.getFrom().getFirstName();
@@ -50,7 +47,7 @@ public class MessageHandler {
             }
             return currentUserCommand.execute(message);
         } else {
-            BotCommand command = commands.get(userMessage);
+            BotCommand command = getCommand(userMessage);
             if (command != null) {
                 userCommands.put(userId, command);
                 return command.execute(message);
@@ -58,5 +55,16 @@ public class MessageHandler {
                 return renderMainMenu(message);
             }
         }
+    }
+
+    public BotCommand getCommand(String command) {
+        if (command == null) return null;
+
+        return switch (command) {
+            case "/start" -> new BotsManagerStartCommand(apiRequestHelper);
+            case "/create" -> new BotsManagerCreateCommand();
+            case "/bots" -> new BotsManagerBotsCommand();
+            default -> null;
+        };
     }
 }

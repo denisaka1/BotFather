@@ -1,5 +1,4 @@
 package org.example.botfather.commands;
-import org.example.botfather.data.entities.Bot;
 import org.example.botfather.data.entities.BusinessOwner;
 import org.example.botfather.telegramform.GenericForm;
 import org.example.botfather.telegramform.FormStep;

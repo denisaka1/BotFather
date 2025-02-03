@@ -35,4 +35,8 @@ public class BusinessOwnerService {
         BusinessOwner owner = businessOwnerRepository.findById(id).orElseThrow();
         return owner.getBots();
     }
+
+    public boolean existsByUserTelegramId(String userTelegramId) {
+        return businessOwnerRepository.existsByUserTelegramId(userTelegramId);
+    }
 }

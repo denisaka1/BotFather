@@ -23,6 +23,11 @@ public class BusinessOwnerController {
     @GetMapping("{id}")
     public ResponseEntity<List<Bot>> findAllBots(@RequestParam Long id){
         return ResponseEntity.ok(businessOwnerService.findAllBots(id));
+    }
 
+    @GetMapping("/exists")
+    public ResponseEntity<Boolean> existsByUserTelegramId(@RequestParam String userTelegramId) {
+        boolean exists = businessOwnerService.existsByUserTelegramId(userTelegramId);
+        return ResponseEntity.ok(exists);
     }
 }

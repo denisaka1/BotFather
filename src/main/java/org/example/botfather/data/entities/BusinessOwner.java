@@ -1,10 +1,7 @@
 package org.example.botfather.data.entities;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +9,8 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
+@Builder
+@ToString
 public class BusinessOwner {
 
     @Setter(AccessLevel.NONE)

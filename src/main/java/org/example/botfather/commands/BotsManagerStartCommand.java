@@ -13,7 +13,7 @@ import java.util.Map;
 public class BotsManagerStartCommand implements BotCommand {
     private final GenericForm userForm;
     private final ApiRequestHelper apiRequestHelper;
-    private boolean formCompleted = false;
+    private boolean forceCompleted = false;
 
     public BotsManagerStartCommand(ApiRequestHelper apiRequestHelper) {
         this.apiRequestHelper = apiRequestHelper;
@@ -26,7 +26,7 @@ public class BotsManagerStartCommand implements BotCommand {
 
     @Override
     public boolean isCompleted() {
-        return userForm.isCompleted() || this.formCompleted;
+        return userForm.isCompleted() || this.forceCompleted;
     }
 
     public boolean checkIfUserExists(Long userId) {
@@ -42,7 +42,7 @@ public class BotsManagerStartCommand implements BotCommand {
         // check if the user is already registered
         Long userId = message.getFrom().getId();
         if (checkIfUserExists(userId)) {
-            this.formCompleted = true;
+            this.forceCompleted = true;
             return "👋 Welcome back! You are already registered!\n Type any text to continue.";
         }
         String response = userForm.handleResponse(message.getText().toLowerCase());
@@ -55,14 +55,13 @@ public class BotsManagerStartCommand implements BotCommand {
                     .email(userForm.getUserResponses().get("email"))
                     .address(userForm.getUserResponses().get("address"))
                     .build();
-//            this.apiRequestHelper.post(
+//            BusinessOwner savedBusinessOwner = this.apiRequestHelper.post(
 //                    "http://localhost:8080/api/business_owner",
-//                    userForm.getUserResponses(),
-//                    Map.class
+//                    businessOwner,
+//                    BusinessOwner.class
 //            );
             System.out.println(businessOwner.toString());
         }
-        // check if the form is completed and create new user with userForm.userResponses()
         return response;
     }
 }

@@ -2,6 +2,7 @@ package org.example.botfather.controllers;
 
 import lombok.AllArgsConstructor;
 import org.example.botfather.data.entities.Bot;
+import org.example.botfather.data.entities.BusinessOwner;
 import org.example.botfather.data.services.BusinessOwnerService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,5 +30,10 @@ public class BusinessOwnerController {
     public ResponseEntity<Boolean> existsByUserTelegramId(@RequestParam String userTelegramId) {
         boolean exists = businessOwnerService.existsByUserTelegramId(userTelegramId);
         return ResponseEntity.ok(exists);
+    }
+
+    @PostMapping
+    public ResponseEntity<BusinessOwner> craeteBusinessOwner(@RequestBody BusinessOwner businessOwner) {
+        return ResponseEntity.ok(businessOwnerService.saveBusinessOwner(businessOwner));
     }
 }

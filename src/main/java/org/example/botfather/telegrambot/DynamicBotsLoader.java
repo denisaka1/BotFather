@@ -15,11 +15,9 @@ public class DynamicBotsLoader implements CommandLineRunner {
     @Override
     public void run(String... args) {
 //        List<Bot> bots = botRepository.findAll();
-        Bot bot = createBot("Lidar310225bot", "8011441952:AAGiV-aSOpv5LoE7PtEK3GvD-oGRVTIE3Nc");
-        List<Bot> bots = List.of(bot);
-        System.out.println("Found " + bots.size() + " bots");
+//        System.out.println("Found " + bots.size() + " bots");
 //        for (Bot bot : bots) {
-            botManager.registerBot(bot.getUsername(), bot.getToken());
+//            botManager.registerBot(bot.getUsername(), bot.getToken());
 //        }
     }
 

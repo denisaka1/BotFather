@@ -28,7 +28,7 @@ public class BotsManagerStartCommand implements BotCommand {
         // check if the user is already registered
         Long userId = message.getFrom().getId();
         String response = userForm.handleResponse(message.getText().toLowerCase());
-
+        // check if the form is completed and create new user with userForm.userResponses()
         return response;
     }
 }

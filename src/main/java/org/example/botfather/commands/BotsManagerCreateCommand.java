@@ -24,7 +24,7 @@ public class BotsManagerCreateCommand implements BotCommand {
                 2️⃣ Send the command /newbot.
                 3️⃣ Follow the instructions to choose a name and username for your bot.
                 4️⃣ Copy the final message containing your bot token.
-                🔹 To continue the creation process, please paste the last message you received (including the token) here..""";
+                """;
         String workingHoursMessage = """
                 ⏳ What are your Working hours?
                 Please provide list of days in this format:
@@ -40,7 +40,7 @@ public class BotsManagerCreateCommand implements BotCommand {
                 Sunday: None
                """;
         String workingDurationsMessage = """
-                ⏳ What are your working durations?
+                📋 What are your working durations?
                 Please provide a list of services with their respective durations in the following format:
                 Service Name: HH:MM (or multiple time slots separated by commas)
 

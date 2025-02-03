@@ -19,6 +19,7 @@ public class BotService {
     }
 
     public Bot saveBot(Bot bot) {
+        // register the bot with DynamicBotsRegistryService to telemgrambotapi with the token and username
         return botRepository.save(bot);
     }
 }

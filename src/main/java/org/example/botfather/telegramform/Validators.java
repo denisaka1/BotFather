@@ -5,7 +5,6 @@ public class Validators {
 
     public interface Validator<T> {
         boolean validate(T input);
-        String getErrorMessage();
     }
 
     // ✅ String Validator (Non-empty check)
@@ -13,11 +12,6 @@ public class Validators {
         @Override
         public boolean validate(String input) {
             return input != null && !input.trim().isEmpty();
-        }
-
-        @Override
-        public String getErrorMessage() {
-            return "Input cannot be empty.";
         }
     }
 
@@ -30,11 +24,6 @@ public class Validators {
         public boolean validate(String input) {
             return input != null && EMAIL_PATTERN.matcher(input).matches();
         }
-
-        @Override
-        public String getErrorMessage() {
-            return "Invalid email.";
-        }
     }
 
     // ✅ Phone Number Validator (Basic check for digits)
@@ -44,11 +33,6 @@ public class Validators {
         @Override
         public boolean validate(String input) {
             return input != null && PHONE_PATTERN.matcher(input).matches();
-        }
-
-        @Override
-        public String getErrorMessage() {
-            return "Invalid phone number.";
         }
     }
 }

@@ -18,7 +18,7 @@ public class Validators {
     // ✅ Email Validator (Regex-based)
     public static class EmailValidator implements Validator<String> {
         private static final Pattern EMAIL_PATTERN =
-                Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
+                Pattern.compile("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
 
         @Override
         public boolean validate(String input) {

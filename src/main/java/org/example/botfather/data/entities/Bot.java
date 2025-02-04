@@ -1,5 +1,4 @@
 package org.example.botfather.data.entities;
-
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,6 +10,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class Bot {
 
     @Setter(AccessLevel.NONE)
@@ -29,15 +29,9 @@ public class Bot {
     @Column
     private String welcomeMessage;
 
-    @Column
-    private String description;
-
-    @Column
-    private String imageUrl;
-
-    @Column
-    private String workingHours;
-
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<Job> jobs;
+
+    @OneToMany(mappedBy = "bot", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<WorkingHours> workingHours;
 }

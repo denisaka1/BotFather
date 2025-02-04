@@ -1,13 +1,14 @@
 package org.example.botfather.commands;
+import org.example.botfather.data.entities.Bot;
 import org.example.botfather.telegramform.FormStep;
 import org.example.botfather.telegramform.GenericForm;
 import org.example.botfather.telegramform.Validators;
 import org.example.botfather.utils.ApiRequestHelper;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.springframework.stereotype.Component;
-
 import java.util.Arrays;
 import java.util.Map;
+import static org.example.botfather.utils.MessageExtractor.*;
 
 @Component
 public class BotsManagerCreateCommand implements BotCommand {
@@ -59,7 +60,7 @@ public class BotsManagerCreateCommand implements BotCommand {
         ), firstMessage, "🎉 Thank you for creating new bot with us! Type any text to continue.");
     }
 
-    public boolean checkIfUserExists(Long userId) {
+    private boolean checkIfUserExists(Long userId) {
         return this.apiRequestHelper.get(
                 "http://localhost:8080/api/business_owner/exists",
                 Boolean.class,
@@ -77,12 +78,26 @@ public class BotsManagerCreateCommand implements BotCommand {
                     You need to register using the /start command to create a new bot.
                     Type any text to return to the menu.""";
         }
-        String response = userForm.handleResponse(message.getText().toLowerCase());
+        String response = userForm.handleResponse(message.getText());
         if (userForm.isCompleted()) {
-            // Save the bot to the database and extract the required data
-            System.out.println(userForm.getUserResponses());
+            buildAndSaveBot(userForm.getUserResponses());
         }
         return response;
+    }
+
+    private void buildAndSaveBot(Map<String, String> userResponses) {
+        String[] botInfo = extractBotInfoFromForwardedMsg(userResponses.get("forwardedMessage"));
+        String username = botInfo[0];
+        String token = botInfo[1];
+        Bot bot = Bot.builder()
+                .username(username)
+                .token(token)
+                .name(userResponses.get("name"))
+                .welcomeMessage(userResponses.get("welcomeMessage"))
+                .build();
+        bot.setWorkingHours(extractWorkingHours(userResponses.get("workingHours"), bot));
+        bot.setJobs(extractJobs(userResponses.get("workingDurations"), bot));
+        System.out.println(bot);
     }
 
     @Override

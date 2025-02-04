@@ -1,5 +1,4 @@
 package org.example.botfather.data.entities;
-
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -25,4 +24,8 @@ public class Job {
     @ManyToOne
     @JoinColumn(name = "bot_id")
     private Bot owner;
+
+    public String toString() {
+        return "Job{id=" + id + ", duration='" + duration + "', type='" + type + "'}";
+    }
 }

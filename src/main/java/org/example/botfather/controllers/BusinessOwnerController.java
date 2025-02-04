@@ -16,9 +16,9 @@ public class BusinessOwnerController {
 
     private final BusinessOwnerService businessOwnerService;
 
-    @PostMapping("{id}")
-    public ResponseEntity<Bot> createBot(@RequestParam Long id, @RequestBody Bot bot) {
-        return ResponseEntity.ok(businessOwnerService.saveBot(id, bot));
+    @PostMapping("{userTelegramId}")
+    public ResponseEntity<Bot> createBot(@RequestParam String userTelegramId, @RequestBody Bot bot) {
+        return ResponseEntity.ok(businessOwnerService.saveBot(userTelegramId, bot));
     }
 
     @GetMapping("{id}")

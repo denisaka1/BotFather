@@ -34,4 +34,12 @@ public class Bot {
 
     @OneToMany(mappedBy = "bot", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<WorkingHours> workingHours;
+
+    public void addJob(Job job) {
+        jobs.add(job);
+    }
+
+    public void removeJob(Job job) {
+        jobs.remove(job);
+    }
 }

@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import org.example.botfather.data.entities.Bot;
 import org.example.botfather.data.entities.BusinessOwner;
 import org.example.botfather.data.repositories.BusinessOwnerRepository;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,8 +22,8 @@ public class BusinessOwnerService {
         return businessOwnerRepository.save(businessOwner);
     }
 
-    public Bot saveBot(Long id, Bot bot) {
-        BusinessOwner owner = businessOwnerRepository.findById(id).orElseThrow();
+    public Bot saveBot(String userTelegramId, Bot bot) {
+        BusinessOwner owner = businessOwnerRepository.findByUserTelegramId(userTelegramId).orElseThrow();
         owner.addBot(bot);
         businessOwnerRepository.save(owner);
 

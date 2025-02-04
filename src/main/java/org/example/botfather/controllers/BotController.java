@@ -1,5 +1,4 @@
 package org.example.botfather.controllers;
-
 import lombok.AllArgsConstructor;
 import org.example.botfather.data.entities.Bot;
 import org.example.botfather.data.services.BotService;

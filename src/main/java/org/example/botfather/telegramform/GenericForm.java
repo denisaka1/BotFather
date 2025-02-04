@@ -32,7 +32,7 @@ public class GenericForm {
 
         FormStep<String> currentStep = steps.get(currentStepIndex);
 
-        if (currentStep.validate(input)) {
+        if (currentStep.validate(input.toLowerCase())) {
             userResponses.put(currentStep.fieldName(), input);
             currentStepIndex++;
 

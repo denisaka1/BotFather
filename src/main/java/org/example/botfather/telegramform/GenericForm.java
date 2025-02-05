@@ -30,6 +30,15 @@ public class GenericForm {
             return finalMessage;
         }
 
+        if (input.equals("/back")) {
+            if (currentStepIndex > 0) {
+                currentStepIndex--;
+                return steps.get(currentStepIndex).question();
+            } else {
+                return "You are already at the first step.";
+            }
+        }
+
         FormStep<String> currentStep = steps.get(currentStepIndex);
 
         if (currentStep.validate(input.toLowerCase())) {

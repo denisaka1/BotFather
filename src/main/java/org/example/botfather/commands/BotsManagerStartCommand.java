@@ -21,7 +21,7 @@ public class BotsManagerStartCommand implements BotCommand {
                 new FormStep<>("📱 What is your phone number?", new Validators.PhoneNumberValidator(), "❌ Invalid phone number!", "✅ Phone number is saved.", "phoneNumber"),
                 new FormStep<>("📧 What is your email?", new Validators.EmailValidator(), "❌ Invalid email!", "✅ Email is saved.", "email"),
                 new FormStep<>("🏠 What is your address?", new Validators.StringValidator(), "❌ Invalid address!", "✅ Address is saved.", "address")
-        ), "👋 Welcome to the Users Creator!", "🎉 Thank you for registering! Type any text to continue.");
+        ), "👋 Welcome to the Users Creator!\n\nPlease follow all the instructions. You can go back anytime by typing /back.", "🎉 Thank you for registering! Type any text to continue.");
     }
 
     @Override

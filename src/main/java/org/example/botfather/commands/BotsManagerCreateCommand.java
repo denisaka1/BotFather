@@ -26,6 +26,7 @@ public class BotsManagerCreateCommand implements BotCommand {
         this.botsRegistryService = botsRegistryService;
         String firstMessage = """
                 👋 Welcome to the Bots Creator!
+                
                 Please follow the steps to create a new bot (Better to do it on a desktop):
                 1️⃣ Search for BotFather in Telegram and open it.
                 2️⃣ Send the command /newbot.

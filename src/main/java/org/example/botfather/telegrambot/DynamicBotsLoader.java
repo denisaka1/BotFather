@@ -14,11 +14,12 @@ public class DynamicBotsLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-//        List<Bot> bots = botRepository.findAll();
-//        System.out.println("Found " + bots.size() + " bots");
-//        for (Bot bot : bots) {
-//            botManager.registerBot(bot.getUsername(), bot.getToken());
-//        }
+        @SuppressWarnings("unchecked")
+        List<Bot> bots = apiRequestHelper.get("http://localhost:8080/api/bots", List.class);
+        System.out.println("Found " + bots.size() + " bots");
+        for (Bot bot : bots) {
+            botManager.registerBot(bot.getUsername(), bot.getToken());
+        }
     }
 
     public Bot createBot(String name, String token) {

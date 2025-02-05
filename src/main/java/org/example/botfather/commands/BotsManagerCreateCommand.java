@@ -2,6 +2,7 @@ package org.example.botfather.commands;
 import org.example.botfather.data.entities.Bot;
 import org.example.botfather.data.entities.Job;
 import org.example.botfather.data.entities.WorkingHours;
+import org.example.botfather.telegrambot.DynamicBotsRegistryService;
 import org.example.botfather.telegramform.FormStep;
 import org.example.botfather.telegramform.GenericForm;
 import org.example.botfather.telegramform.Validators;
@@ -17,10 +18,12 @@ import static org.example.botfather.utils.MessageExtractor.*;
 public class BotsManagerCreateCommand implements BotCommand {
     private final GenericForm userForm;
     private final ApiRequestHelper apiRequestHelper;
+    private final DynamicBotsRegistryService botsRegistryService;
     private boolean forceCompleted = false;
 
-    public BotsManagerCreateCommand(ApiRequestHelper apiRequestHelper) {
+    public BotsManagerCreateCommand(ApiRequestHelper apiRequestHelper, DynamicBotsRegistryService botsRegistryService) {
         this.apiRequestHelper = apiRequestHelper;
+        this.botsRegistryService = botsRegistryService;
         String firstMessage = """
                 👋 Welcome to the Bots Creator!
                 Please follow the steps to create a new bot (Better to do it on a desktop):
@@ -60,7 +63,7 @@ public class BotsManagerCreateCommand implements BotCommand {
                 new FormStep<>("💬 What should be your bot's welcome message?", new Validators.StringValidator(), "❌ Invalid welcome message! Please enter a valid text.", "✅ Welcome message saved successfully!", "welcomeMessage"),
                 new FormStep<>(workingHoursMessage, new Validators.WorkingHoursValidator(), "❌ Invalid working hours! Please try again...", "✅ Working hours are saved.", "workingHours"),
                 new FormStep<>(workingDurationsMessage, new Validators.WorkingDurationsValidator(), "❌ Invalid working durations! Please try again...", "✅ Working durations are saved.", "workingDurations")
-        ), firstMessage, "🎉 Thank you for creating new bot with us! Type any text to continue.");
+        ), firstMessage, "Your new bot has been created successfully! You can now access it using the link from the first message.\n🎉 Thank you for creating new bot with us! Type any text to continue.");
     }
 
     private boolean checkIfUserExists(Long userId) {
@@ -119,6 +122,8 @@ public class BotsManagerCreateCommand implements BotCommand {
                     Job.class
             );
         }
+        botsRegistryService.registerBot(savedBot.getUsername(), savedBot.getToken());
+        System.out.println("Bot " + savedBot.getName() + " created and registered successfully!");
     }
 
     @Override

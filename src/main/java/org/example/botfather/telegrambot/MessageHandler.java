@@ -14,6 +14,7 @@ import java.util.Map;
 @AllArgsConstructor
 public class MessageHandler {
     private final ApiRequestHelper apiRequestHelper;
+    private final DynamicBotsRegistryService botsRegistryService;
     private final Map<Long, BotCommand> userCommands = new HashMap<>();
 
     public String renderMainMenu(Message message) {
@@ -62,7 +63,7 @@ public class MessageHandler {
 
         return switch (command) {
             case "/start" -> new BotsManagerStartCommand(apiRequestHelper);
-            case "/create" -> new BotsManagerCreateCommand(apiRequestHelper);
+            case "/create" -> new BotsManagerCreateCommand(apiRequestHelper, botsRegistryService);
             case "/bots" -> new BotsManagerBotsCommand();
             default -> null;
         };

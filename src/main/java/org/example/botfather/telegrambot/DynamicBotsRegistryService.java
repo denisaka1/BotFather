@@ -11,7 +11,7 @@ public class DynamicBotsRegistryService {
     private final TelegramBotsApi telegramBotsApi;
     private final Map<String, DynamicBot> activeBots = new ConcurrentHashMap<>();
 
-    public DynamicBotsRegistryService(BotsManager botFather) throws Exception {
+    public DynamicBotsRegistryService() throws Exception {
         this.telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
     }
 

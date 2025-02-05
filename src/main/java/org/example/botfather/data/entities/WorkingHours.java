@@ -1,7 +1,9 @@
 package org.example.botfather.data.entities;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.List;
 
 @Setter
 @Getter
@@ -9,6 +11,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class WorkingHours {
 
     @Setter(AccessLevel.NONE)
@@ -19,15 +22,12 @@ public class WorkingHours {
     @Column(name = "day_of_week", nullable = false)
     private String day; // e.g., "Monday"
 
-    @Column(nullable = false)
-    private String timeRange; // e.g., "09:00 - 17:00" or "None"
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<TimeRange> timeRanges;
 
     @ManyToOne
     @JoinColumn(name = "bot_id", nullable = false)
+    @ToString.Exclude
+    @JsonIgnore
     private Bot bot;
-
-    @Override
-    public String toString() {
-        return "WorkingHours{id=" + id + ", day='" + day + "', timeRange='" + timeRange + "'}";
-    }
 }

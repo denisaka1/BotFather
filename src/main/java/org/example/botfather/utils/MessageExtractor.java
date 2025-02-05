@@ -2,6 +2,7 @@ package org.example.botfather.utils;
 
 import org.example.botfather.data.entities.Bot;
 import org.example.botfather.data.entities.Job;
+import org.example.botfather.data.entities.TimeRange;
 import org.example.botfather.data.entities.WorkingHours;
 
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ public class MessageExtractor {
     public static List<WorkingHours> extractWorkingHours(String input, Bot bot) {
         List<WorkingHours> workingHoursList = new ArrayList<>();
 
-        String[] lines = input.split("\\n");
+        String[] lines = input.split("\n");
         for (String line : lines) {
             line = line.trim();
             if (line.isEmpty()) continue;
@@ -36,25 +37,25 @@ public class MessageExtractor {
             if (parts.length != 2) continue; // Skip invalid lines
 
             String day = parts[0].trim();
-            String timeRange = parts[1].trim();
+            String timeRangesStr = parts[1].trim();
 
-            // Handle "None" case
-            if (timeRange.equalsIgnoreCase("None")) {
-                workingHoursList.add(new WorkingHours(null, day, "None", bot));
-                continue;
-            }
+            List<TimeRange> timeRanges = new ArrayList<>();
 
-            // Validate time ranges
-            Matcher matcher = Pattern.compile("(\\d{2}:\\d{2} - \\d{2}:\\d{2})").matcher(timeRange);
-            StringBuilder validRanges = new StringBuilder();
-            while (matcher.find()) {
-                if (!validRanges.isEmpty()) validRanges.append(", ");
-                validRanges.append(matcher.group());
+            if (!timeRangesStr.equalsIgnoreCase("None")) {
+                Matcher matcher = Pattern.compile("(\\d{2}:\\d{2}) - (\\d{2}:\\d{2})").matcher(timeRangesStr);
+                while (matcher.find()) {
+                    String startTime = matcher.group(1);
+                    String endTime = matcher.group(2);
+                    timeRanges.add(new TimeRange(null, startTime, endTime));
+                }
             }
+            WorkingHours workingHours = WorkingHours.builder()
+                    .day(day)
+                    .bot(bot)
+                    .timeRanges(timeRanges)
+                    .build();
 
-            if (!validRanges.isEmpty()) {
-                workingHoursList.add(new WorkingHours(null, day, validRanges.toString(), bot));
-            }
+            workingHoursList.add(workingHours);
         }
         return workingHoursList;
     }

@@ -73,10 +73,11 @@ public class MessageExtractor {
                 String[] durations = matcher.group(2).split(",\\s*");
 
                 for (String duration : durations) {
-                    Job job = new Job();
-                    job.setType(type);
-                    job.setDuration(parseDurationToHours(duration));
-                    job.setOwner(bot);
+                    Job job = Job.builder()
+                            .type(type)
+                            .duration(parseDurationToHours(duration))
+                            .owner(bot)
+                            .build();
                     jobs.add(job);
                 }
             }

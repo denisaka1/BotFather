@@ -1,12 +1,15 @@
 package org.example.botfather.data.entities;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 @Entity
+@Builder
 public class Job {
 
     @Setter(AccessLevel.NONE)
@@ -22,6 +25,7 @@ public class Job {
     private String type;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "bot_id")
     private Bot owner;
 

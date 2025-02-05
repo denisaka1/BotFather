@@ -64,7 +64,7 @@ public class BotsManagerCreateCommand implements BotCommand {
                 new FormStep<>("💬 What should be your bot's welcome message?", new Validators.StringValidator(), "❌ Invalid welcome message! Please enter a valid text.", "✅ Welcome message saved successfully!", "welcomeMessage"),
                 new FormStep<>(workingHoursMessage, new Validators.WorkingHoursValidator(), "❌ Invalid working hours! Please try again...", "✅ Working hours are saved.", "workingHours"),
                 new FormStep<>(workingDurationsMessage, new Validators.WorkingDurationsValidator(), "❌ Invalid working durations! Please try again...", "✅ Working durations are saved.", "workingDurations")
-        ), firstMessage, "Your new bot has been created successfully! You can now access it using the link from the first message.\n🎉 Thank you for creating new bot with us! Type any text to continue.");
+        ), firstMessage, "🎉 Your new bot has been created successfully!\nYou can now access it using the link from the first message.\n\n🙏 Thank you for creating new bot with us! Type any text to continue.");
     }
 
     private boolean checkIfUserExists(Long userId) {

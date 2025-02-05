@@ -11,8 +11,9 @@ import java.util.List;
 @Entity
 @Builder
 @ToString
+@NoArgsConstructor
+@AllArgsConstructor
 public class BusinessOwner {
-
     @Setter(AccessLevel.NONE)
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

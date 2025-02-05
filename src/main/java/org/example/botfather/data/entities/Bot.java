@@ -32,7 +32,7 @@ public class Bot {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<Job> jobs;
 
-    @OneToMany(mappedBy = "bot", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<WorkingHours> workingHours;
 
     public void addJob(Job job) {
@@ -41,5 +41,13 @@ public class Bot {
 
     public void removeJob(Job job) {
         jobs.remove(job);
+    }
+
+    public void addWorkingHour(WorkingHours workingHour) {
+        workingHours.add(workingHour);
+    }
+
+    public void removeWorkingHour(WorkingHours workingHour) {
+        workingHours.remove(workingHour);
     }
 }

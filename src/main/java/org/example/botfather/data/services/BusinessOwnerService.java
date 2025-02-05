@@ -3,6 +3,7 @@ package org.example.botfather.data.services;
 import lombok.AllArgsConstructor;
 import org.example.botfather.data.entities.Bot;
 import org.example.botfather.data.entities.BusinessOwner;
+import org.example.botfather.data.repositories.BotRepository;
 import org.example.botfather.data.repositories.BusinessOwnerRepository;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,7 @@ import java.util.List;
 public class BusinessOwnerService {
 
     private final BusinessOwnerRepository businessOwnerRepository;
+    private final BotRepository botRepository;
 
     public List<BusinessOwner> findAll() {
         return businessOwnerRepository.findAll();
@@ -24,10 +26,11 @@ public class BusinessOwnerService {
 
     public Bot saveBot(String userTelegramId, Bot bot) {
         BusinessOwner owner = businessOwnerRepository.findByUserTelegramId(userTelegramId).orElseThrow();
-        owner.addBot(bot);
+        Bot savedBot = botRepository.save(bot);
+        owner.addBot(savedBot);
         businessOwnerRepository.save(owner);
 
-        return bot;
+        return savedBot;
     }
 
     public List<Bot> findAllBots(Long id) {

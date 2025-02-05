@@ -1,5 +1,7 @@
 package org.example.botfather.commands;
 import org.example.botfather.data.entities.Bot;
+import org.example.botfather.data.entities.Job;
+import org.example.botfather.data.entities.WorkingHours;
 import org.example.botfather.telegramform.FormStep;
 import org.example.botfather.telegramform.GenericForm;
 import org.example.botfather.telegramform.Validators;
@@ -7,6 +9,7 @@ import org.example.botfather.utils.ApiRequestHelper;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.springframework.stereotype.Component;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import static org.example.botfather.utils.MessageExtractor.*;
 
@@ -80,12 +83,12 @@ public class BotsManagerCreateCommand implements BotCommand {
         }
         String response = userForm.handleResponse(message.getText());
         if (userForm.isCompleted()) {
-            buildAndSaveBot(userForm.getUserResponses());
+            buildAndSaveBot(userForm.getUserResponses(), userId);
         }
         return response;
     }
 
-    private void buildAndSaveBot(Map<String, String> userResponses) {
+    private void buildAndSaveBot(Map<String, String> userResponses, Long userId) {
         String[] botInfo = extractBotInfoFromForwardedMsg(userResponses.get("forwardedMessage"));
         String username = botInfo[0];
         String token = botInfo[1];
@@ -95,9 +98,27 @@ public class BotsManagerCreateCommand implements BotCommand {
                 .name(userResponses.get("name"))
                 .welcomeMessage(userResponses.get("welcomeMessage"))
                 .build();
-        bot.setWorkingHours(extractWorkingHours(userResponses.get("workingHours"), bot));
-        bot.setJobs(extractJobs(userResponses.get("workingDurations"), bot));
-        System.out.println(bot);
+        Bot savedBot = this.apiRequestHelper.post(
+                "http://localhost:8080/api/business_owner/" + userId.toString(),
+                bot,
+                Bot.class
+        );
+        List<WorkingHours> workingHours = extractWorkingHours(userResponses.get("workingHours"), savedBot);
+        List<Job> jobs = extractJobs(userResponses.get("workingDurations"), savedBot);
+        for (WorkingHours workingHour : workingHours) {
+            this.apiRequestHelper.post(
+                    "http://localhost:8080/api/bots/" + savedBot.getId().toString() + "/working_hour",
+                    workingHour,
+                    WorkingHours.class
+            );
+        }
+        for (Job job : jobs) {
+            this.apiRequestHelper.post(
+                    "http://localhost:8080/api/bots/" + savedBot.getId().toString() + "/job",
+                    job,
+                    Job.class
+            );
+        }
     }
 
     @Override

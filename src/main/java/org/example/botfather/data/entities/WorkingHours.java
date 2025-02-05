@@ -11,6 +11,7 @@ import lombok.*;
 @AllArgsConstructor
 public class WorkingHours {
 
+    @Setter(AccessLevel.NONE)
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

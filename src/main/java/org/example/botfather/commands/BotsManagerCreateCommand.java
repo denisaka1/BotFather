@@ -24,6 +24,35 @@ public class BotsManagerCreateCommand implements BotCommand {
     public BotsManagerCreateCommand(ApiRequestHelper apiRequestHelper, DynamicBotsRegistryService botsRegistryService) {
         this.apiRequestHelper = apiRequestHelper;
         this.botsRegistryService = botsRegistryService;
+        userForm = createForm();
+    }
+
+    private boolean checkIfUserExists(Long userId) {
+        return this.apiRequestHelper.get(
+                "http://localhost:8080/api/business_owner/exists",
+                Boolean.class,
+                Map.of("userTelegramId", userId.toString())
+        );
+    }
+
+    @Override
+    public String execute(Message message) {
+        Long userId = message.getFrom().getId();
+        if (!checkIfUserExists(userId)) {
+            this.forceCompleted = true;
+            return """
+                    👋 Welcome to the Bots Creator!
+                    You need to register using the /start command to create a new bot.
+                    Type any text to return to the menu.""";
+        }
+        String response = userForm.handleResponse(message.getText());
+        if (userForm.isCompleted()) {
+            buildAndSaveBot(userForm.getUserResponses(), userId);
+        }
+        return response;
+    }
+
+    private GenericForm createForm() {
         String firstMessage = """
                 👋 Welcome to the Bots Creator!
                 
@@ -58,38 +87,13 @@ public class BotsManagerCreateCommand implements BotCommand {
                 Lesson: 01:00, 02:00
                 Yoga class: 01:00
                """;
-        userForm = new GenericForm(Arrays.asList(
+        return new GenericForm(Arrays.asList(
                 new FormStep<>("📩 Please paste the last message you received from BotFather.", new Validators.BotMessageValidator(), "❌ Invalid bot creation message! Please try again.", "✅ Bot creation message is verified!", "forwardedMessage"),
                 new FormStep<>("📝 What is your bot name?", new Validators.StringValidator(), "❌ Invalid name! Please enter a valid text.", "✅ Bot name saved successfully!", "name"),
                 new FormStep<>("💬 What should be your bot's welcome message?", new Validators.StringValidator(), "❌ Invalid welcome message! Please enter a valid text.", "✅ Welcome message saved successfully!", "welcomeMessage"),
                 new FormStep<>(workingHoursMessage, new Validators.WorkingHoursValidator(), "❌ Invalid working hours! Please try again...", "✅ Working hours are saved.", "workingHours"),
                 new FormStep<>(workingDurationsMessage, new Validators.WorkingDurationsValidator(), "❌ Invalid working durations! Please try again...", "✅ Working durations are saved.", "workingDurations")
         ), firstMessage, "🎉 Your new bot has been created successfully!\nYou can now access it using the link from the first message.\n\n🙏 Thank you for creating new bot with us! Type any text to continue.");
-    }
-
-    private boolean checkIfUserExists(Long userId) {
-        return this.apiRequestHelper.get(
-                "http://localhost:8080/api/business_owner/exists",
-                Boolean.class,
-                Map.of("userTelegramId", userId.toString())
-        );
-    }
-
-    @Override
-    public String execute(Message message) {
-        Long userId = message.getFrom().getId();
-        if (!checkIfUserExists(userId)) {
-            this.forceCompleted = true;
-            return """
-                    👋 Welcome to the Bots Creator!
-                    You need to register using the /start command to create a new bot.
-                    Type any text to return to the menu.""";
-        }
-        String response = userForm.handleResponse(message.getText());
-        if (userForm.isCompleted()) {
-            buildAndSaveBot(userForm.getUserResponses(), userId);
-        }
-        return response;
     }
 
     private void buildAndSaveBot(Map<String, String> userResponses, Long userId) {
@@ -107,8 +111,14 @@ public class BotsManagerCreateCommand implements BotCommand {
                 bot,
                 Bot.class
         );
-        List<WorkingHours> workingHours = extractWorkingHours(userResponses.get("workingHours"), savedBot);
-        List<Job> jobs = extractJobs(userResponses.get("workingDurations"), savedBot);
+        buildAndSaveWorkingHours(userResponses.get("workingHours"), savedBot);
+        buildAndSaveJobs(userResponses.get("workingDurations"), savedBot);
+        botsRegistryService.registerBot(savedBot.getUsername(), savedBot.getToken());
+        System.out.println("Bot " + savedBot.getName() + " created and registered successfully!");
+    }
+
+    private void buildAndSaveWorkingHours(String workingHoursStr, Bot savedBot) {
+        List<WorkingHours> workingHours = extractWorkingHours(workingHoursStr, savedBot);
         for (WorkingHours workingHour : workingHours) {
             this.apiRequestHelper.post(
                     "http://localhost:8080/api/bots/" + savedBot.getId().toString() + "/working_hour",
@@ -116,6 +126,10 @@ public class BotsManagerCreateCommand implements BotCommand {
                     WorkingHours.class
             );
         }
+    }
+
+    private void buildAndSaveJobs(String workingDurationsStr, Bot savedBot) {
+        List<Job> jobs = extractJobs(workingDurationsStr, savedBot);
         for (Job job : jobs) {
             this.apiRequestHelper.post(
                     "http://localhost:8080/api/bots/" + savedBot.getId().toString() + "/job",
@@ -123,8 +137,6 @@ public class BotsManagerCreateCommand implements BotCommand {
                     Job.class
             );
         }
-        botsRegistryService.registerBot(savedBot.getUsername(), savedBot.getToken());
-        System.out.println("Bot " + savedBot.getName() + " created and registered successfully!");
     }
 
     @Override

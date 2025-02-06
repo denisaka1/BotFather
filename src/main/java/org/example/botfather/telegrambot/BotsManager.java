@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @AllArgsConstructor
 public class BotsManager extends TelegramLongPollingBot {
 
-    private final MessageHandler messageHandler;
+    private final BotsManagerMessageHandler botsManagerMessageHandler;
     private final ConfigLoader configLoader;
 
     @Override
@@ -29,7 +29,7 @@ public class BotsManager extends TelegramLongPollingBot {
         if (update.hasMessage() && update.getMessage().hasText()) {
             String chatId = update.getMessage().getChatId().toString();
 
-            String response = messageHandler.processMessage(update.getMessage());
+            String response = botsManagerMessageHandler.processMessage(update.getMessage());
 
             sendMessage(chatId, response);
         }

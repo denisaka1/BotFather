@@ -113,7 +113,7 @@ public class BotsManagerCreateCommand implements BotCommand {
         );
         buildAndSaveWorkingHours(userResponses.get("workingHours"), savedBot);
         buildAndSaveJobs(userResponses.get("workingDurations"), savedBot);
-        botsRegistryService.registerBot(savedBot.getUsername(), savedBot.getToken());
+        botsRegistryService.registerBot(savedBot);
         System.out.println("Bot " + savedBot.getName() + " created and registered successfully!");
     }
 

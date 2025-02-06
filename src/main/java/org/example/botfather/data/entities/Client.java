@@ -1,13 +1,14 @@
 package org.example.botfather.data.entities;
-
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @Entity
+@Builder
+@ToString
+@NoArgsConstructor
+@AllArgsConstructor
 public class Client {
 
     @Setter(AccessLevel.NONE)
@@ -15,9 +16,15 @@ public class Client {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
+    @Column(nullable = false)
     private String telegramId;
 
-    @Column
+    @Column(nullable = false)
     private String name;
+
+    @Column(nullable = false)
+    private String email;
+
+    @Column(nullable = false)
+    private String phoneNumber;
 }

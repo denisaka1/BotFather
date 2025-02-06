@@ -12,7 +12,7 @@ import java.util.Map;
 
 @Service
 @AllArgsConstructor
-public class MessageHandler {
+public class BotsManagerMessageHandler {
     private final ApiRequestHelper apiRequestHelper;
     private final DynamicBotsRegistryService botsRegistryService;
     private final Map<Long, BotCommand> userCommands = new HashMap<>();

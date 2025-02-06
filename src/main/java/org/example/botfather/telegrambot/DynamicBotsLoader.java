@@ -9,7 +9,7 @@ import java.util.List;
 @Component
 @AllArgsConstructor
 public class DynamicBotsLoader implements CommandLineRunner {
-    private final DynamicBotsRegistryService botManager;
+    private final DynamicBotsRegistryService dynamicBotsRegistryService;
     private final ApiRequestHelper apiRequestHelper;
 
     @Override
@@ -18,7 +18,7 @@ public class DynamicBotsLoader implements CommandLineRunner {
         List<Bot> bots = apiRequestHelper.get("http://localhost:8080/api/bots", List.class);
         System.out.println("Found " + bots.size() + " bots");
         for (Bot bot : bots) {
-            botManager.registerBot(bot.getUsername(), bot.getToken());
+            dynamicBotsRegistryService.registerBot(bot);
         }
     }
 

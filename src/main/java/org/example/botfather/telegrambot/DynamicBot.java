@@ -13,7 +13,9 @@ public class DynamicBot extends TelegramLongPollingBot {
     private final DynamicBotsMessageHandler dynamicBotsMessageHandler;
 
     @Override
-    public String getBotUsername() { return bot.getUsername(); }
+    public String getBotUsername() {
+        return bot.getUsername();
+    }
 
     @Override
     public String getBotToken() {
@@ -22,18 +24,11 @@ public class DynamicBot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        if (update.hasMessage() && update.getMessage().hasText()) {
-            String response = dynamicBotsMessageHandler.processMessage(bot, update.getMessage());
-            String chatId = update.getMessage().getChatId().toString();
-            sendMessage(chatId, response);
-        }
+        SendMessage response = dynamicBotsMessageHandler.processMessage(bot, update);
+        sendMessage(response);
     }
 
-    private void sendMessage(String chatId, String text) {
-        SendMessage message = new SendMessage();
-        message.setChatId(chatId);
-        message.setText(text);
-
+    private void sendMessage(SendMessage message) {
         try {
             execute(message);
         } catch (TelegramApiException e) {

@@ -5,8 +5,11 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
 public interface DynamicBotState {
-    SendMessage handle(DynamicBotsMessageHandler context, Bot bot, Message message);
+    SendMessage handle(DynamicBotsMessageHandler context, Bot bot, Message message, String callbackData);
 
+    default SendMessage handle(DynamicBotsMessageHandler context, Bot bot, Message message) {
+        return handle(context, bot, message, null); // Pass null when callbackData isn't provided
+    }
     default boolean isCancelCommand(Message message) {
         return message.getText().equalsIgnoreCase("/cancel");
     }

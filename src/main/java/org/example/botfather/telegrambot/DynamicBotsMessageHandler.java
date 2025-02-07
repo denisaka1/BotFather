@@ -29,10 +29,11 @@ public class DynamicBotsMessageHandler {
     public SendMessage processMessage(Bot bot, Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
             return handleTextMessage(update.getMessage(), bot);
-        } else if (update.hasCallbackQuery()) {
-            return handleCallbackQuery(update);
         }
-        return new SendMessage(update.getMessage().getChatId().toString(), "I only understand text messages.");
+        if (update.hasCallbackQuery()) {
+            return handleCallbackQuery(update, bot);
+        }
+        return new SendMessage(getChatId(update), "I only understand text messages.");
     }
 
     private Client clientByTelegramId(Long userId) {
@@ -46,29 +47,43 @@ public class DynamicBotsMessageHandler {
         }
     }
 
-    private SendMessage handleCallbackQuery(Update update) {
+    private SendMessage handleCallbackQuery(Update update, Bot bot) {
         String callbackData = update.getCallbackQuery().getData();
-        Long chatId = update.getCallbackQuery().getMessage().getChatId();
-        if ("SCHEDULE".equals(callbackData)) {
-            return new SendMessage(chatId.toString(), "You've selected: Schedule an appointment.");
-        } else if ("EDIT".equals(callbackData)) {
-            return new SendMessage(chatId.toString(), "You've selected: Delete an existing appointment.");
-        }
-        return new SendMessage(chatId.toString(), "I only understand text messages.");
+        Message message = update.getCallbackQuery().getMessage();
+        Long userId = update.getCallbackQuery().getFrom().getId();
+
+        return getUserState(userId, bot).handle(this, bot, message, callbackData);
     }
 
     private SendMessage handleTextMessage(Message message, Bot bot) {
         Long userId = message.getFrom().getId();
-        Client currentClient = clientByTelegramId(userId);
-        if (currentClient == null && !userStates.containsKey(userId)) {
-            userStates.put(userId, new AuthState(apiRequestHelper, bot));
-        }
-        userStates.putIfAbsent(userId, new ScheduleOrCancelQuestionState());
-        DynamicBotState currentState = userStates.get(userId);
+        DynamicBotState currentState = getUserState(userId, bot);
+
         if (currentState.isBackCommand(message)) {
             userStates.put(userId, currentState.getPreviousState(this));
             return new SendMessage(message.getChatId().toString(), "Going back...");
         }
         return currentState.handle(this, bot, message);
+    }
+
+    private DynamicBotState getUserState(Long userId, Bot bot) {
+        userStates.putIfAbsent(userId, determineInitialState(userId, bot));
+        return userStates.get(userId);
+    }
+
+    private DynamicBotState determineInitialState(Long userId, Bot bot) {
+        return (!userStates.containsKey(userId) && clientByTelegramId(userId) == null)
+                ? new AuthState(apiRequestHelper, bot)
+                : new ScheduleOrCancelQuestionState();
+    }
+
+    private String getChatId(Update update) {
+        if (update.hasMessage()) {
+            return update.getMessage().getChatId().toString();
+        }
+        if (update.hasCallbackQuery()) {
+            return update.getCallbackQuery().getMessage().getChatId().toString();
+        }
+        return "Unknown Chat";
     }
 }

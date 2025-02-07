@@ -13,14 +13,22 @@ import java.util.List;
 public class ScheduleOrCancelQuestionState implements DynamicBotState {
 
     @Override
-    public SendMessage handle(DynamicBotsMessageHandler context, Bot bot, Message message) {
+    public SendMessage handle(DynamicBotsMessageHandler context, Bot bot, Message message, String callbackData) {
+        String chatId = message.getChatId().toString();
         if (isCancelCommand(message) || isBackCommand(message)) {
-            return new SendMessage(message.getChatId().toString(), "You're already in the scheduling options.");
+            return new SendMessage(chatId, "You're already in the scheduling options.");
         }
-        return createMenu(message.getChatId().toString(), bot);
+        if (callbackData != null) {
+            if ("SCHEDULE".equals(callbackData)) {
+                return new SendMessage(chatId, "You've selected: Schedule an appointment.");
+            } else if ("CANCEL".equals(callbackData)) {
+                return new SendMessage(chatId, "You've selected: Delete an existing appointment.");
+            }
+        }
+        return createScheduleOrCancelButtons(chatId, bot);
     }
 
-    private SendMessage createMenu(String chatId, Bot bot) {
+    private SendMessage createScheduleOrCancelButtons(String chatId, Bot bot) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(chatId);
         sendMessage.setText(bot.getWelcomeMessage() + "\n\n" + "What would you like to do?");
@@ -43,7 +51,7 @@ public class ScheduleOrCancelQuestionState implements DynamicBotState {
 
         InlineKeyboardButton editButton = new InlineKeyboardButton();
         editButton.setText("❌ Cancel An Existing Appointment");
-        editButton.setCallbackData("EDIT");
+        editButton.setCallbackData("CANCEL");
 
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         keyboard.add(Collections.singletonList(scheduleButton)); // Row 1

@@ -15,7 +15,7 @@ public class AuthState implements DynamicBotState {
     }
 
     @Override
-    public SendMessage handle(DynamicBotsMessageHandler context, Bot bot, Message message) {
+    public SendMessage handle(DynamicBotsMessageHandler context, Bot bot, Message message, String callbackData) {
         if (isBackCommand(message) || isCancelCommand(message)) {
             return new SendMessage(message.getChatId().toString(), "You're already at the first step.");
         }

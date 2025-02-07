@@ -2,7 +2,9 @@ package org.example.botfather.commands;
 import org.example.botfather.data.entities.BusinessOwner;
 import org.example.botfather.telegramform.GenericForm;
 import org.example.botfather.telegramform.FormStep;
-import org.example.botfather.telegramform.Validators;
+import org.example.botfather.telegramform.validators.EmailValidator;
+import org.example.botfather.telegramform.validators.PhoneNumberValidator;
+import org.example.botfather.telegramform.validators.StringValidator;
 import org.example.botfather.utils.ApiRequestHelper;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.springframework.stereotype.Component;
@@ -13,14 +15,13 @@ import java.util.Map;
 
 @Component
 public class BotsManagerStartCommand extends AbstractBotCommand {
-    private final GenericForm userForm;
 
     public BotsManagerStartCommand(ApiRequestHelper apiRequestHelper) {
         super(apiRequestHelper);
         userForm = new GenericForm(Arrays.asList(
-                new FormStep<>("📱 What is your phone number?", new Validators.PhoneNumberValidator(), "❌ Invalid phone number!", "✅ Phone number is saved.", "phoneNumber"),
-                new FormStep<>("📧 What is your email?", new Validators.EmailValidator(), "❌ Invalid email!", "✅ Email is saved.", "email"),
-                new FormStep<>("🏠 What is your address?", new Validators.StringValidator(), "❌ Invalid address!", "✅ Address is saved.", "address")
+                new FormStep<>("📱 What is your phone number?", new PhoneNumberValidator(), "❌ Invalid phone number!", "✅ Phone number is saved.", "phoneNumber"),
+                new FormStep<>("📧 What is your email?", new EmailValidator(), "❌ Invalid email!", "✅ Email is saved.", "email"),
+                new FormStep<>("🏠 What is your address?", new StringValidator(), "❌ Invalid address!", "✅ Address is saved.", "address")
         ), "👋 Welcome to the Users Creator!\n\nPlease follow all the instructions. You can go back anytime by typing /back.", "🎉 Thank you for registering! Type any text to continue.");
     }
 

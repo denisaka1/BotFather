@@ -5,7 +5,10 @@ import org.example.botfather.data.entities.WorkingHours;
 import org.example.botfather.telegrambot.DynamicBotsRegistryService;
 import org.example.botfather.telegramform.FormStep;
 import org.example.botfather.telegramform.GenericForm;
-import org.example.botfather.telegramform.Validators;
+import org.example.botfather.telegramform.validators.BotMessageValidator;
+import org.example.botfather.telegramform.validators.StringValidator;
+import org.example.botfather.telegramform.validators.WorkingDurationsValidator;
+import org.example.botfather.telegramform.validators.WorkingHoursValidator;
 import org.example.botfather.utils.ApiRequestHelper;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.springframework.stereotype.Component;
@@ -17,7 +20,6 @@ import static org.example.botfather.utils.MessageExtractor.*;
 
 @Component
 public class BotsManagerCreateCommand extends AbstractBotCommand {
-    private final GenericForm userForm;
     private final DynamicBotsRegistryService botsRegistryService;
 
     public BotsManagerCreateCommand(ApiRequestHelper apiRequestHelper, DynamicBotsRegistryService botsRegistryService) {
@@ -85,11 +87,11 @@ public class BotsManagerCreateCommand extends AbstractBotCommand {
                 Yoga class: 01:00
                """;
         return new GenericForm(Arrays.asList(
-                new FormStep<>("📩 Please paste the last message you received from BotFather.", new Validators.BotMessageValidator(), "❌ Invalid bot creation message! Please try again.", "✅ Bot creation message is verified!", "forwardedMessage"),
-                new FormStep<>("📝 What is your bot name?", new Validators.StringValidator(), "❌ Invalid name! Please enter a valid text.", "✅ Bot name saved successfully!", "name"),
-                new FormStep<>("💬 What should be your bot's welcome message?", new Validators.StringValidator(), "❌ Invalid welcome message! Please enter a valid text.", "✅ Welcome message saved successfully!", "welcomeMessage"),
-                new FormStep<>(workingHoursMessage, new Validators.WorkingHoursValidator(), "❌ Invalid working hours! Please try again...", "✅ Working hours are saved.", "workingHours"),
-                new FormStep<>(workingDurationsMessage, new Validators.WorkingDurationsValidator(), "❌ Invalid working durations! Please try again...", "✅ Working durations are saved.", "workingDurations")
+                new FormStep<>("📩 Please paste the last message you received from BotFather.", new BotMessageValidator(), "❌ Invalid bot creation message! Please try again.", "✅ Bot creation message is verified!", "forwardedMessage"),
+                new FormStep<>("📝 What is your bot name?", new StringValidator(), "❌ Invalid name! Please enter a valid text.", "✅ Bot name saved successfully!", "name"),
+                new FormStep<>("💬 What should be your bot's welcome message?", new StringValidator(), "❌ Invalid welcome message! Please enter a valid text.", "✅ Welcome message saved successfully!", "welcomeMessage"),
+                new FormStep<>(workingHoursMessage, new WorkingHoursValidator(), "❌ Invalid working hours! Please try again...", "✅ Working hours are saved.", "workingHours"),
+                new FormStep<>(workingDurationsMessage, new WorkingDurationsValidator(), "❌ Invalid working durations! Please try again...", "✅ Working durations are saved.", "workingDurations")
         ), firstMessage, "🎉 Your new bot has been created successfully!\nYou can now access it using the link from the first message.\n\n🙏 Thank you for creating new bot with us! Type any text to continue.");
     }
 

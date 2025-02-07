@@ -3,7 +3,8 @@ import org.example.botfather.data.entities.Bot;
 import org.example.botfather.data.entities.Client;
 import org.example.botfather.telegramform.FormStep;
 import org.example.botfather.telegramform.GenericForm;
-import org.example.botfather.telegramform.Validators;
+import org.example.botfather.telegramform.validators.EmailValidator;
+import org.example.botfather.telegramform.validators.PhoneNumberValidator;
 import org.example.botfather.utils.ApiRequestHelper;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import java.util.Arrays;
@@ -18,8 +19,8 @@ public class DynamicBotAuthCommand extends AbstractBotCommand {
                 "\nPlease follow the instructions to complete your registration." +
                 "\nYou can go back at any time by typing /back.";
         userForm = new GenericForm(Arrays.asList(
-                new FormStep<>("📱 What is your phone number?", new Validators.PhoneNumberValidator(), "❌ Invalid phone number!", "✅ Phone number is saved.", "phoneNumber"),
-                new FormStep<>("📧 What is your email?", new Validators.EmailValidator(), "❌ Invalid email!", "✅ Email is saved.", "email")),
+                new FormStep<>("📱 What is your phone number?", new PhoneNumberValidator(), "❌ Invalid phone number!", "✅ Phone number is saved.", "phoneNumber"),
+                new FormStep<>("📧 What is your email?", new EmailValidator(), "❌ Invalid email!", "✅ Email is saved.", "email")),
                 firstMessage, "🎉 Thank you for registering! Type any text to continue.");
     }
 

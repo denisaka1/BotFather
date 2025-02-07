@@ -28,7 +28,10 @@ public class Job {
     @JoinColumn(name = "bot_id")
     private Bot owner;
 
+    @Override
     public String toString() {
-        return "Job{id=" + id + ", duration='" + duration + "', type='" + type + "'}";
+        StringBuilder str = new StringBuilder();
+        str.append(type).append(" duration: ").append(duration).append("\n");
+        return str.toString();
     }
 }

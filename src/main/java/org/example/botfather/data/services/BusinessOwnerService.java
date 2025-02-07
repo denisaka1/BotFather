@@ -1,6 +1,7 @@
 package org.example.botfather.data.services;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.botfather.data.entities.Bot;
 import org.example.botfather.data.entities.BusinessOwner;
 import org.example.botfather.data.repositories.BotRepository;
@@ -24,7 +25,7 @@ public class BusinessOwnerService {
         return businessOwnerRepository.save(businessOwner);
     }
 
-    public Bot saveBot(String userTelegramId, Bot bot) {
+    public Bot saveBot(Long userTelegramId, Bot bot) {
         BusinessOwner owner = businessOwnerRepository.findByUserTelegramId(userTelegramId).orElseThrow();
         Bot savedBot = botRepository.save(bot);
         owner.addBot(savedBot);
@@ -33,12 +34,12 @@ public class BusinessOwnerService {
         return savedBot;
     }
 
-    public List<Bot> findAllBots(Long id) {
-        BusinessOwner owner = businessOwnerRepository.findById(id).orElseThrow();
+    public List<Bot> findAllBots(Long userTelegramId) {
+        BusinessOwner owner = businessOwnerRepository.findByUserTelegramId(userTelegramId).orElseThrow();
         return owner.getBots();
     }
 
-    public boolean existsByUserTelegramId(String userTelegramId) {
+    public boolean existsByUserTelegramId(Long userTelegramId) {
         return businessOwnerRepository.existsByUserTelegramId(userTelegramId);
     }
 }

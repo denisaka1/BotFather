@@ -4,7 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface BusinessOwnerRepository extends JpaRepository<BusinessOwner, Long> {
-    boolean existsByUserTelegramId(String userTelegramId);
+    boolean existsByUserTelegramId(Long userTelegramId);
 
-    Optional<BusinessOwner> findByUserTelegramId(String userTelegramId);
+    Optional<BusinessOwner> findByUserTelegramId(Long userTelegramId);
 }

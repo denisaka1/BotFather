@@ -8,12 +8,11 @@ import org.example.botfather.utils.ApiRequestHelper;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import java.util.Arrays;
 
-public class DynamicBotAuthCommand implements BotCommand {
+public class DynamicBotAuthCommand extends AbstractBotCommand {
     private final GenericForm userForm;
-    private final ApiRequestHelper apiRequestHelper;
 
     public DynamicBotAuthCommand(ApiRequestHelper apiRequestHelper, Bot bot) {
-        this.apiRequestHelper = apiRequestHelper;
+        super(apiRequestHelper);
         String firstMessage = bot.getWelcomeMessage() +
                 "\n\nIt looks like you're not registered yet." +
                 "\nPlease follow the instructions to complete your registration." +

@@ -9,47 +9,44 @@ import org.example.botfather.telegramform.Validators;
 import org.example.botfather.utils.ApiRequestHelper;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.springframework.stereotype.Component;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import static org.example.botfather.utils.MessageExtractor.*;
 
 @Component
-public class BotsManagerCreateCommand implements BotCommand {
+public class BotsManagerCreateCommand extends AbstractBotCommand {
     private final GenericForm userForm;
-    private final ApiRequestHelper apiRequestHelper;
     private final DynamicBotsRegistryService botsRegistryService;
-    private boolean forceCompleted = false;
 
     public BotsManagerCreateCommand(ApiRequestHelper apiRequestHelper, DynamicBotsRegistryService botsRegistryService) {
-        this.apiRequestHelper = apiRequestHelper;
+        super(apiRequestHelper);
         this.botsRegistryService = botsRegistryService;
         userForm = createForm();
-    }
-
-    private boolean checkIfUserExists(Long userId) {
-        return this.apiRequestHelper.get(
-                "http://localhost:8080/api/business_owner/exists",
-                Boolean.class,
-                Map.of("userTelegramId", userId.toString())
-        );
     }
 
     @Override
     public String execute(Message message) {
         Long userId = message.getFrom().getId();
         if (!checkIfUserExists(userId)) {
-            this.forceCompleted = true;
+            forceCompleted = true;
             return """
                     👋 Welcome to the Bots Creator!
                     You need to register using the /start command to create a new bot.
                     Type any text to return to the menu.""";
         }
+
         String response = userForm.handleResponse(message.getText());
         if (userForm.isCompleted()) {
             buildAndSaveBot(userForm.getUserResponses(), userId);
         }
         return response;
+    }
+
+    @Override
+    public boolean isCompleted() {
+        return userForm.isCompleted() || forceCompleted;
     }
 
     private GenericForm createForm() {
@@ -106,8 +103,8 @@ public class BotsManagerCreateCommand implements BotCommand {
                 .name(userResponses.get("name"))
                 .welcomeMessage(userResponses.get("welcomeMessage"))
                 .build();
-        Bot savedBot = this.apiRequestHelper.post(
-                "http://localhost:8080/api/business_owner/" + userId.toString(),
+        Bot savedBot = apiRequestHelper.post(
+                "http://localhost:8080/api/business_owner/" + userId,
                 bot,
                 Bot.class
         );
@@ -120,7 +117,7 @@ public class BotsManagerCreateCommand implements BotCommand {
     private void buildAndSaveWorkingHours(String workingHoursStr, Bot savedBot) {
         List<WorkingHours> workingHours = extractWorkingHours(workingHoursStr, savedBot);
         for (WorkingHours workingHour : workingHours) {
-            this.apiRequestHelper.post(
+            apiRequestHelper.post(
                     "http://localhost:8080/api/bots/" + savedBot.getId().toString() + "/working_hour",
                     workingHour,
                     WorkingHours.class
@@ -131,17 +128,12 @@ public class BotsManagerCreateCommand implements BotCommand {
     private void buildAndSaveJobs(String workingDurationsStr, Bot savedBot) {
         List<Job> jobs = extractJobs(workingDurationsStr, savedBot);
         for (Job job : jobs) {
-            this.apiRequestHelper.post(
+            apiRequestHelper.post(
                     "http://localhost:8080/api/bots/" + savedBot.getId().toString() + "/job",
                     job,
                     Job.class
             );
         }
-    }
-
-    @Override
-    public boolean isCompleted() {
-        return userForm.isCompleted() || this.forceCompleted;
     }
 }
 

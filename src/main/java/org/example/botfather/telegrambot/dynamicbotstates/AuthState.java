@@ -1,5 +1,5 @@
 package org.example.botfather.telegrambot.dynamicbotstates;
-import org.example.botfather.commands.BotCommand;
+import org.example.botfather.commands.AbstractBotCommand;
 import org.example.botfather.commands.DynamicBotAuthCommand;
 import org.example.botfather.data.entities.Bot;
 import org.example.botfather.telegrambot.DynamicBotsMessageHandler;
@@ -10,7 +10,7 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
 public class AuthState implements DynamicBotState {
-    private final BotCommand command;
+    private final AbstractBotCommand command;
 
     public AuthState(ApiRequestHelper apiRequestHelper, Bot bot) {
         this.command = new DynamicBotAuthCommand(apiRequestHelper, bot);

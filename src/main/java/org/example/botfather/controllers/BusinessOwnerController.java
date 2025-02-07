@@ -17,23 +17,23 @@ public class BusinessOwnerController {
     private final BusinessOwnerService businessOwnerService;
 
     @PostMapping("{userTelegramId}")
-    public ResponseEntity<Bot> createBot(@PathVariable String userTelegramId, @RequestBody Bot bot) {
+    public ResponseEntity<Bot> createBot(@PathVariable Long userTelegramId, @RequestBody Bot bot) {
         return ResponseEntity.ok(businessOwnerService.saveBot(userTelegramId, bot));
     }
 
-    @GetMapping("{id}")
-    public ResponseEntity<List<Bot>> findAllBots(@RequestParam Long id){
-        return ResponseEntity.ok(businessOwnerService.findAllBots(id));
+    @GetMapping("{userTelegramId}")
+    public ResponseEntity<List<Bot>> findAllBots(@PathVariable Long userTelegramId){
+        return ResponseEntity.ok(businessOwnerService.findAllBots(userTelegramId));
     }
 
-    @GetMapping("/exists")
-    public ResponseEntity<Boolean> existsByUserTelegramId(@RequestParam String userTelegramId) {
+    @GetMapping("{userTelegramId}/exists")
+    public ResponseEntity<Boolean> existsByUserTelegramId(@PathVariable Long userTelegramId) {
         boolean exists = businessOwnerService.existsByUserTelegramId(userTelegramId);
         return ResponseEntity.ok(exists);
     }
 
     @PostMapping
-    public ResponseEntity<BusinessOwner> craeteBusinessOwner(@RequestBody BusinessOwner businessOwner) {
+    public ResponseEntity<BusinessOwner> createBusinessOwner(@RequestBody BusinessOwner businessOwner) {
         return ResponseEntity.ok(businessOwnerService.saveBusinessOwner(businessOwner));
     }
 }

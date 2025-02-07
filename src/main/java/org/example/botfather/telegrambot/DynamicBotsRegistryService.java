@@ -10,11 +10,12 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class DynamicBotsRegistryService {
     private final TelegramBotsApi telegramBotsApi;
-    private final Map<String, DynamicBot> activeBots = new ConcurrentHashMap<>();
+    private final Map<String, DynamicBot> activeBots;
     private final DynamicBotsMessageHandler dynamicBotsMessageHandler;
 
     public DynamicBotsRegistryService(DynamicBotsMessageHandler dynamicBotsMessageHandler) throws Exception {
         this.dynamicBotsMessageHandler = dynamicBotsMessageHandler;
+        this.activeBots = new ConcurrentHashMap<>();
         this.telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
     }
 

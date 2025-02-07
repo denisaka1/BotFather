@@ -11,6 +11,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MessageExtractor {
+
+    private MessageExtractor() {}
+
     public static String[] extractBotInfoFromForwardedMsg(String input) {
         Matcher usernameMatcher = Pattern.compile("t\\.me/(\\w+)").matcher(input);
         Matcher tokenMatcher = Pattern.compile("Use this token to access the HTTP API:\\s*(\\S+)").matcher(input);

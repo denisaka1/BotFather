@@ -14,18 +14,19 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BusinessOwner {
+
     @Setter(AccessLevel.NONE)
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String userTelegramId;
+    private Long userTelegramId;
 
     @Column(nullable = false)
     private String firstName;
 
-    @Column(nullable = false)
+    @Column
     private String lastName;
 
     @Column(nullable = false, unique = true)

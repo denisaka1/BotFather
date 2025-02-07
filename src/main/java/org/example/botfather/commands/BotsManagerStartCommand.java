@@ -6,17 +6,17 @@ import org.example.botfather.telegramform.Validators;
 import org.example.botfather.utils.ApiRequestHelper;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.objects.User;
+
 import java.util.Arrays;
 import java.util.Map;
 
 @Component
-public class BotsManagerStartCommand implements BotCommand {
+public class BotsManagerStartCommand extends AbstractBotCommand {
     private final GenericForm userForm;
-    private final ApiRequestHelper apiRequestHelper;
-    private boolean forceCompleted = false;
 
     public BotsManagerStartCommand(ApiRequestHelper apiRequestHelper) {
-        this.apiRequestHelper = apiRequestHelper;
+        super(apiRequestHelper);
         userForm = new GenericForm(Arrays.asList(
                 new FormStep<>("📱 What is your phone number?", new Validators.PhoneNumberValidator(), "❌ Invalid phone number!", "✅ Phone number is saved.", "phoneNumber"),
                 new FormStep<>("📧 What is your email?", new Validators.EmailValidator(), "❌ Invalid email!", "✅ Email is saved.", "email"),
@@ -26,36 +26,30 @@ public class BotsManagerStartCommand implements BotCommand {
 
     @Override
     public boolean isCompleted() {
-        return userForm.isCompleted() || this.forceCompleted;
-    }
-
-    public boolean checkIfUserExists(Long userId) {
-        return this.apiRequestHelper.get(
-                "http://localhost:8080/api/business_owner/exists",
-                    Boolean.class,
-                    Map.of("userTelegramId", userId.toString())
-        );
+        return userForm.isCompleted() || forceCompleted;
     }
 
     @Override
     public String execute(Message message) {
         // check if the user is already registered
-        Long userId = message.getFrom().getId();
-        if (checkIfUserExists(userId)) {
-            this.forceCompleted = true;
+        User telegramUser = message.getFrom();
+        if (checkIfUserExists(telegramUser.getId())) {
+            forceCompleted = true;
             return "👋 Welcome back! You are already registered!\n Type any text to continue.";
         }
-        String response = userForm.handleResponse(message.getText().toLowerCase());
+
+        String response = userForm.handleResponse(message.getText());
+        Map<String, String> userInput = userForm.getUserResponses();
         if (userForm.isCompleted()) {
             BusinessOwner businessOwner = BusinessOwner.builder()
-                    .firstName(message.getFrom().getFirstName())
-                    .lastName(message.getFrom().getLastName())
-                    .userTelegramId(message.getFrom().getId().toString())
-                    .phoneNumber(userForm.getUserResponses().get("phoneNumber"))
-                    .email(userForm.getUserResponses().get("email"))
-                    .address(userForm.getUserResponses().get("address"))
+                    .firstName(telegramUser.getFirstName())
+                    .lastName(telegramUser.getLastName())
+                    .userTelegramId(telegramUser.getId())
+                    .phoneNumber(userInput.get("phoneNumber"))
+                    .email(userInput.get("email").toLowerCase())
+                    .address(userInput.get("address"))
                     .build();
-            BusinessOwner savedBusinessOwner = this.apiRequestHelper.post(
+            BusinessOwner savedBusinessOwner = apiRequestHelper.post(
                     "http://localhost:8080/api/business_owner",
                     businessOwner,
                     BusinessOwner.class

@@ -30,9 +30,6 @@ public class BotService {
 
     public WorkingHours saveWorkingHour(Long id, WorkingHours workingHours) {
         Bot bot = botRepository.findById(id).orElseThrow();
-//        bot.addWorkingHour(workingHours);
-//        workingHours.setBot(bot);
-        // Ensure the timeRanges list is initialized
         bot.addWorkingHour(workingHours);
         botRepository.save(bot);
         return workingHours;

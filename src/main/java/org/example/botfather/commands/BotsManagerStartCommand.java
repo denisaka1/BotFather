@@ -1,4 +1,5 @@
 package org.example.botfather.commands;
+import lombok.extern.slf4j.Slf4j;
 import org.example.botfather.data.entities.BusinessOwner;
 import org.example.botfather.telegramform.GenericForm;
 import org.example.botfather.telegramform.FormStep;
@@ -13,6 +14,7 @@ import org.telegram.telegrambots.meta.api.objects.User;
 import java.util.Arrays;
 import java.util.Map;
 
+@Slf4j
 @Component
 public class BotsManagerStartCommand extends AbstractBotCommand {
 
@@ -55,7 +57,7 @@ public class BotsManagerStartCommand extends AbstractBotCommand {
                     businessOwner,
                     BusinessOwner.class
             );
-            System.out.println(savedBusinessOwner.toString());
+            log.info("Saved business owner: {}", savedBusinessOwner);
         }
         return response;
     }

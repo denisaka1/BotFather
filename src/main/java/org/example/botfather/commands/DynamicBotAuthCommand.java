@@ -1,4 +1,5 @@
 package org.example.botfather.commands;
+import lombok.extern.slf4j.Slf4j;
 import org.example.botfather.data.entities.Bot;
 import org.example.botfather.data.entities.Client;
 import org.example.botfather.telegramform.FormStep;
@@ -9,6 +10,7 @@ import org.example.botfather.utils.ApiRequestHelper;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import java.util.Arrays;
 
+@Slf4j
 public class DynamicBotAuthCommand extends AbstractBotCommand {
     private final GenericForm userForm;
 
@@ -39,7 +41,7 @@ public class DynamicBotAuthCommand extends AbstractBotCommand {
                     client,
                     Client.class
             );
-            System.out.println("Client saved: " + savedClient);
+            log.info("Client saved: {}", savedClient);
         }
         return response;
     }

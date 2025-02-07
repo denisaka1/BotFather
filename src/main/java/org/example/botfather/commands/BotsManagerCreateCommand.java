@@ -1,4 +1,5 @@
 package org.example.botfather.commands;
+import lombok.extern.slf4j.Slf4j;
 import org.example.botfather.data.entities.Bot;
 import org.example.botfather.data.entities.Job;
 import org.example.botfather.data.entities.WorkingHours;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import static org.example.botfather.utils.MessageExtractor.*;
 
+@Slf4j
 @Component
 public class BotsManagerCreateCommand extends AbstractBotCommand {
     private final DynamicBotsRegistryService botsRegistryService;
@@ -113,7 +115,7 @@ public class BotsManagerCreateCommand extends AbstractBotCommand {
         buildAndSaveWorkingHours(userResponses.get("workingHours"), savedBot);
         buildAndSaveJobs(userResponses.get("workingDurations"), savedBot);
         botsRegistryService.registerBot(savedBot);
-        System.out.println("Bot " + savedBot.getName() + " created and registered successfully!");
+        log.info("Bot {} created and registered successfully!", savedBot.getName());
     }
 
     private void buildAndSaveWorkingHours(String workingHoursStr, Bot savedBot) {

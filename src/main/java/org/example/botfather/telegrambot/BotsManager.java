@@ -1,5 +1,6 @@
 package org.example.botfather.telegrambot;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.botfather.config.ConfigLoader;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -7,6 +8,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @AllArgsConstructor
 public class BotsManager extends TelegramLongPollingBot {
@@ -44,6 +46,7 @@ public class BotsManager extends TelegramLongPollingBot {
             execute(message);
         } catch (TelegramApiException e) {
             e.printStackTrace();
+            log.error("Failed to send message {}, error: {}", message, e.getMessage());
         }
     }
 }

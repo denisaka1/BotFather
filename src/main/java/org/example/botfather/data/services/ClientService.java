@@ -11,7 +11,7 @@ public class ClientService {
     private final ClientRepository clientRepository;
 
     public ResponseEntity<Client> findByTelegramId(String telegramId) {
-        return clientRepository.findByUserTelegramId(telegramId)
+        return clientRepository.findByTelegramId(telegramId)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }

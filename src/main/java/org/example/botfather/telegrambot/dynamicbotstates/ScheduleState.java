@@ -15,7 +15,7 @@ import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ScheduleState implements DynamicBotState {
+public class ScheduleState implements IDynamicBotState {
     private final ApiRequestHelper apiRequestHelper;
 
     public ScheduleState(ApiRequestHelper apiRequestHelper) {

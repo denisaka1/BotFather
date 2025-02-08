@@ -4,7 +4,7 @@ import lombok.Getter;
 import org.example.botfather.data.entities.Bot;
 import org.example.botfather.data.entities.Client;
 import org.example.botfather.telegrambot.dynamicbotstates.AuthState;
-import org.example.botfather.telegrambot.dynamicbotstates.DynamicBotState;
+import org.example.botfather.telegrambot.dynamicbotstates.IDynamicBotState;
 import org.example.botfather.telegrambot.dynamicbotstates.ScheduleOrCancelQuestionState;
 import org.example.botfather.utils.ApiRequestHelper;
 import org.springframework.stereotype.Service;
@@ -19,11 +19,11 @@ import java.util.Map;
 @Service
 @AllArgsConstructor
 public class DynamicBotsMessageHandler {
-    private final Map<Long, DynamicBotState> userStates = new HashMap<>();
+    private final Map<Long, IDynamicBotState> userStates = new HashMap<>();
     @Getter
     private final ApiRequestHelper apiRequestHelper;
 
-    public void setState(Long userId, DynamicBotState newState) {
+    public void setState(Long userId, IDynamicBotState newState) {
         userStates.put(userId, newState);
     }
 
@@ -51,9 +51,9 @@ public class DynamicBotsMessageHandler {
     private BotApiMethod<?> handleCallbackQuery(Update update, Bot bot) {
         Message message = update.getCallbackQuery().getMessage();
         Long userId = update.getCallbackQuery().getFrom().getId();
-        DynamicBotState currentState = getUserState(userId, bot);
+        IDynamicBotState currentState = getUserState(userId, bot);
         if (currentState.isBackCommand(update.getCallbackQuery())) {
-            DynamicBotState previousState = currentState.getPreviousState(this);
+            IDynamicBotState previousState = currentState.getPreviousState(this);
             userStates.put(userId, previousState);
             return previousState.handle(this, bot, message, update.getCallbackQuery());
         }
@@ -63,16 +63,16 @@ public class DynamicBotsMessageHandler {
 
     private BotApiMethod<?> handleTextMessage(Message message, Bot bot) {
         Long userId = message.getFrom().getId();
-        DynamicBotState currentState = getUserState(userId, bot);
+        IDynamicBotState currentState = getUserState(userId, bot);
         return currentState.handle(this, bot, message);
     }
 
-    private DynamicBotState getUserState(Long userId, Bot bot) {
+    private IDynamicBotState getUserState(Long userId, Bot bot) {
         userStates.putIfAbsent(userId, determineInitialState(userId, bot));
         return userStates.get(userId);
     }
 
-    private DynamicBotState determineInitialState(Long userId, Bot bot) {
+    private IDynamicBotState determineInitialState(Long userId, Bot bot) {
         return (!userStates.containsKey(userId) && clientByTelegramId(userId) == null)
                 ? new AuthState(apiRequestHelper, bot)
                 : new ScheduleOrCancelQuestionState();

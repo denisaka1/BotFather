@@ -5,7 +5,7 @@ import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
-public interface DynamicBotState {
+public interface IDynamicBotState {
     BotApiMethod<?> handle(DynamicBotsMessageHandler context, Bot bot, Message message, CallbackQuery callbackData);
 
     default BotApiMethod<?> handle(DynamicBotsMessageHandler context, Bot bot, Message message) {
@@ -16,7 +16,7 @@ public interface DynamicBotState {
         return callbackData.getData().equalsIgnoreCase("BACK");
     }
 
-    default DynamicBotState getPreviousState(DynamicBotsMessageHandler context) {
+    default IDynamicBotState getPreviousState(DynamicBotsMessageHandler context) {
         return new ScheduleOrCancelQuestionState(); // Default fallback
     }
 }

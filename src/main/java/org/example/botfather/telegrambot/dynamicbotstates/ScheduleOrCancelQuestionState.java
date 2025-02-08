@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class ScheduleOrCancelQuestionState implements DynamicBotState {
+public class ScheduleOrCancelQuestionState implements IDynamicBotState {
 
     @Override
     public BotApiMethod<?> handle(DynamicBotsMessageHandler context, Bot bot, Message message, CallbackQuery callbackData) {

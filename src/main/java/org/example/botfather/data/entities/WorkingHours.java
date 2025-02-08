@@ -22,7 +22,7 @@ public class WorkingHours {
     @Column(name = "day_of_week", nullable = false)
     private String day; // e.g., "Monday"
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "workingHours", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<TimeRange> timeRanges = new ArrayList<>();
 
     @ManyToOne

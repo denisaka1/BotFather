@@ -38,7 +38,7 @@ public class BusinessOwner {
     @Column
     private String address;
 
-    @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "owner", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Bot> bots = new ArrayList<>();
 
     public void addBot(Bot bot) {

@@ -1,7 +1,7 @@
 package org.example.telegram.bot.commands;
 
 import org.example.client.api.helper.ApiRequestHelper;
-import org.example.telegram.bot.data.entities.Bot;
+import org.example.data.layer.entities.Bot;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Message;
 

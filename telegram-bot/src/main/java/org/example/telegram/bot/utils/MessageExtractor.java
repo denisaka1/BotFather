@@ -1,9 +1,9 @@
 package org.example.telegram.bot.utils;
 
-import org.example.telegram.bot.data.entities.Bot;
-import org.example.telegram.bot.data.entities.Job;
-import org.example.telegram.bot.data.entities.TimeRange;
-import org.example.telegram.bot.data.entities.WorkingHours;
+import org.example.data.layer.entities.Bot;
+import org.example.data.layer.entities.Job;
+import org.example.data.layer.entities.TimeRange;
+import org.example.data.layer.entities.WorkingHours;
 
 import java.util.ArrayList;
 import java.util.List;

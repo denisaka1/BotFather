@@ -18,6 +18,8 @@
     <modules>
         <module>client-api-layer</module>
         <module>telegram-components</module>
+        <module>data-layer</module>
+        <module>backend-api-layer</module>
         <module>telegram-bot</module>
     </modules>
 

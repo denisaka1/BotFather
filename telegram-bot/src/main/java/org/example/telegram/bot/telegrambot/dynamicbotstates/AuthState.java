@@ -1,8 +1,8 @@
 package org.example.telegram.bot.telegrambot.dynamicbotstates;
 import org.example.client.api.helper.ApiRequestHelper;
+import org.example.data.layer.entities.Bot;
 import org.example.telegram.bot.commands.AbstractBotCommand;
 import org.example.telegram.bot.commands.DynamicBotAuthCommand;
-import org.example.telegram.bot.data.entities.Bot;
 import org.example.telegram.bot.telegrambot.DynamicBotsMessageHandler;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;

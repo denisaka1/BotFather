@@ -1,5 +1,5 @@
 package org.example.telegram.bot.telegrambot.dynamicbotstates;
-import org.example.telegram.bot.data.entities.Bot;
+import org.example.data.layer.entities.Bot;
 import org.example.telegram.bot.telegrambot.DynamicBotsMessageHandler;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;

@@ -3,7 +3,7 @@ package org.example.telegram.bot.telegrambot;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.client.api.helper.ApiRequestHelper;
-import org.example.telegram.bot.data.entities.Bot;
+import org.example.data.layer.entities.Bot;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 

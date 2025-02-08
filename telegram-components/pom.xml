@@ -35,7 +35,6 @@
             <groupId>org.telegram</groupId>
             <artifactId>telegrambots-meta</artifactId>
             <version>6.8.0</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>

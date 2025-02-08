@@ -1,7 +1,8 @@
 package org.example.telegram.bot.telegrambot.dynamicbotstates;
 
+import lombok.AllArgsConstructor;
 import org.example.client.api.helper.ApiRequestHelper;
-import org.example.telegram.bot.data.entities.Bot;
+import org.example.data.layer.entities.Bot;
 import org.example.telegram.bot.telegrambot.DynamicBotsMessageHandler;
 import org.example.telegram.components.inline.keyboard.CalendarKeyboardGenerator;
 import org.example.telegram.components.inline.keyboard.MessageGenerator;
@@ -14,12 +15,9 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 
 import java.time.LocalDate;
 
+@AllArgsConstructor
 public class ScheduleState implements IDynamicBotState {
     private final ApiRequestHelper apiRequestHelper;
-
-    public ScheduleState(ApiRequestHelper apiRequestHelper) {
-        this.apiRequestHelper = apiRequestHelper;
-    }
 
     @Override
     public BotApiMethod<?> handle(DynamicBotsMessageHandler context, Bot bot, Message message, CallbackQuery callbackData) {

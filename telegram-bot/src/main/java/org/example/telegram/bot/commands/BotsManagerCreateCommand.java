@@ -2,9 +2,9 @@ package org.example.telegram.bot.commands;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.client.api.helper.ApiRequestHelper;
-import org.example.telegram.bot.data.entities.Bot;
-import org.example.telegram.bot.data.entities.Job;
-import org.example.telegram.bot.data.entities.WorkingHours;
+import org.example.data.layer.entities.Bot;
+import org.example.data.layer.entities.Job;
+import org.example.data.layer.entities.WorkingHours;
 import org.example.telegram.bot.telegrambot.DynamicBotsRegistryService;
 import org.example.telegram.components.forms.FormStep;
 import org.example.telegram.components.forms.GenericForm;

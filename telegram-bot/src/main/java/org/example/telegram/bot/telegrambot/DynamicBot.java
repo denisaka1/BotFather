@@ -1,7 +1,7 @@
 package org.example.telegram.bot.telegrambot;
 
 import lombok.AllArgsConstructor;
-import org.example.telegram.bot.data.entities.Bot;
+import org.example.data.layer.entities.Bot;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.objects.Update;

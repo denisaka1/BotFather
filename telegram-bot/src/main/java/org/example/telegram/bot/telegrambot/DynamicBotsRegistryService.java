@@ -1,6 +1,6 @@
 package org.example.telegram.bot.telegrambot;
 import lombok.extern.slf4j.Slf4j;
-import org.example.telegram.bot.data.entities.Bot;
+import org.example.data.layer.entities.Bot;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;

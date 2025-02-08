@@ -1,6 +1,8 @@
 package org.example.botfather.telegrambot.dynamicbotstates;
 import org.example.botfather.data.entities.Bot;
 import org.example.botfather.telegrambot.DynamicBotsMessageHandler;
+import org.example.botfather.telegramform.ButtonsGenerator;
+import org.example.botfather.telegramform.MessageGenerator;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
@@ -8,8 +10,7 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import java.util.ArrayList;
-import java.util.Collections;
+
 import java.util.List;
 
 public class ScheduleOrCancelQuestionState implements IDynamicBotState {
@@ -36,41 +37,18 @@ public class ScheduleOrCancelQuestionState implements IDynamicBotState {
         String text = bot.getWelcomeMessage() + "\n\n" + "What would you like to do?";
 
         // Create inline keyboard with two rows
-        List<List<InlineKeyboardButton>> keyboard = getInlineKeyboardButtons();
+        String[][] buttonConfigs = {
+                {"📅 Schedule An Appointment:SCHEDULE"},
+                {"❌ Cancel An Existing Appointment:CANCEL"}
+        };
+        List<List<InlineKeyboardButton>> keyboard = ButtonsGenerator.createKeyboard(buttonConfigs);
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         markup.setKeyboard(keyboard);
 
         if (isBack) {
-            // Edit the existing message instead of sending a new one
-            EditMessageText editMessage = new EditMessageText();
-            editMessage.setChatId(chatId);
-            editMessage.setMessageId(message.getMessageId()); // Edit the current message
-            editMessage.setText(text);
-            editMessage.setReplyMarkup(markup);
-            return editMessage;
+            return MessageGenerator.createEditMessageWithMarkup(chatId, text, markup, message.getMessageId());
         } else {
-            // Send a new message
-            SendMessage sendMessage = new SendMessage();
-            sendMessage.setChatId(chatId);
-            sendMessage.setText(text);
-            sendMessage.setReplyMarkup(markup);
-            return sendMessage;
+            return MessageGenerator.createSendMessageWithMarkup(chatId, text, markup);
         }
-    }
-
-    private static List<List<InlineKeyboardButton>> getInlineKeyboardButtons() {
-        InlineKeyboardButton scheduleButton = new InlineKeyboardButton();
-        scheduleButton.setText("📅 Schedule An Appointment");
-        scheduleButton.setCallbackData("SCHEDULE");
-
-        InlineKeyboardButton editButton = new InlineKeyboardButton();
-        editButton.setText("❌ Cancel An Existing Appointment");
-        editButton.setCallbackData("CANCEL");
-
-        List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
-        keyboard.add(Collections.singletonList(scheduleButton)); // Row 1
-        keyboard.add(Collections.singletonList(editButton));     // Row 2
-
-        return keyboard;
     }
 }

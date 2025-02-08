@@ -64,6 +64,9 @@ public class ScheduleState implements DynamicBotState {
     }
 
     private InlineKeyboardMarkup generateCalendar(int year, int month) {
+        LocalDate today = LocalDate.now();
+        LocalDate lastAllowedDate = today.plusMonths(1);
+
         YearMonth yearMonth = YearMonth.of(year, month);
         LocalDate firstDay = yearMonth.atDay(1);
         int daysInMonth = yearMonth.lengthOfMonth();
@@ -84,13 +87,33 @@ public class ScheduleState implements DynamicBotState {
             row.add(InlineKeyboardButton.builder().text(" ").callbackData("noop").build());
         }
 
+        boolean hasNextMonthDates = false;
+        boolean hasPreviousMonthDates = false;
+
         for (int day = 1; day <= daysInMonth; day++) {
-            row.add(InlineKeyboardButton.builder().text(String.valueOf(day))
-                    .callbackData("date:" + String.format("%02d/%02d/%04d", day, month, year))
-                    .build());
+            LocalDate currentDate = LocalDate.of(year, month, day);
+
+            if (currentDate.isBefore(today)) {
+                // Display past dates as disabled (non-clickable)
+                row.add(InlineKeyboardButton.builder().text("❌").callbackData("noop").build());
+            } else if (!currentDate.isAfter(lastAllowedDate)) {
+                // Display valid dates as selectable
+                row.add(InlineKeyboardButton.builder()
+                        .text(String.valueOf(day))
+                        .callbackData("date:" + String.format("%02d/%02d/%04d", day, month, year))
+                        .build());
+            } else {
+                // Display future dates as disabled (non-clickable)
+                row.add(InlineKeyboardButton.builder().text("❌").callbackData("noop").build());
+            }
+
             if (row.size() == 7) {
                 keyboard.add(row);
                 row = new ArrayList<>();
+            }
+
+            if (currentDate.getMonthValue() > month && currentDate.isBefore(lastAllowedDate)) {
+                hasNextMonthDates = true;
             }
         }
 
@@ -101,15 +124,38 @@ public class ScheduleState implements DynamicBotState {
             keyboard.add(row);
         }
 
+        // Navigation buttons logic
         List<InlineKeyboardButton> navRow = new ArrayList<>();
-        int prevMonth = month == 1 ? 12 : month - 1;
-        int prevYear = month == 1 ? year - 1 : year;
-        int nextMonth = month == 12 ? 1 : month + 1;
-        int nextYear = month == 12 ? year + 1 : year;
+        LocalDate firstValidDate = today;
+        LocalDate lastValidDate = lastAllowedDate;
 
-        navRow.add(InlineKeyboardButton.builder().text("⬅️ Previous").callbackData("month:" + prevYear + "-" + prevMonth).build());
+        if (YearMonth.from(firstValidDate).isBefore(yearMonth)) {
+            hasPreviousMonthDates = true;
+        }
+
+        if (YearMonth.from(lastValidDate).isAfter(yearMonth)) {
+            hasNextMonthDates = true;
+        }
+
+        if (hasPreviousMonthDates) {
+            int prevMonth = month == 1 ? 12 : month - 1;
+            int prevYear = month == 1 ? year - 1 : year;
+            navRow.add(InlineKeyboardButton.builder()
+                    .text("⬅️ Previous")
+                    .callbackData("month:" + prevYear + "-" + prevMonth)
+                    .build());
+        }
+
         navRow.add(InlineKeyboardButton.builder().text("<< Back To Menu").callbackData("BACK").build());
-        navRow.add(InlineKeyboardButton.builder().text("Next ➡️").callbackData("month:" + nextYear + "-" + nextMonth).build());
+
+        if (hasNextMonthDates) {
+            int nextMonth = month == 12 ? 1 : month + 1;
+            int nextYear = month == 12 ? year + 1 : year;
+            navRow.add(InlineKeyboardButton.builder()
+                    .text("Next ➡️")
+                    .callbackData("month:" + nextYear + "-" + nextMonth)
+                    .build());
+        }
 
         keyboard.add(navRow);
 

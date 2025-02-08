@@ -25,7 +25,7 @@ public class DynamicBot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         BotApiMethod<?> response = dynamicBotsMessageHandler.processMessage(bot, update);
-        sendMessage(response);
+        if (response != null) sendMessage(response);
     }
 
     private void sendMessage(BotApiMethod<?> message) {

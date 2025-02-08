@@ -5,6 +5,7 @@ import org.example.botfather.utils.ApiRequestHelper;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -24,18 +25,12 @@ public class ScheduleState implements DynamicBotState {
     @Override
     public BotApiMethod<?> handle(DynamicBotsMessageHandler context, Bot bot, Message message, CallbackQuery callbackData) {
         Long chatId = message.getChatId();
-        Long userId = message.getFrom().getId();
-
-        if (isCancelCommand(message) || isBackCommand(message)) {
-            context.setState(userId, new ScheduleOrCancelQuestionState());
-            return new SendMessage(chatId.toString(), "Action canceled. Returning to scheduling options.");
-        }
 
         if (callbackData != null) {
             return handleCallbackQuery(context, bot, message, callbackData.getData());
         }
 
-        return sendCalendar(chatId, LocalDate.now().getYear(), LocalDate.now().getMonthValue());
+        return sendCalendar(chatId, LocalDate.now().getYear(), LocalDate.now().getMonthValue(), message);
     }
 
     private BotApiMethod<?> handleCallbackQuery(DynamicBotsMessageHandler context, Bot bot, Message message, String callbackData) {
@@ -59,10 +54,11 @@ public class ScheduleState implements DynamicBotState {
         return null;
     }
 
-    private SendMessage sendCalendar(Long chatId, int year, int month) {
-        return SendMessage.builder()
+    private BotApiMethod<?> sendCalendar(Long chatId, int year, int month, Message message) {
+        return EditMessageText.builder()
                 .chatId(chatId.toString())
-                .text("📅 " + getMonthName(month) + " " + year)
+                .messageId(message.getMessageId())
+                .text("Please select a date:")
                 .replyMarkup(generateCalendar(year, month))
                 .build();
     }
@@ -112,7 +108,7 @@ public class ScheduleState implements DynamicBotState {
         int nextYear = month == 12 ? year + 1 : year;
 
         navRow.add(InlineKeyboardButton.builder().text("⬅️ Previous").callbackData("month:" + prevYear + "-" + prevMonth).build());
-        navRow.add(InlineKeyboardButton.builder().text("📅 Enter Date Manually").callbackData("manual").build());
+        navRow.add(InlineKeyboardButton.builder().text("<< Back To Menu").callbackData("BACK").build());
         navRow.add(InlineKeyboardButton.builder().text("Next ➡️").callbackData("month:" + nextYear + "-" + nextMonth).build());
 
         keyboard.add(navRow);

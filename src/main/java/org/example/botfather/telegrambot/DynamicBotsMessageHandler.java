@@ -51,18 +51,19 @@ public class DynamicBotsMessageHandler {
     private BotApiMethod<?> handleCallbackQuery(Update update, Bot bot) {
         Message message = update.getCallbackQuery().getMessage();
         Long userId = update.getCallbackQuery().getFrom().getId();
+        DynamicBotState currentState = getUserState(userId, bot);
+        if (currentState.isBackCommand(update.getCallbackQuery())) {
+            DynamicBotState previousState = currentState.getPreviousState(this);
+            userStates.put(userId, previousState);
+            return previousState.handle(this, bot, message, update.getCallbackQuery());
+        }
 
-        return getUserState(userId, bot).handle(this, bot, message, update.getCallbackQuery());
+        return currentState.handle(this, bot, message, update.getCallbackQuery());
     }
 
     private BotApiMethod<?> handleTextMessage(Message message, Bot bot) {
         Long userId = message.getFrom().getId();
         DynamicBotState currentState = getUserState(userId, bot);
-
-        if (currentState.isBackCommand(message)) {
-            userStates.put(userId, currentState.getPreviousState(this));
-            return new SendMessage(message.getChatId().toString(), "Going back...");
-        }
         return currentState.handle(this, bot, message);
     }
 

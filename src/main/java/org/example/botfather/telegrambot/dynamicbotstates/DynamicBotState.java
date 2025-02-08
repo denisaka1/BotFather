@@ -11,12 +11,9 @@ public interface DynamicBotState {
     default BotApiMethod<?> handle(DynamicBotsMessageHandler context, Bot bot, Message message) {
         return handle(context, bot, message, null); // Pass null when callbackData isn't provided
     }
-    default boolean isCancelCommand(Message message) {
-        return message.getText().equalsIgnoreCase("/cancel");
-    }
 
-    default boolean isBackCommand(Message message) {
-        return message.getText().equalsIgnoreCase("/back");
+    default boolean isBackCommand(CallbackQuery callbackData) {
+        return callbackData.getData().equalsIgnoreCase("BACK");
     }
 
     default DynamicBotState getPreviousState(DynamicBotsMessageHandler context) {

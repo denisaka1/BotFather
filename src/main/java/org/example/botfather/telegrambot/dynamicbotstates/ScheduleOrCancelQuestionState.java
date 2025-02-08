@@ -1,11 +1,12 @@
 package org.example.botfather.telegrambot.dynamicbotstates;
 import org.example.botfather.data.entities.Bot;
 import org.example.botfather.telegrambot.DynamicBotsMessageHandler;
+import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -13,15 +14,18 @@ import java.util.List;
 public class ScheduleOrCancelQuestionState implements DynamicBotState {
 
     @Override
-    public SendMessage handle(DynamicBotsMessageHandler context, Bot bot, Message message, String callbackData) {
+    public BotApiMethod<?> handle(DynamicBotsMessageHandler context, Bot bot, Message message, CallbackQuery callbackData) {
         String chatId = message.getChatId().toString();
         if (isCancelCommand(message) || isBackCommand(message)) {
             return new SendMessage(chatId, "You're already in the scheduling options.");
         }
         if (callbackData != null) {
-            if ("SCHEDULE".equals(callbackData)) {
-                return new SendMessage(chatId, "You've selected: Schedule an appointment.");
-            } else if ("CANCEL".equals(callbackData)) {
+            String data = callbackData.getData();
+            if ("SCHEDULE".equals(data)) {
+                ScheduleState scheduleState = new ScheduleState(context.getApiRequestHelper());
+                context.setState(callbackData.getFrom().getId(), scheduleState);
+                return scheduleState.handle(context, bot, message);
+            } else if ("CANCEL".equals(data)) {
                 return new SendMessage(chatId, "You've selected: Delete an existing appointment.");
             }
         }

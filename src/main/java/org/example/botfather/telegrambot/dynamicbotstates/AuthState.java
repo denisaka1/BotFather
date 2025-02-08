@@ -4,7 +4,9 @@ import org.example.botfather.commands.DynamicBotAuthCommand;
 import org.example.botfather.data.entities.Bot;
 import org.example.botfather.telegrambot.DynamicBotsMessageHandler;
 import org.example.botfather.utils.ApiRequestHelper;
+import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
 public class AuthState implements DynamicBotState {
@@ -15,7 +17,7 @@ public class AuthState implements DynamicBotState {
     }
 
     @Override
-    public SendMessage handle(DynamicBotsMessageHandler context, Bot bot, Message message, String callbackData) {
+    public BotApiMethod<?> handle(DynamicBotsMessageHandler context, Bot bot, Message message, CallbackQuery callbackData) {
         if (isBackCommand(message) || isCancelCommand(message)) {
             return new SendMessage(message.getChatId().toString(), "You're already at the first step.");
         }

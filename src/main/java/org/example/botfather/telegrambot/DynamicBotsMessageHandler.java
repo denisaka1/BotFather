@@ -8,6 +8,7 @@ import org.example.botfather.telegrambot.dynamicbotstates.DynamicBotState;
 import org.example.botfather.telegrambot.dynamicbotstates.ScheduleOrCancelQuestionState;
 import org.example.botfather.utils.ApiRequestHelper;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -26,7 +27,7 @@ public class DynamicBotsMessageHandler {
         userStates.put(userId, newState);
     }
 
-    public SendMessage processMessage(Bot bot, Update update) {
+    public BotApiMethod<?> processMessage(Bot bot, Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
             return handleTextMessage(update.getMessage(), bot);
         }
@@ -47,15 +48,14 @@ public class DynamicBotsMessageHandler {
         }
     }
 
-    private SendMessage handleCallbackQuery(Update update, Bot bot) {
-        String callbackData = update.getCallbackQuery().getData();
+    private BotApiMethod<?> handleCallbackQuery(Update update, Bot bot) {
         Message message = update.getCallbackQuery().getMessage();
         Long userId = update.getCallbackQuery().getFrom().getId();
 
-        return getUserState(userId, bot).handle(this, bot, message, callbackData);
+        return getUserState(userId, bot).handle(this, bot, message, update.getCallbackQuery());
     }
 
-    private SendMessage handleTextMessage(Message message, Bot bot) {
+    private BotApiMethod<?> handleTextMessage(Message message, Bot bot) {
         Long userId = message.getFrom().getId();
         DynamicBotState currentState = getUserState(userId, bot);
 

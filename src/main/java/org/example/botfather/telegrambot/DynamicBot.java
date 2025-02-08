@@ -3,7 +3,7 @@ package org.example.botfather.telegrambot;
 import lombok.AllArgsConstructor;
 import org.example.botfather.data.entities.Bot;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
@@ -24,11 +24,11 @@ public class DynamicBot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        SendMessage response = dynamicBotsMessageHandler.processMessage(bot, update);
+        BotApiMethod<?> response = dynamicBotsMessageHandler.processMessage(bot, update);
         sendMessage(response);
     }
 
-    private void sendMessage(SendMessage message) {
+    private void sendMessage(BotApiMethod<?> message) {
         try {
             execute(message);
         } catch (TelegramApiException e) {

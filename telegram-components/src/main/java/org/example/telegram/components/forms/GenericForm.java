@@ -1,4 +1,4 @@
-package org.example.telegram.bot.telegramcomponents.form;
+package org.example.telegram.components.forms;
 
 import lombok.Getter;
 

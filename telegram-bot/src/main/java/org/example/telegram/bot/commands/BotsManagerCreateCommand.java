@@ -6,12 +6,12 @@ import org.example.telegram.bot.data.entities.Bot;
 import org.example.telegram.bot.data.entities.Job;
 import org.example.telegram.bot.data.entities.WorkingHours;
 import org.example.telegram.bot.telegrambot.DynamicBotsRegistryService;
-import org.example.telegram.bot.telegramcomponents.form.FormStep;
-import org.example.telegram.bot.telegramcomponents.form.GenericForm;
-import org.example.telegram.bot.telegramcomponents.form.validators.BotMessageValidator;
-import org.example.telegram.bot.telegramcomponents.form.validators.StringValidator;
-import org.example.telegram.bot.telegramcomponents.form.validators.WorkingDurationsValidator;
-import org.example.telegram.bot.telegramcomponents.form.validators.WorkingHoursValidator;
+import org.example.telegram.components.forms.FormStep;
+import org.example.telegram.components.forms.GenericForm;
+import org.example.telegram.components.validators.BotMessageValidator;
+import org.example.telegram.components.validators.StringValidator;
+import org.example.telegram.components.validators.WorkingDurationsValidator;
+import org.example.telegram.components.validators.WorkingHoursValidator;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Message;
 

@@ -4,17 +4,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.client.api.helper.ApiRequestHelper;
 import org.example.telegram.bot.data.entities.Bot;
 import org.example.telegram.bot.data.entities.Client;
-import org.example.telegram.bot.telegramcomponents.form.FormStep;
-import org.example.telegram.bot.telegramcomponents.form.GenericForm;
-import org.example.telegram.bot.telegramcomponents.form.validators.EmailValidator;
-import org.example.telegram.bot.telegramcomponents.form.validators.PhoneNumberValidator;
+import org.example.telegram.components.forms.FormStep;
+import org.example.telegram.components.forms.GenericForm;
+import org.example.telegram.components.validators.EmailValidator;
+import org.example.telegram.components.validators.PhoneNumberValidator;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
 import java.util.Arrays;
 
 @Slf4j
 public class DynamicBotAuthCommand extends AbstractBotCommand {
-    private final GenericForm userForm;
 
     public DynamicBotAuthCommand(ApiRequestHelper apiRequestHelper, Bot bot) {
         super(apiRequestHelper);

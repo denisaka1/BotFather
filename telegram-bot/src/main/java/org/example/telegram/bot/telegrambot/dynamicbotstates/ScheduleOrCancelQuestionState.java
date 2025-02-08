@@ -1,8 +1,8 @@
 package org.example.telegram.bot.telegrambot.dynamicbotstates;
 import org.example.telegram.bot.data.entities.Bot;
 import org.example.telegram.bot.telegrambot.DynamicBotsMessageHandler;
-import org.example.telegram.bot.telegramcomponents.ButtonsGenerator;
-import org.example.telegram.bot.telegramcomponents.MessageGenerator;
+import org.example.telegram.components.inline.keyboard.ButtonsGenerator;
+import org.example.telegram.components.inline.keyboard.MessageGenerator;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;

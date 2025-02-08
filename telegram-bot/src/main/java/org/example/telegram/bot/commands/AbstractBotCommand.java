@@ -3,7 +3,7 @@ package org.example.telegram.bot.commands;
 import jakarta.persistence.MappedSuperclass;
 import lombok.RequiredArgsConstructor;
 import org.example.client.api.helper.ApiRequestHelper;
-import org.example.telegram.bot.telegramcomponents.form.GenericForm;
+import org.example.telegram.components.forms.GenericForm;
 
 @MappedSuperclass
 @RequiredArgsConstructor

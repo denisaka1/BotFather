@@ -1,6 +1,6 @@
-package org.example.telegram.bot.telegramcomponents.form;
+package org.example.telegram.components.forms;
 
-import org.example.telegram.bot.telegramcomponents.form.validators.IValidator;
+import org.example.telegram.components.validators.IValidator;
 
 public record FormStep<T>(String question, IValidator<T> validator, String errorMessage, String successMessage,
                           String fieldName) {

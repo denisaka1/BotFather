@@ -1,4 +1,4 @@
-package org.example.telegram.bot.telegramcomponents.form.validators;
+package org.example.telegram.components.validators;
 
 // ✅ String Validator (Non-empty check)
 public class StringValidator implements IValidator<String> {

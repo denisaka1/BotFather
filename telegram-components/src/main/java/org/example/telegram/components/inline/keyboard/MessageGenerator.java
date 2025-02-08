@@ -1,10 +1,13 @@
-package org.example.telegram.bot.telegramcomponents;
+package org.example.telegram.components.inline.keyboard;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 
 public class MessageGenerator {
+
+    private MessageGenerator() {}
+
     public static EditMessageText createEditMessageWithMarkup(String chatId, String text, InlineKeyboardMarkup markup, Integer messageId) {
         EditMessageText editMessage = new EditMessageText();
         editMessage.setChatId(chatId);

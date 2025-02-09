@@ -49,7 +49,10 @@ public class MessageExtractor {
                 while (matcher.find()) {
                     String startTime = matcher.group(1);
                     String endTime = matcher.group(2);
-                    timeRanges.add(new TimeRange(null, startTime, endTime));
+                    timeRanges.add(TimeRange.builder()
+                            .startTime(startTime)
+                            .endTime(endTime)
+                            .build());
                 }
             }
             WorkingHours workingHours = WorkingHours.builder()

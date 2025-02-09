@@ -1,4 +1,5 @@
 package org.example.botfather.data.entities;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,4 +22,10 @@ public class TimeRange {
 
     @Column(nullable = false)
     private String endTime; // e.g., "17:00"
+
+    @ManyToOne
+    @JoinColumn(name = "working_hours_id")
+    @JsonIgnore
+    @ToString.Exclude
+    private WorkingHours workingHours;
 }

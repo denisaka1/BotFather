@@ -26,6 +26,8 @@ public class ScheduleState implements IDynamicBotState {
 
         if (callbackData != null) {
             return handleCallbackQuery(context, bot, message, callbackData.getData());
+        } else if(message.hasText() && !message.getFrom().getIsBot()) { // In case a text message was received instead of a callback
+            return null;
         }
 
         return sendCalendar(chatId, LocalDate.now().getYear(), LocalDate.now().getMonthValue(), message);

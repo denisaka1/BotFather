@@ -43,6 +43,7 @@ public class BusinessOwner {
 
     public void addBot(Bot bot) {
         bots.add(bot);
+        bot.setOwner(this);
     }
 
     public void removeBot(Bot bot) {

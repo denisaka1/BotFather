@@ -44,6 +44,7 @@ public class Bot {
 
     public void addJob(Job job) {
         jobs.add(job);
+        job.setOwner(this);
     }
 
     public void removeJob(Job job) {
@@ -53,6 +54,9 @@ public class Bot {
     public void addWorkingHour(WorkingHours workingHour) {
         workingHours.add(workingHour);
         workingHour.setBot(this);
+        for (TimeRange timeRange : workingHour.getTimeRanges()) {
+            timeRange.setWorkingHours(workingHour);
+        }
     }
 
     public void removeWorkingHour(WorkingHours workingHour) {

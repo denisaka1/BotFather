@@ -2,6 +2,7 @@ package org.example.botfather.telegrambot.dynamicbotstates;
 import org.example.botfather.telegrambot.DynamicBotsMessageHandler;
 import org.example.botfather.data.entities.Bot;
 import org.example.botfather.telegramcomponents.CalendarKeyboardGenerator;
+import org.example.botfather.telegramcomponents.MessageGenerator;
 import org.example.botfather.utils.ApiRequestHelper;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -9,6 +10,7 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageRe
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 
 import java.time.LocalDate;
 
@@ -41,12 +43,8 @@ public class ScheduleState implements IDynamicBotState {
             String[] parts = callbackData.split(":")[1].split("-");
             int year = Integer.parseInt(parts[0]);
             int month = Integer.parseInt(parts[1]);
-
-            return EditMessageReplyMarkup.builder()
-                    .chatId(chatId)
-                    .messageId(messageId)
-                    .replyMarkup(CalendarKeyboardGenerator.generateCalendar(year, month))
-                    .build();
+            InlineKeyboardMarkup calendar = CalendarKeyboardGenerator.generateCalendar(year, month);
+            return MessageGenerator.createEditMessageReplyMarkup(chatId.toString(), messageId, calendar);
         }
         return null;
     }

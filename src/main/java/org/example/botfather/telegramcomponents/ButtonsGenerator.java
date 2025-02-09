@@ -1,4 +1,4 @@
-package org.example.botfather.telegramform;
+package org.example.botfather.telegramcomponents;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
 import java.util.ArrayList;

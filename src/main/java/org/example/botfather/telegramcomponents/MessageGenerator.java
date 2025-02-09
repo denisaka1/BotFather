@@ -1,4 +1,4 @@
-package org.example.botfather.telegramform;
+package org.example.botfather.telegramcomponents;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;

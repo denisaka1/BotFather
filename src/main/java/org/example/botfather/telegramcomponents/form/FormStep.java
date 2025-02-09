@@ -1,5 +1,5 @@
-package org.example.botfather.telegramform;
-import org.example.botfather.telegramform.validators.IValidator;
+package org.example.botfather.telegramcomponents.form;
+import org.example.botfather.telegramcomponents.form.validators.IValidator;
 
 public record FormStep<T>(String question, IValidator<T> validator, String errorMessage, String successMessage,
                           String fieldName) {

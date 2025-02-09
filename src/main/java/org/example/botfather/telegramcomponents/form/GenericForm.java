@@ -1,5 +1,6 @@
-package org.example.botfather.telegramform;
+package org.example.botfather.telegramcomponents.form;
 import lombok.Getter;
+
 import java.util.*;
 
 public class GenericForm {

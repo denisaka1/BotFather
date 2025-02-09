@@ -1,11 +1,11 @@
 package org.example.botfather.commands;
 import lombok.extern.slf4j.Slf4j;
 import org.example.botfather.data.entities.BusinessOwner;
-import org.example.botfather.telegramform.GenericForm;
-import org.example.botfather.telegramform.FormStep;
-import org.example.botfather.telegramform.validators.EmailValidator;
-import org.example.botfather.telegramform.validators.PhoneNumberValidator;
-import org.example.botfather.telegramform.validators.StringValidator;
+import org.example.botfather.telegramcomponents.form.GenericForm;
+import org.example.botfather.telegramcomponents.form.FormStep;
+import org.example.botfather.telegramcomponents.form.validators.EmailValidator;
+import org.example.botfather.telegramcomponents.form.validators.PhoneNumberValidator;
+import org.example.botfather.telegramcomponents.form.validators.StringValidator;
 import org.example.botfather.utils.ApiRequestHelper;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.springframework.stereotype.Component;

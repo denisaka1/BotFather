@@ -2,7 +2,7 @@ package org.example.botfather.commands;
 
 import jakarta.persistence.MappedSuperclass;
 import lombok.RequiredArgsConstructor;
-import org.example.botfather.telegramform.GenericForm;
+import org.example.botfather.telegramcomponents.form.GenericForm;
 import org.example.botfather.utils.ApiRequestHelper;
 
 @MappedSuperclass

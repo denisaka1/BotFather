@@ -1,4 +1,4 @@
-package org.example.botfather.telegramform.validators;
+package org.example.botfather.telegramcomponents.form.validators;
 
 import java.util.regex.Pattern;
 

@@ -1,4 +1,4 @@
-package org.example.botfather.telegramform.validators;
+package org.example.botfather.telegramcomponents.form.validators;
 
 // ✅ String Validator (Non-empty check)
 public class StringValidator implements IValidator<String> {

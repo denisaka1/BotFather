@@ -26,7 +26,7 @@ public class ScheduleState implements IDynamicBotState {
 
         if (callbackData != null) {
             return handleCallbackQuery(context, bot, message, callbackData.getData());
-        } else if(message.hasText() && !message.getFrom().getIsBot()) { // In case a text message was received instead of a callback
+        } else if (message.hasText() && !message.getFrom().getIsBot()) { // In case a text message was received instead of a callback
             return null;
         }
 
@@ -56,7 +56,7 @@ public class ScheduleState implements IDynamicBotState {
             }
             String selectedDate = parts[1];
             String selectedTime = parts[2] + ":" + parts[3];
-            return new SendMessage(chatId.toString(), "✅ You selected: " + selectedDate + " at " + selectedTime);
+            return new SendMessage(chatId.toString(), "✅ A confirmation for the appointment on " + selectedDate + " at " + selectedTime + " has been sent.\nYou will receive the confirmation message here.");
         } else if ("backToDates".equals(callbackData)) {
             return sendCalendar(chatId, LocalDate.now().getYear(), LocalDate.now().getMonthValue(), message);
         }

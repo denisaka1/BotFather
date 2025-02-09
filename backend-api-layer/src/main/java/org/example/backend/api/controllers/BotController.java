@@ -31,6 +31,11 @@ public class BotController {
         return ResponseEntity.ok(botService.saveJob(id, job));
     }
 
+    @GetMapping("{id}/jobs")
+    public ResponseEntity<List<Job>> getJobs(@PathVariable Long id) {
+        return ResponseEntity.ok(botService.fetchJobs(id));
+    }
+
     @PostMapping("{id}/working_hour")
     public ResponseEntity<WorkingHours> createWorkingHour(@PathVariable Long id, @RequestBody WorkingHours workingHours) {
         return ResponseEntity.ok(botService.saveWorkingHour(id, workingHours));

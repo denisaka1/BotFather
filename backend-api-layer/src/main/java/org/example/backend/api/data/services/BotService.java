@@ -36,4 +36,9 @@ public class BotService {
         botRepository.save(bot);
         return workingHours;
     }
+
+    public List<Job> fetchJobs(Long id) {
+        Bot bot = botRepository.findById(id).orElseThrow();
+        return bot.getJobs();
+    }
 }

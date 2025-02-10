@@ -1,18 +1,21 @@
 package org.example.telegram.components.inline.keyboard;
 
+import org.example.data.layer.entities.WorkingHours;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class CalendarKeyboardGenerator {
 
-    public static InlineKeyboardMarkup generateCalendar(int year, int month) {
+    public static InlineKeyboardMarkup generateCalendar(int year, int month, List<WorkingHours> workingHours) {
         LocalDate today = LocalDate.now();
         LocalDate lastAllowedDate = today.plusMonths(1);
+        List<Integer> workingDays = parseWorkingHours(workingHours);
 
         YearMonth yearMonth = YearMonth.of(year, month);
         LocalDate firstDay = yearMonth.atDay(1);
@@ -39,10 +42,11 @@ public class CalendarKeyboardGenerator {
 
         for (int day = 1; day <= daysInMonth; day++) {
             LocalDate currentDate = LocalDate.of(year, month, day);
+            int currentDayOfWeek = currentDate.getDayOfWeek().getValue();
 
             if (currentDate.isBefore(today)) {
                 row.add(InlineKeyboardButton.builder().text("❌").callbackData("noop").build());
-            } else if (!currentDate.isAfter(lastAllowedDate)) {
+            } else if (!currentDate.isAfter(lastAllowedDate) && workingDays.contains(currentDayOfWeek - 1)) {
                 row.add(InlineKeyboardButton.builder()
                         .text(String.valueOf(day))
                         .callbackData("date:" + String.format("%02d/%02d/%04d", day, month, year))
@@ -106,6 +110,16 @@ public class CalendarKeyboardGenerator {
     private static String getMonthName(int month) {
         String[] months = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
         return months[month - 1];
+    }
+
+    private static List<Integer> parseWorkingHours(List<WorkingHours> workingHours) {
+        String[] daysOfWeek = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+        List<Integer> workingDays = new ArrayList<>();
+        for (WorkingHours workingHour : workingHours) {
+            if (workingHour.getTimeRanges().isEmpty()) continue;
+            workingDays.add(Arrays.asList(daysOfWeek).indexOf(workingHour.getDay()));
+        }
+        return workingDays;
     }
 }
 

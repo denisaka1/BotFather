@@ -3,6 +3,7 @@ import lombok.AllArgsConstructor;
 import org.example.client.api.helper.ApiRequestHelper;
 import org.example.data.layer.entities.Bot;
 import org.example.data.layer.entities.Job;
+import org.example.data.layer.entities.WorkingHours;
 import org.example.telegram.bot.telegrambot.DynamicBotsMessageHandler;
 import org.example.telegram.components.inline.keyboard.CalendarKeyboardGenerator;
 import org.example.telegram.components.inline.keyboard.HourKeyboardGenerator;
@@ -33,7 +34,7 @@ public class ScheduleState implements IDynamicBotState {
             return null;
         }
 
-        return sendCalendar(message.getChatId(), LocalDate.now().getYear(), LocalDate.now().getMonthValue(), message);
+        return sendCalendar(message.getChatId(), LocalDate.now().getYear(), LocalDate.now().getMonthValue(), message, bot.getWorkingHours());
     }
 
     private List<Job> fetchBotJobs(Bot bot) {
@@ -48,7 +49,7 @@ public class ScheduleState implements IDynamicBotState {
             return sendHourSelection(chatId, messageId, callbackData.split(":")[1]);
         }
         if (callbackData.startsWith("month:")) {
-            return updateCalendar(chatId, messageId, callbackData);
+            return updateCalendar(chatId, messageId, callbackData, bot.getWorkingHours());
         }
         if (callbackData.startsWith("hour:")) {
             return updateHourSelection(chatId, messageId, callbackData);
@@ -57,7 +58,7 @@ public class ScheduleState implements IDynamicBotState {
             return processTimeSelection(chatId, messageId, bot, callbackData);
         }
         if (callbackData.equals("backToDates")) {
-            return sendCalendar(chatId, LocalDate.now().getYear(), LocalDate.now().getMonthValue(), message);
+            return sendCalendar(chatId, LocalDate.now().getYear(), LocalDate.now().getMonthValue(), message, bot.getWorkingHours());
         }
         if (callbackData.startsWith("backToTimeSelection")) {
             return sendHourSelection(chatId, messageId, callbackData.split("@")[1]);
@@ -80,17 +81,17 @@ public class ScheduleState implements IDynamicBotState {
         );
     }
 
-    private BotApiMethod<?> sendCalendar(Long chatId, int year, int month, Message message) {
-        InlineKeyboardMarkup calendar = CalendarKeyboardGenerator.generateCalendar(year, month);
+    private BotApiMethod<?> sendCalendar(Long chatId, int year, int month, Message message, List<WorkingHours> workingHours) {
+        InlineKeyboardMarkup calendar = CalendarKeyboardGenerator.generateCalendar(year, month, workingHours);
         return MessageGenerator.createEditMessageWithMarkup(chatId.toString(), "📅 Please select a date:", calendar, message.getMessageId());
     }
 
-    private BotApiMethod<?> updateCalendar(Long chatId, Integer messageId, String callbackData) {
+    private BotApiMethod<?> updateCalendar(Long chatId, Integer messageId, String callbackData, List<WorkingHours> workingHours) {
         String[] parts = callbackData.split(":")[1].split("-");
         int year = Integer.parseInt(parts[0]);
         int month = Integer.parseInt(parts[1]);
 
-        InlineKeyboardMarkup calendar = CalendarKeyboardGenerator.generateCalendar(year, month);
+        InlineKeyboardMarkup calendar = CalendarKeyboardGenerator.generateCalendar(year, month, workingHours);
         return MessageGenerator.createEditMessageReplyMarkup(chatId.toString(), messageId, calendar);
     }
 

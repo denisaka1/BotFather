@@ -66,10 +66,12 @@ public class BotsManagerCreateCommand extends AbstractBotCommand {
                 4️⃣ Copy the final message containing your bot token.
                 """;
         String workingHoursMessage = """
-                ⏳ What are your Working hours?
-                Please provide list of days in this format:
-                Day: HH:MM - HH:MM (24-hour clock) OR None (if you don't work on that day)
-
+                ⏳ What are your working hours?
+                ❗️ Please provide a list of days in the following format:
+                   Day: HH:MM - HH:MM (24-hour format) or "None" if you don't work on that day.
+                ❗️ The last hour represents the latest time you are available to provide services.
+                ❗️ Please ensure you use full hours or half-hour intervals only.
+        
                 Example:
                 Monday: 09:00 - 17:00
                 Tuesday: 09:00 - 17:00

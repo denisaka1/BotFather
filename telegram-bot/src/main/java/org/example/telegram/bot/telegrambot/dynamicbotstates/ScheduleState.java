@@ -136,12 +136,12 @@ public class ScheduleState implements IDynamicBotState {
     private BotApiMethod<?> confirmJobSelection(Long chatId, String callbackData) {
         String[] parts = callbackData.split("@");
         if (parts.length < 4) {
-            return new SendMessage(chatId.toString(), "⚠ Invalid job selection!");
+            return new SendMessage(chatId.toString(), "⚠ Invalid service selection!");
         }
 
         String[] jobParts = parts[1].split(":");
         if (jobParts.length < 3) {
-            return new SendMessage(chatId.toString(), "⚠ Invalid job details!");
+            return new SendMessage(chatId.toString(), "⚠ Invalid service details!");
         }
 
         String jobId = jobParts[0];

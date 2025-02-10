@@ -26,9 +26,10 @@ public class BotsManagerBotsCommand extends AbstractBotCommand {
 
         Bot[] ownerBots = getOwnerBots(userId);
 
-        StringBuilder result = new StringBuilder("Bots information:\n");
-        for (Bot bot : ownerBots) {
-            result.append(bot);
+        StringBuilder result = new StringBuilder("Bots information:\n\n");
+        for (int i = 0; i < ownerBots.length; i++) {
+            result.append("Bot ").append(i + 1).append(":\n");
+            result.append(ownerBots[i]);
         }
         forceCompleted = true;
 

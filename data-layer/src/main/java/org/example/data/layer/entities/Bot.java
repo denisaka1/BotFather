@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 @Setter
 @Getter
@@ -78,8 +80,19 @@ public class Bot {
         stringBuilder.append("\n");
 
         stringBuilder.append("Jobs:").append("\n");
-        for (Job job : jobs) {
-            stringBuilder.append(job);
+        List<Job> sortedJobs = jobs.stream()
+                .sorted(Comparator.comparing(Job::getType))
+                .toList();
+
+        Job previousJob = sortedJobs.get(0);
+        stringBuilder.append(previousJob);
+        for (Job job : sortedJobs.subList(1, sortedJobs.size())) {
+            if (Objects.equals(previousJob.getType(), job.getType())) {
+                stringBuilder.append(", ").append(job.getDuration());
+            } else {
+                stringBuilder.append("\n").append(job);
+            }
+            previousJob = job;
         }
         stringBuilder.append("\n");
 

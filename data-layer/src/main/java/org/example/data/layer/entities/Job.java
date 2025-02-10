@@ -31,7 +31,7 @@ public class Job {
     @Override
     public String toString() {
         StringBuilder str = new StringBuilder();
-        str.append(type).append(" duration: ").append(duration).append("\n");
+        str.append(type).append(" duration: ").append(duration);
         return str.toString();
     }
 }

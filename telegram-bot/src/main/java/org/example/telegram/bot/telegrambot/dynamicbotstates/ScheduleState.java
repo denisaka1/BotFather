@@ -15,8 +15,6 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @AllArgsConstructor
@@ -151,10 +149,11 @@ public class ScheduleState implements IDynamicBotState {
         String jobDuration = jobParts[2];
         String selectedDate = parts[2];
         String selectedTime = parts[3];
-
-        return new SendMessage(
-                chatId.toString(),
-                "✅ Your appointment for a " + jobType + " (" + jobDuration + "h) on " + selectedDate + " at " + selectedTime + " has been confirmed.\nYou'll receive a confirmation message here shortly."
+        String returnMessage = String.format(
+                "✅ Your appointment for a %s (%s h) on %s at %s is waiting for confirmation.\nYou'll receive a confirmation message here shortly.",
+                jobType, jobDuration, selectedDate, selectedTime
         );
+        return new SendMessage(
+                chatId.toString(), returnMessage);
     }
 }

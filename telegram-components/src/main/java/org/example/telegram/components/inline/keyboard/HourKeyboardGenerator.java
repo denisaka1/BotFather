@@ -11,6 +11,7 @@ import java.util.List;
 
 public class HourKeyboardGenerator {
     private static final int HOUR_DISPLAY_RANGE = 4;
+    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
 
     public static InlineKeyboardMarkup generateHourKeyboard(String selectedDate, String startHour, List<WorkingHours> workingHours) {
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
@@ -20,35 +21,28 @@ public class HourKeyboardGenerator {
         String day = selected.getDayOfWeek().name();
         List<String> availableHoursList = availableHours(workingHours, day);
 
-        // Parse working hours start and end times from strings to LocalTime
-        LocalTime parsedWorkingHoursStart = selected.equals(today) ? now : LocalTime.parse(availableHoursList.get(0).split("-")[0], DateTimeFormatter.ofPattern("HH:mm"));
-        LocalTime parsedWorkingHoursEnd = LocalTime.parse(availableHoursList.get(availableHoursList.size() - 1).split("-")[1], DateTimeFormatter.ofPattern("HH:mm"));
+        // Parse working hours start and end times from available working hours
+        LocalTime parsedWorkingHoursStart = selected.equals(today) ? now : LocalTime.parse(availableHoursList.get(0).split("-")[0], TIME_FORMATTER);
+        LocalTime parsedWorkingHoursEnd = LocalTime.parse(availableHoursList.get(availableHoursList.size() - 1).split("-")[1], TIME_FORMATTER);
 
-        // Parse startHour and endHour from strings to LocalTime
-        LocalTime parsedStartHour = (startHour != null)
-                ? LocalTime.parse(startHour, DateTimeFormatter.ofPattern("HH:mm"))
-                : parsedWorkingHoursStart;
+        // Parse startHour and adjust it if necessary
+        LocalTime parsedStartHour = (startHour != null) ? LocalTime.parse(startHour, TIME_FORMATTER) : parsedWorkingHoursStart;
 
+        // Adjusted end hour based on range
         LocalTime parsedEndHour = parsedStartHour.plusHours(HOUR_DISPLAY_RANGE);
 
-        // Adjust startHour based on selected time
-        LocalTime adjustedStartHour = parsedStartHour;
+        // Adjust start hour if today to avoid showing past times
+        LocalTime adjustedStartHour = selected.equals(today) ? LocalTime.of(Math.max(parsedStartHour.getHour(), now.getHour()), 0) : parsedStartHour;
 
-        // If the selected date is today, don't show past hours
-        if (selected.equals(today)) {
-            parsedWorkingHoursStart = now;
-            adjustedStartHour = LocalTime.of(Math.max(parsedStartHour.getHour(), now.getHour()), 0); // Adjust to current hour if today
-        }
+        // Ensure the start and end times are within working hours
+        adjustedStartHour = adjustedStartHour.isBefore(parsedWorkingHoursStart) ? parsedWorkingHoursStart : adjustedStartHour;
+        parsedEndHour = parsedEndHour.isAfter(parsedWorkingHoursEnd) ? parsedWorkingHoursEnd : parsedEndHour;
 
-        // Ensure we do not exceed working hours
-        if (adjustedStartHour.isBefore(parsedWorkingHoursStart)) adjustedStartHour = parsedWorkingHoursStart;
-        if (parsedEndHour.isAfter(parsedWorkingHoursEnd)) parsedEndHour = parsedWorkingHoursEnd;
-
-        // Generate buttons for every 15 minutes within the range
+        // Generate time buttons for available hours
         for (int hour = adjustedStartHour.getHour(); hour < parsedEndHour.getHour(); hour++) {
             List<InlineKeyboardButton> row = new ArrayList<>();
             for (int minutes = 0; minutes < 60; minutes += 15) {
-                if (selected.equals(today) && (hour + 1 < now.getHour() || (hour == now.getHour() && minutes < now.getMinute()))) {
+                if (selected.equals(today) && (hour < now.getHour() || (hour == now.getHour() && minutes < now.getMinute()))) {
                     continue; // Skip past times if today
                 }
                 String time = String.format("%02d:%02d", hour, minutes);
@@ -64,42 +58,19 @@ public class HourKeyboardGenerator {
             }
         }
 
-        // Navigation buttons (only show if within working hours)
-        List<InlineKeyboardButton> navigationRow = new ArrayList<>();
+        // Add navigation buttons if available
+        addNavigationButtons(rows, selectedDate, adjustedStartHour, parsedEndHour, parsedWorkingHoursStart, parsedWorkingHoursEnd);
 
-        // Show "Previous" button only if there's an earlier time available
-        if (adjustedStartHour.isAfter(parsedWorkingHoursStart)) {
-            navigationRow.add(InlineKeyboardButton.builder()
-                    .text("⬅ Previous")
-                    .callbackData("hour:" + selectedDate + ":" + Math.max(adjustedStartHour.getHour() - HOUR_DISPLAY_RANGE, parsedWorkingHoursStart.getHour()) + ":" + adjustedStartHour.getHour())
-                    .build());
-        }
-
-        // Show "Next" button only if there's a later time available
-        if (parsedEndHour.isBefore(parsedWorkingHoursEnd)) {
-            navigationRow.add(InlineKeyboardButton.builder()
-                    .text("Next ➡")
-                    .callbackData("hour:" + selectedDate + ":" + parsedEndHour.getHour() + ":" + Math.min(parsedEndHour.getHour() + HOUR_DISPLAY_RANGE, parsedWorkingHoursEnd.getHour()))
-                    .build());
-        }
-
-        // Add navigation row only if at least one button exists
-        if (!navigationRow.isEmpty()) {
-            rows.add(navigationRow);
-        }
-
-        // Add "Back" button to return to the date selection
-        List<InlineKeyboardButton> backRow = List.of(
+        // Add "Back" button
+        rows.add(List.of(
                 InlineKeyboardButton.builder()
                         .text("<< Back to Dates")
                         .callbackData("backToDates")
                         .build()
-        );
-        rows.add(backRow);
+        ));
 
         return InlineKeyboardMarkup.builder().keyboard(rows).build();
     }
-
 
     private static List<String> availableHours(List<WorkingHours> workingHours, String day) {
         for (WorkingHours workingHour : workingHours) {
@@ -115,13 +86,40 @@ public class HourKeyboardGenerator {
     }
 
     private static boolean isBetween(List<String> timeRanges, String time) {
-        LocalTime targetTime = LocalTime.parse(time);
+        LocalTime targetTime = LocalTime.parse(time, TIME_FORMATTER);
         for (String range : timeRanges) {
             String[] parts = range.split("-");
-            LocalTime startTime = LocalTime.parse(parts[0].trim());
-            LocalTime endTime = LocalTime.parse(parts[1].trim());
-            if (!targetTime.isBefore(startTime) && !targetTime.isAfter(endTime)) return true;
+            LocalTime startTime = LocalTime.parse(parts[0].trim(), TIME_FORMATTER);
+            LocalTime endTime = LocalTime.parse(parts[1].trim(), TIME_FORMATTER);
+            if (!targetTime.isBefore(startTime) && !targetTime.isAfter(endTime)) {
+                return true;
+            }
         }
         return false;
+    }
+
+    private static void addNavigationButtons(List<List<InlineKeyboardButton>> rows, String selectedDate, LocalTime adjustedStartHour, LocalTime parsedEndHour, LocalTime parsedWorkingHoursStart, LocalTime parsedWorkingHoursEnd) {
+        List<InlineKeyboardButton> navigationRow = new ArrayList<>();
+
+        // Show "Previous" button if there's an earlier time available
+        if (adjustedStartHour.isAfter(parsedWorkingHoursStart)) {
+            navigationRow.add(InlineKeyboardButton.builder()
+                    .text("⬅ Previous")
+                    .callbackData("hour:" + selectedDate + ":" + Math.max(adjustedStartHour.getHour() - HOUR_DISPLAY_RANGE, parsedWorkingHoursStart.getHour()) + ":" + adjustedStartHour.getHour())
+                    .build());
+        }
+
+        // Show "Next" button if there's a later time available
+        if (parsedEndHour.isBefore(parsedWorkingHoursEnd)) {
+            navigationRow.add(InlineKeyboardButton.builder()
+                    .text("Next ➡")
+                    .callbackData("hour:" + selectedDate + ":" + parsedEndHour.getHour() + ":" + Math.min(parsedEndHour.getHour() + HOUR_DISPLAY_RANGE, parsedWorkingHoursEnd.getHour()))
+                    .build());
+        }
+
+        // Add navigation row if it contains buttons
+        if (!navigationRow.isEmpty()) {
+            rows.add(navigationRow);
+        }
     }
 }

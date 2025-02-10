@@ -15,14 +15,13 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @AllArgsConstructor
 public class ScheduleState implements IDynamicBotState {
     private final ApiRequestHelper apiRequestHelper;
-    private static final int HOUR_DISPLAY_RANGE = 4;
-    private static final int WORKING_HOURS_START = 8;
-    private static final int WORKING_HOURS_END = 17;
 
     @Override
     public BotApiMethod<?> handle(DynamicBotsMessageHandler context, Bot bot, Message message, CallbackQuery callbackData) {
@@ -46,13 +45,13 @@ public class ScheduleState implements IDynamicBotState {
         Integer messageId = message.getMessageId();
 
         if (callbackData.startsWith("date:")) {
-            return sendHourSelection(chatId, messageId, callbackData.split(":")[1]);
+            return sendHourSelection(chatId, messageId, callbackData.split(":")[1], bot.getWorkingHours());
         }
         if (callbackData.startsWith("month:")) {
             return updateCalendar(chatId, messageId, callbackData, bot.getWorkingHours());
         }
         if (callbackData.startsWith("hour:")) {
-            return updateHourSelection(chatId, messageId, callbackData);
+            return updateHourSelection(chatId, messageId, callbackData, bot.getWorkingHours());
         }
         if (callbackData.startsWith("selectedTime:")) {
             return processTimeSelection(chatId, messageId, bot, callbackData);
@@ -61,7 +60,7 @@ public class ScheduleState implements IDynamicBotState {
             return sendCalendar(chatId, LocalDate.now().getYear(), LocalDate.now().getMonthValue(), message, bot.getWorkingHours());
         }
         if (callbackData.startsWith("backToTimeSelection")) {
-            return sendHourSelection(chatId, messageId, callbackData.split("@")[1]);
+            return sendHourSelection(chatId, messageId, callbackData.split("@")[1], bot.getWorkingHours());
         }
         if (callbackData.startsWith("jobSelected")) {
             return confirmJobSelection(chatId, callbackData);
@@ -70,11 +69,11 @@ public class ScheduleState implements IDynamicBotState {
         return null;
     }
 
-    private BotApiMethod<?> sendHourSelection(Long chatId, Integer messageId, String selectedDate) {
+    private BotApiMethod<?> sendHourSelection(Long chatId, Integer messageId, String selectedDate, List<WorkingHours> workingHours) {
         InlineKeyboardMarkup hourKeyboard = HourKeyboardGenerator.generateHourKeyboard(
-                selectedDate, WORKING_HOURS_START, WORKING_HOURS_START + HOUR_DISPLAY_RANGE,
-                WORKING_HOURS_START, WORKING_HOURS_END, HOUR_DISPLAY_RANGE
+                selectedDate, null, workingHours
         );
+
         return MessageGenerator.createEditMessageWithMarkup(
                 chatId.toString(), "📅 You selected: " + selectedDate + "\n\n⏳ Please select a time:",
                 hourKeyboard, messageId
@@ -95,19 +94,16 @@ public class ScheduleState implements IDynamicBotState {
         return MessageGenerator.createEditMessageReplyMarkup(chatId.toString(), messageId, calendar);
     }
 
-    private BotApiMethod<?> updateHourSelection(Long chatId, Integer messageId, String callbackData) {
+    private BotApiMethod<?> updateHourSelection(Long chatId, Integer messageId, String callbackData, List<WorkingHours> workingHours) {
         String[] parts = callbackData.split(":");
-
         if (parts.length < 4) {
             return new SendMessage(chatId.toString(), "⚠ Invalid hour selection!");
         }
-
         String selectedDate = parts[1];
-        int startHour = Integer.parseInt(parts[2]);
-        int endHour = Integer.parseInt(parts[3]);
+        String startHour = String.format("%02d:00", Integer.parseInt(parts[2]));
 
         InlineKeyboardMarkup hourKeyboard = HourKeyboardGenerator.generateHourKeyboard(
-                selectedDate, startHour, endHour, WORKING_HOURS_START, WORKING_HOURS_END, HOUR_DISPLAY_RANGE
+                selectedDate, startHour, workingHours
         );
 
         return MessageGenerator.createEditMessageWithMarkup(

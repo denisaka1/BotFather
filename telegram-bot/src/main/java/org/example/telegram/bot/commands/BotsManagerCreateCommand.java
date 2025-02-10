@@ -59,7 +59,8 @@ public class BotsManagerCreateCommand extends AbstractBotCommand {
         String firstMessage = """
                 👋 Welcome to the Bots Creator!
                 
-                Please follow the steps to create a new bot (Better to do it on a desktop):
+                Please follow the steps to create a new bot (Better to do it on a PC):
+                
                 1️⃣ Search for BotFather in Telegram and open it.
                 2️⃣ Send the command /newbot.
                 3️⃣ Follow the instructions to choose a name and username for your bot.
@@ -67,13 +68,14 @@ public class BotsManagerCreateCommand extends AbstractBotCommand {
                 """;
         String workingHoursMessage = """
                 ⏳ What are your working hours?
-                ❗️ Please provide a list of days in the following format:
-                   Day: HH:MM - HH:MM (24-hour format) or "None" if you don't work on that day.
-                ❗️ The last hour represents the latest time you are available to provide services.
-                ❗️ Please ensure you use full hours or half-hour intervals only.
+               
+                ℹ️️ Please provide a list of days in the following format:
+                { Day: HH:MM - HH:MM } (24-hour format) or "None" if you don't work on that day.
+                ℹ️️ The last hour represents the latest time you are available to provide services.
+                ℹ️️ Please ensure you use full hours or half-hour intervals only.
         
                 Example:
-                Monday: 09:00 - 17:00
+                Monday: 09:30 - 17:00
                 Tuesday: 09:00 - 17:00
                 Wednesday: 09:00 - 16:00, 17:00 - 20:00
                 Thursday: 09:00 - 17:00

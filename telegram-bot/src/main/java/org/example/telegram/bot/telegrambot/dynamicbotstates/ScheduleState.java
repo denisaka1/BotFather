@@ -5,15 +5,13 @@ import org.example.data.layer.entities.Bot;
 import org.example.data.layer.entities.Job;
 import org.example.data.layer.entities.WorkingHours;
 import org.example.telegram.bot.telegrambot.DynamicBotsMessageHandler;
-import org.example.telegram.components.inline.keyboard.CalendarKeyboardGenerator;
-import org.example.telegram.components.inline.keyboard.HourKeyboardGenerator;
-import org.example.telegram.components.inline.keyboard.JobKeyboardBuilder;
-import org.example.telegram.components.inline.keyboard.MessageGenerator;
+import org.example.telegram.components.inline.keyboard.*;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -61,7 +59,7 @@ public class ScheduleState implements IDynamicBotState {
             return sendHourSelection(chatId, messageId, callbackData.split("@")[1], bot.getWorkingHours());
         }
         if (callbackData.startsWith("jobSelected")) {
-            return confirmJobSelection(chatId, callbackData);
+            return confirmJobSelection(chatId, callbackData, messageId);
         }
 
         return null;
@@ -133,7 +131,7 @@ public class ScheduleState implements IDynamicBotState {
         );
     }
 
-    private BotApiMethod<?> confirmJobSelection(Long chatId, String callbackData) {
+    private BotApiMethod<?> confirmJobSelection(Long chatId, String callbackData, Integer messageId) {
         String[] parts = callbackData.split("@");
         if (parts.length < 4) {
             return new SendMessage(chatId.toString(), "⚠ Invalid service selection!");
@@ -153,7 +151,15 @@ public class ScheduleState implements IDynamicBotState {
                 "✅ Your appointment for a %s (%s h) on %s at %s is waiting for confirmation.\nYou'll receive a confirmation message here shortly.",
                 jobType, jobDuration, selectedDate, selectedTime
         );
-        return new SendMessage(
-                chatId.toString(), returnMessage);
+        String[][] buttonConfig = {
+                {"<< Back To Menu:BACK"}
+        };
+        List<List<InlineKeyboardButton>> keyboard = ButtonsGenerator.createKeyboard(buttonConfig);
+        InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+        markup.setKeyboard(keyboard);
+        return MessageGenerator.createEditMessageWithMarkup(
+                chatId.toString(), returnMessage,
+                markup, messageId
+        );
     }
 }

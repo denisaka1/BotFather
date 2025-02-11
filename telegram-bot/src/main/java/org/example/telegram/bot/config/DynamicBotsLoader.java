@@ -1,19 +1,21 @@
-package org.example.telegram.bot.telegrambot;
+package org.example.telegram.bot.config;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.client.api.helper.ApiRequestHelper;
 import org.example.data.layer.entities.Bot;
+import org.example.telegram.bot.services.dynamic.RegistrationService;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 
 @Slf4j
-@Component
+//@Component
+@Configuration
 @AllArgsConstructor
 public class DynamicBotsLoader implements CommandLineRunner {
-    private final DynamicBotsRegistryService dynamicBotsRegistryService;
+    private final RegistrationService registrationService;
     private final ApiRequestHelper apiRequestHelper;
 
     @Override
@@ -21,7 +23,7 @@ public class DynamicBotsLoader implements CommandLineRunner {
         List<Bot> bots = List.of(apiRequestHelper.get("http://localhost:8080/api/bots", Bot[].class));
         log.info("Found {} bots", bots.size());
         for (Bot bot : bots) {
-            dynamicBotsRegistryService.registerBot(bot);
+            registrationService.registerBot(bot);
         }
     }
 

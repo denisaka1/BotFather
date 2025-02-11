@@ -1,6 +1,7 @@
-package org.example.telegram.bot.telegrambot;
+package org.example.telegram.bot.services.dynamic;
 import lombok.extern.slf4j.Slf4j;
 import org.example.data.layer.entities.Bot;
+import org.example.telegram.bot.polling.DynamicBot;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
@@ -10,13 +11,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Service
-public class DynamicBotsRegistryService {
+public class RegistrationService {
     private final TelegramBotsApi telegramBotsApi;
     private final Map<String, DynamicBot> activeBots;
-    private final DynamicBotsMessageHandler dynamicBotsMessageHandler;
+    private final DynamicMessageService dynamicMessageService;
 
-    public DynamicBotsRegistryService(DynamicBotsMessageHandler dynamicBotsMessageHandler) throws Exception {
-        this.dynamicBotsMessageHandler = dynamicBotsMessageHandler;
+    public RegistrationService(DynamicMessageService dynamicMessageService) throws Exception {
+        this.dynamicMessageService = dynamicMessageService;
         this.activeBots = new ConcurrentHashMap<>();
         this.telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
     }
@@ -28,7 +29,7 @@ public class DynamicBotsRegistryService {
         }
 
         try {
-            DynamicBot bot = new DynamicBot(tmpBot, dynamicBotsMessageHandler);
+            DynamicBot bot = new DynamicBot(tmpBot, dynamicMessageService);
             telegramBotsApi.registerBot(bot);
             activeBots.put(tmpBot.getToken(), bot);
             log.info("Listening for bot: {}", tmpBot.getUsername());

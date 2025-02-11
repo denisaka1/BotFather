@@ -1,6 +1,6 @@
-package org.example.telegram.bot.telegrambot.dynamicbotstates;
+package org.example.telegram.bot.actions.dynamic;
 import org.example.data.layer.entities.Bot;
-import org.example.telegram.bot.telegrambot.DynamicBotsMessageHandler;
+import org.example.telegram.bot.services.dynamic.DynamicMessageService;
 import org.example.telegram.components.inline.keyboard.ButtonsGenerator;
 import org.example.telegram.components.inline.keyboard.MessageGenerator;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
@@ -15,7 +15,7 @@ import java.util.List;
 public class ScheduleOrCancelQuestionState implements IDynamicBotState {
 
     @Override
-    public BotApiMethod<?> handle(DynamicBotsMessageHandler context, Bot bot, Message message, CallbackQuery callbackData) {
+    public BotApiMethod<?> handle(DynamicMessageService context, Bot bot, Message message, CallbackQuery callbackData) {
         String chatId = message.getChatId().toString();
         if (callbackData != null) {
             String data = callbackData.getData();

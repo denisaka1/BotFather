@@ -9,9 +9,10 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
                 "org.example.client.api.config",
                 "org.example.client.api.helper",
                 "org.example.data.layer.entities",
+                "org.example.telegram.bot.actions",
                 "org.example.telegram.bot.config",
-                "org.example.telegram.bot.commands",
-                "org.example.telegram.bot.telegrambot",
+                "org.example.telegram.bot.polling",
+                "org.example.telegram.bot.services",
                 "org.example.telegram.bot.utils",
 
         }

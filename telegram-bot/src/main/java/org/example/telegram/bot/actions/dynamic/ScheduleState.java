@@ -1,10 +1,10 @@
-package org.example.telegram.bot.telegrambot.dynamicbotstates;
+package org.example.telegram.bot.actions.dynamic;
 import lombok.AllArgsConstructor;
 import org.example.client.api.helper.ApiRequestHelper;
 import org.example.data.layer.entities.Bot;
 import org.example.data.layer.entities.Job;
 import org.example.data.layer.entities.WorkingHours;
-import org.example.telegram.bot.telegrambot.DynamicBotsMessageHandler;
+import org.example.telegram.bot.services.dynamic.DynamicMessageService;
 import org.example.telegram.components.inline.keyboard.*;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -20,7 +20,7 @@ public class ScheduleState implements IDynamicBotState {
     private final ApiRequestHelper apiRequestHelper;
 
     @Override
-    public BotApiMethod<?> handle(DynamicBotsMessageHandler context, Bot bot, Message message, CallbackQuery callbackData) {
+    public BotApiMethod<?> handle(DynamicMessageService context, Bot bot, Message message, CallbackQuery callbackData) {
         if (callbackData != null) {
             return handleCallbackQuery(bot, message, callbackData.getData());
         }

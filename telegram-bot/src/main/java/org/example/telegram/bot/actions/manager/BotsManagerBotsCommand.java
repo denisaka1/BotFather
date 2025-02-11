@@ -1,4 +1,4 @@
-package org.example.telegram.bot.commands;
+package org.example.telegram.bot.actions.manager;
 
 import org.example.client.api.helper.ApiRequestHelper;
 import org.example.data.layer.entities.Bot;

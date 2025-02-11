@@ -1,4 +1,4 @@
-package org.example.telegram.bot.commands;
+package org.example.telegram.bot.actions.manager;
 
 import jakarta.persistence.MappedSuperclass;
 import lombok.RequiredArgsConstructor;

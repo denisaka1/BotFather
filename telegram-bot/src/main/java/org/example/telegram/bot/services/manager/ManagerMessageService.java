@@ -1,11 +1,12 @@
-package org.example.telegram.bot.telegrambot;
+package org.example.telegram.bot.services.manager;
 
 import lombok.AllArgsConstructor;
 import org.example.client.api.helper.ApiRequestHelper;
-import org.example.telegram.bot.commands.BotsManagerBotsCommand;
-import org.example.telegram.bot.commands.BotsManagerCreateCommand;
-import org.example.telegram.bot.commands.BotsManagerStartCommand;
-import org.example.telegram.bot.commands.IBotCommand;
+import org.example.telegram.bot.actions.manager.BotsManagerBotsCommand;
+import org.example.telegram.bot.actions.manager.BotsManagerCreateCommand;
+import org.example.telegram.bot.actions.manager.BotsManagerStartCommand;
+import org.example.telegram.bot.actions.manager.IBotCommand;
+import org.example.telegram.bot.services.dynamic.RegistrationService;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
@@ -14,9 +15,9 @@ import java.util.Map;
 
 @Service
 @AllArgsConstructor
-public class BotsManagerMessageHandler {
+public class ManagerMessageService {
     private final ApiRequestHelper apiRequestHelper;
-    private final DynamicBotsRegistryService botsRegistryService;
+    private final RegistrationService botsRegistryService;
     private final Map<Long, IBotCommand> userCommands = new HashMap<>();
 
     public String renderMainMenu(Message message) {

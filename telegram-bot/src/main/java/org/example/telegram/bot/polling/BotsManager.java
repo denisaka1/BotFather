@@ -1,8 +1,9 @@
-package org.example.telegram.bot.telegrambot;
+package org.example.telegram.bot.polling;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.telegram.bot.config.ConfigLoader;
+import org.example.telegram.bot.services.manager.ManagerMessageService;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -14,7 +15,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 @AllArgsConstructor
 public class BotsManager extends TelegramLongPollingBot {
 
-    private final BotsManagerMessageHandler botsManagerMessageHandler;
+    private final ManagerMessageService managerMessageService;
     private final ConfigLoader configLoader;
 
     @Override
@@ -32,7 +33,7 @@ public class BotsManager extends TelegramLongPollingBot {
         if (update.hasMessage() && update.getMessage().hasText()) {
             String chatId = update.getMessage().getChatId().toString();
 
-            String response = botsManagerMessageHandler.processMessage(update.getMessage());
+            String response = managerMessageService.processMessage(update.getMessage());
 
             sendMessage(chatId, response);
         }

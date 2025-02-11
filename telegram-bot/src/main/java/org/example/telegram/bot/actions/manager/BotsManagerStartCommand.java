@@ -1,4 +1,4 @@
-package org.example.telegram.bot.commands;
+package org.example.telegram.bot.actions.manager;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.client.api.helper.ApiRequestHelper;

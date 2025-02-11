@@ -1,9 +1,9 @@
-package org.example.telegram.bot.telegrambot.dynamicbotstates;
+package org.example.telegram.bot.actions.dynamic;
 import lombok.extern.slf4j.Slf4j;
 import org.example.client.api.helper.ApiRequestHelper;
 import org.example.data.layer.entities.Bot;
 import org.example.data.layer.entities.Client;
-import org.example.telegram.bot.telegrambot.DynamicBotsMessageHandler;
+import org.example.telegram.bot.services.dynamic.DynamicMessageService;
 import org.example.telegram.components.forms.FormStep;
 import org.example.telegram.components.forms.GenericForm;
 import org.example.telegram.components.validators.EmailValidator;
@@ -33,7 +33,7 @@ public class AuthState implements IDynamicBotState {
     }
 
     @Override
-    public BotApiMethod<?> handle(DynamicBotsMessageHandler context, Bot bot, Message message, CallbackQuery callbackData) {
+    public BotApiMethod<?> handle(DynamicMessageService context, Bot bot, Message message, CallbackQuery callbackData) {
         String response = execute(message);
         if (userForm.isCompleted()) {
             context.setState(message.getFrom().getId(), new ScheduleOrCancelQuestionState());

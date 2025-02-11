@@ -1,12 +1,12 @@
-package org.example.telegram.bot.telegrambot;
+package org.example.telegram.bot.services.dynamic;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.example.client.api.helper.ApiRequestHelper;
 import org.example.data.layer.entities.Bot;
 import org.example.data.layer.entities.Client;
-import org.example.telegram.bot.telegrambot.dynamicbotstates.AuthState;
-import org.example.telegram.bot.telegrambot.dynamicbotstates.IDynamicBotState;
-import org.example.telegram.bot.telegrambot.dynamicbotstates.ScheduleOrCancelQuestionState;
+import org.example.telegram.bot.actions.dynamic.AuthState;
+import org.example.telegram.bot.actions.dynamic.IDynamicBotState;
+import org.example.telegram.bot.actions.dynamic.ScheduleOrCancelQuestionState;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -18,7 +18,7 @@ import java.util.Map;
 
 @Service
 @AllArgsConstructor
-public class DynamicBotsMessageHandler {
+public class DynamicMessageService {
     private final Map<Long, IDynamicBotState> userStates = new HashMap<>();
     @Getter
     private final ApiRequestHelper apiRequestHelper;

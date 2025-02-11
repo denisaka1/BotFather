@@ -8,6 +8,7 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
         scanBasePackages = {
                 "org.example.client.api.config",
                 "org.example.client.api.helper",
+                "org.example.client.api.controller",
                 "org.example.data.layer.entities",
                 "org.example.telegram.bot.actions",
                 "org.example.telegram.bot.config",

@@ -17,12 +17,11 @@ import java.util.List;
 
 @AllArgsConstructor
 public class ScheduleState implements IDynamicBotState {
-    private final ApiRequestHelper apiRequestHelper;
 
     @Override
     public BotApiMethod<?> handle(DynamicMessageService context, Bot bot, Message message, CallbackQuery callbackData) {
         if (callbackData != null) {
-            return handleCallbackQuery(bot, message, callbackData.getData());
+            return handleCallbackQuery(bot, message, callbackData.getData(), context.getApiRequestHelper());
         }
 
         if (message.hasText() && !message.getFrom().getIsBot()) {
@@ -32,11 +31,11 @@ public class ScheduleState implements IDynamicBotState {
         return sendCalendar(message.getChatId(), LocalDate.now().getYear(), LocalDate.now().getMonthValue(), message, bot.getWorkingHours());
     }
 
-    private List<Job> fetchBotJobs(Bot bot) {
+    private List<Job> fetchBotJobs(Bot bot, ApiRequestHelper apiRequestHelper) {
         return List.of(apiRequestHelper.get("http://localhost:8080/api/bots/" + bot.getId() + "/jobs", Job[].class));
     }
 
-    private BotApiMethod<?> handleCallbackQuery(Bot bot, Message message, String callbackData) {
+    private BotApiMethod<?> handleCallbackQuery(Bot bot, Message message, String callbackData, ApiRequestHelper apiRequestHelper) {
         Long chatId = message.getChatId();
         Integer messageId = message.getMessageId();
 
@@ -50,7 +49,7 @@ public class ScheduleState implements IDynamicBotState {
             return updateHourSelection(chatId, messageId, callbackData, bot.getWorkingHours());
         }
         if (callbackData.startsWith("selectedTime:")) {
-            return processTimeSelection(chatId, messageId, bot, callbackData);
+            return processTimeSelection(chatId, messageId, bot, callbackData, apiRequestHelper);
         }
         if (callbackData.equals("backToDates")) {
             return sendCalendar(chatId, LocalDate.now().getYear(), LocalDate.now().getMonthValue(), message, bot.getWorkingHours());
@@ -108,7 +107,7 @@ public class ScheduleState implements IDynamicBotState {
         );
     }
 
-    private BotApiMethod<?> processTimeSelection(Long chatId, Integer messageId, Bot bot, String callbackData) {
+    private BotApiMethod<?> processTimeSelection(Long chatId, Integer messageId, Bot bot, String callbackData, ApiRequestHelper apiRequestHelper) {
         String[] parts = callbackData.split(":");
 
         if (parts.length < 3) {
@@ -118,11 +117,11 @@ public class ScheduleState implements IDynamicBotState {
         String selectedDate = parts[1];
         String selectedTime = parts[2] + ":" + parts[3];
 
-        return requestJobSelection(chatId, messageId, bot, selectedDate, selectedTime);
+        return requestJobSelection(chatId, messageId, bot, selectedDate, selectedTime, apiRequestHelper);
     }
 
-    private BotApiMethod<?> requestJobSelection(Long chatId, Integer messageId, Bot bot, String selectedDate, String selectedTime) {
-        List<Job> jobs = fetchBotJobs(bot);
+    private BotApiMethod<?> requestJobSelection(Long chatId, Integer messageId, Bot bot, String selectedDate, String selectedTime, ApiRequestHelper apiRequestHelper) {
+        List<Job> jobs = fetchBotJobs(bot, apiRequestHelper);
 
         InlineKeyboardMarkup jobKeyboard = JobKeyboardBuilder.createJobSelectionKeyboard(jobs, selectedDate, selectedTime);
         return MessageGenerator.createEditMessageWithMarkup(

@@ -12,7 +12,6 @@ import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -51,7 +50,7 @@ public class DynamicMessageService {
     private BotApiMethod<?> handleCallbackQuery(Update update, Bot bot) {
         Message message = update.getCallbackQuery().getMessage();
         Long userId = update.getCallbackQuery().getFrom().getId();
-        IDynamicBotState currentState = getUserState(userId, bot);
+        IDynamicBotState currentState = getUserState(userId);
         if (currentState.isBackCommand(update.getCallbackQuery())) {
             IDynamicBotState previousState = currentState.getPreviousState(this);
             userStates.put(userId, previousState);
@@ -63,18 +62,18 @@ public class DynamicMessageService {
 
     private BotApiMethod<?> handleTextMessage(Message message, Bot bot) {
         Long userId = message.getFrom().getId();
-        IDynamicBotState currentState = getUserState(userId, bot);
+        IDynamicBotState currentState = getUserState(userId);
         return currentState.handle(this, bot, message);
     }
 
-    private IDynamicBotState getUserState(Long userId, Bot bot) {
-        userStates.putIfAbsent(userId, determineInitialState(userId, bot));
+    private IDynamicBotState getUserState(Long userId) {
+        userStates.putIfAbsent(userId, determineInitialState(userId));
         return userStates.get(userId);
     }
 
-    private IDynamicBotState determineInitialState(Long userId, Bot bot) {
+    private IDynamicBotState determineInitialState(Long userId) {
         return (!userStates.containsKey(userId) && clientByTelegramId(userId) == null)
-                ? new AuthState(apiRequestHelper, bot)
+                ? new AuthState()
                 : new ScheduleOrCancelQuestionState();
     }
 

@@ -20,7 +20,7 @@ public class ScheduleOrCancelQuestionState implements IDynamicBotState {
         if (callbackData != null) {
             String data = callbackData.getData();
             if ("SCHEDULE".equals(data)) {
-                ScheduleState scheduleState = new ScheduleState(context.getApiRequestHelper());
+                ScheduleState scheduleState = new ScheduleState();
                 context.setState(callbackData.getFrom().getId(), scheduleState);
                 return scheduleState.handle(context, bot, message);
             } else if ("CANCEL".equals(data)) {

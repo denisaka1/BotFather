@@ -38,6 +38,9 @@ public class Bot {
     @JoinColumn(name = "owner_id")
     private BusinessOwner owner;
 
+    @OneToMany(mappedBy = "bot", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<Appointment> appointments;
+
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<Job> jobs = new ArrayList<>();
 

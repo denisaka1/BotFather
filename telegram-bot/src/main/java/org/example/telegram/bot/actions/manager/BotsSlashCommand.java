@@ -1,22 +1,21 @@
 package org.example.telegram.bot.actions.manager;
 
+import lombok.AllArgsConstructor;
+import org.example.client.api.controller.BusinessOwnerApi;
 import org.example.client.api.helper.ApiRequestHelper;
 import org.example.data.layer.entities.Bot;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
+@AllArgsConstructor
 @Component
-public class BotsManagerBotsCommand extends AbstractBotCommand {
+public class BotsSlashCommand implements ISlashCommand {
 
-    public BotsManagerBotsCommand(ApiRequestHelper apiRequestHelper) {
-        super(apiRequestHelper);
-    }
+    private final BusinessOwnerApi businessOwnerApi;
 
-    @Override
     public String execute(Message message) {
         Long userId = message.getFrom().getId();
-        if (!checkIfUserExists(userId)) {
-            forceCompleted = true;
+        if (!businessOwnerApi.isPresent(userId)) {
             return """
                     👋 Welcome to the Bots Creator!
                     You don't have any bots created.
@@ -24,28 +23,20 @@ public class BotsManagerBotsCommand extends AbstractBotCommand {
                     Type any text to return to the menu.""";
         }
 
-        Bot[] ownerBots = getOwnerBots(userId);
+        return renderBotsInfo(userId);
+    }
+
+    private String renderBotsInfo(Long userId) {
+        Bot[] ownerBots = businessOwnerApi.getBots(userId);
 
         StringBuilder result = new StringBuilder("Bots information:\n\n");
         for (int i = 0; i < ownerBots.length; i++) {
             result.append("Bot ").append(i + 1).append(":\n");
             result.append(ownerBots[i]);
         }
-        forceCompleted = true;
 
         return result.toString();
     }
 
-    @Override
-    public boolean isCompleted() {
-        return forceCompleted;
-    }
-
-    private Bot[] getOwnerBots(Long userId) {
-        return apiRequestHelper.get(
-                "http://localhost:8080/api/business_owner/" + userId,
-                Bot[].class
-        );
-    }
 }
 

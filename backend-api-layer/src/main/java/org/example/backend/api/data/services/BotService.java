@@ -41,4 +41,8 @@ public class BotService {
         Bot bot = botRepository.findById(id).orElseThrow();
         return bot.getJobs();
     }
+
+    public Bot getBot(Long id) {
+        return botRepository.findById(id).orElseThrow();
+    }
 }

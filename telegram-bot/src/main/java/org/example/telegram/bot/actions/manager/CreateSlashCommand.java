@@ -115,8 +115,8 @@ public class CreateSlashCommand implements ISlashCommand {
 
         buildAndSaveWorkingHours(userResponses.get("workingHours"), savedBot);
         buildAndSaveJobs(userResponses.get("workingDurations"), savedBot);
-
-        botsRegistryService.registerBot(savedBot);
+        Bot updatedBot = botApi.getBot(savedBot.getId());
+        botsRegistryService.registerBot(updatedBot);
         log.info("Bot {} created and registered successfully!", savedBot.getName());
     }
 

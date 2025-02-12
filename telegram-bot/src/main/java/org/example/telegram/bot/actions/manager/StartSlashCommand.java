@@ -1,6 +1,7 @@
 package org.example.telegram.bot.actions.manager;
 
 import lombok.extern.slf4j.Slf4j;
+import org.example.client.api.controller.BusinessOwnerApi;
 import org.example.client.api.helper.ApiRequestHelper;
 import org.example.data.layer.entities.BusinessOwner;
 import org.example.telegram.components.forms.FormStep;
@@ -17,10 +18,12 @@ import java.util.Map;
 
 @Slf4j
 @Component
-public class BotsManagerStartCommand extends AbstractBotCommand {
+public class StartSlashCommand extends ISlashCommand {
 
-    public BotsManagerStartCommand(ApiRequestHelper apiRequestHelper) {
-        super(apiRequestHelper);
+    private final GenericForm userForm;
+    private final BusinessOwnerApi businessOwnerApi;
+
+    public StartSlashCommand(ApiRequestHelper apiRequestHelper) {
         userForm = new GenericForm(Arrays.asList(
                 new FormStep<>("📱 What is your phone number?", new PhoneNumberValidator(), "❌ Invalid phone number!", "✅ Phone number is saved.", "phoneNumber"),
                 new FormStep<>("📧 What is your email?", new EmailValidator(), "❌ Invalid email!", "✅ Email is saved.", "email"),
@@ -29,15 +32,10 @@ public class BotsManagerStartCommand extends AbstractBotCommand {
     }
 
     @Override
-    public boolean isCompleted() {
-        return userForm.isCompleted() || forceCompleted;
-    }
-
-    @Override
     public String execute(Message message) {
         // check if the user is already registered
         User telegramUser = message.getFrom();
-        if (checkIfUserExists(telegramUser.getId())) {
+        if (businessOwnerApi.isPresent)checkIfUserExists(telegramUser.getId())) {
             forceCompleted = true;
             return "👋 Welcome back! You are already registered!\n Type any text to continue.";
         }
@@ -53,11 +51,7 @@ public class BotsManagerStartCommand extends AbstractBotCommand {
                     .email(userInput.get("email").toLowerCase())
                     .address(userInput.get("address"))
                     .build();
-            BusinessOwner savedBusinessOwner = apiRequestHelper.post(
-                    "http://localhost:8080/api/business_owner",
-                    businessOwner,
-                    BusinessOwner.class
-            );
+            BusinessOwner savedBusinessOwner = businessOwnerApi.create(businessOwner);
             log.info("Saved business owner: {}", savedBusinessOwner);
         }
         return response;

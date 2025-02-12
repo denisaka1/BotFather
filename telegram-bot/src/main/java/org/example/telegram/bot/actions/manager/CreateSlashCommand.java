@@ -1,6 +1,10 @@
 package org.example.telegram.bot.actions.manager;
 
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.client.api.controller.BotApi;
+import org.example.client.api.controller.BusinessOwnerApi;
 import org.example.client.api.helper.ApiRequestHelper;
 import org.example.data.layer.entities.Bot;
 import org.example.data.layer.entities.Job;
@@ -22,21 +26,20 @@ import java.util.Map;
 import static org.example.telegram.bot.utils.MessageExtractor.*;
 
 @Slf4j
+@RequiredArgsConstructor
 @Component
-public class BotsManagerCreateCommand extends AbstractBotCommand {
+public class CreateSlashCommand implements ISlashCommand {
+    private final BotApi botApi;
+    private final BusinessOwnerApi businessOwnerApi;
     private final RegistrationService botsRegistryService;
 
-    public BotsManagerCreateCommand(ApiRequestHelper apiRequestHelper, RegistrationService botsRegistryService) {
-        super(apiRequestHelper);
-        this.botsRegistryService = botsRegistryService;
-        userForm = createForm();
-    }
+    private GenericForm userForm;
 
     @Override
     public String execute(Message message) {
         Long userId = message.getFrom().getId();
-        if (!checkIfUserExists(userId)) {
-            forceCompleted = true;
+        userForm = createForm();
+        if (!businessOwnerApi.isPresent(userId)) {
             return """
                     👋 Welcome to the Bots Creator!
                     You need to register using the /start command to create a new bot.
@@ -48,11 +51,6 @@ public class BotsManagerCreateCommand extends AbstractBotCommand {
             buildAndSaveBot(userForm.getUserResponses(), userId);
         }
         return response;
-    }
-
-    @Override
-    public boolean isCompleted() {
-        return userForm.isCompleted() || forceCompleted;
     }
 
     private GenericForm createForm() {
@@ -113,13 +111,11 @@ public class BotsManagerCreateCommand extends AbstractBotCommand {
                 .name(userResponses.get("name"))
                 .welcomeMessage(userResponses.get("welcomeMessage"))
                 .build();
-        Bot savedBot = apiRequestHelper.post(
-                "http://localhost:8080/api/business_owner/" + userId,
-                bot,
-                Bot.class
-        );
+        Bot savedBot = businessOwnerApi.addBot(userId, bot);
+
         buildAndSaveWorkingHours(userResponses.get("workingHours"), savedBot);
         buildAndSaveJobs(userResponses.get("workingDurations"), savedBot);
+
         botsRegistryService.registerBot(savedBot);
         log.info("Bot {} created and registered successfully!", savedBot.getName());
     }
@@ -127,22 +123,14 @@ public class BotsManagerCreateCommand extends AbstractBotCommand {
     private void buildAndSaveWorkingHours(String workingHoursStr, Bot savedBot) {
         List<WorkingHours> workingHours = extractWorkingHours(workingHoursStr, savedBot);
         for (WorkingHours workingHour : workingHours) {
-            apiRequestHelper.post(
-                    "http://localhost:8080/api/bots/" + savedBot.getId().toString() + "/working_hour",
-                    workingHour,
-                    WorkingHours.class
-            );
+            botApi.addWorkingHours(savedBot.getId(), workingHour);
         }
     }
 
     private void buildAndSaveJobs(String workingDurationsStr, Bot savedBot) {
         List<Job> jobs = extractJobs(workingDurationsStr, savedBot);
         for (Job job : jobs) {
-            apiRequestHelper.post(
-                    "http://localhost:8080/api/bots/" + savedBot.getId().toString() + "/job",
-                    job,
-                    Job.class
-            );
+            botApi.addJob(savedBot.getId(), job);
         }
     }
 }

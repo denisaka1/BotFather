@@ -32,4 +32,9 @@ public class Client {
 
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Appointment> appointments;
+
+    public void addAppointment(Appointment appointment) {
+        appointments.add(appointment);
+        appointment.setClient(this);
+    }
 }

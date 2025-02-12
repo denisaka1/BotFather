@@ -120,7 +120,11 @@ public class BotsManagerCreateCommand extends AbstractBotCommand {
         );
         buildAndSaveWorkingHours(userResponses.get("workingHours"), savedBot);
         buildAndSaveJobs(userResponses.get("workingDurations"), savedBot);
-        botsRegistryService.registerBot(savedBot);
+        Bot updatedBot = apiRequestHelper.get(
+                "http://localhost:8080/api/bots/" + savedBot.getId().toString(),
+                Bot.class
+        );
+        botsRegistryService.registerBot(updatedBot);
         log.info("Bot {} created and registered successfully!", savedBot.getName());
     }
 

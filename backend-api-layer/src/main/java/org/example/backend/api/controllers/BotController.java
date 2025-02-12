@@ -16,6 +16,9 @@ public class BotController {
 
     private final BotService botService;
 
+    @GetMapping("{id}")
+    public ResponseEntity<Bot> getBot(@PathVariable Long id) { return ResponseEntity.ok(botService.getBot(id)); }
+
     @GetMapping
     public ResponseEntity<List<Bot>> getAllBots() {
         return ResponseEntity.ok(botService.getBots());

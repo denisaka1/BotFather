@@ -1,17 +1,20 @@
 package org.example.telegram.bot.actions.dynamic;
+import lombok.extern.slf4j.Slf4j;
 import org.example.data.layer.entities.Bot;
 import org.example.telegram.bot.services.dynamic.DynamicMessageService;
 import org.example.telegram.components.inline.keyboard.ButtonsGenerator;
 import org.example.telegram.components.inline.keyboard.MessageGenerator;
+import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-
 import java.util.List;
 
+@Component
+@Slf4j
 public class ScheduleOrCancelQuestionState implements IDynamicBotState {
 
     @Override
@@ -20,7 +23,7 @@ public class ScheduleOrCancelQuestionState implements IDynamicBotState {
         if (callbackData != null) {
             String data = callbackData.getData();
             if ("SCHEDULE".equals(data)) {
-                ScheduleState scheduleState = new ScheduleState();
+                ScheduleState scheduleState = context.getScheduleState();
                 context.setState(callbackData.getFrom().getId(), scheduleState);
                 return scheduleState.handle(context, bot, message);
             } else if ("CANCEL".equals(data)) {

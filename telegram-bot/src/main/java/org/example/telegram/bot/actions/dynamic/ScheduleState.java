@@ -1,11 +1,14 @@
 package org.example.telegram.bot.actions.dynamic;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.client.api.helper.ApiRequestHelper;
 import org.example.data.layer.entities.Bot;
 import org.example.data.layer.entities.Job;
 import org.example.data.layer.entities.WorkingHours;
+import org.example.telegram.bot.polling.BotsManager;
 import org.example.telegram.bot.services.dynamic.DynamicMessageService;
 import org.example.telegram.components.inline.keyboard.*;
+import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
@@ -15,8 +18,11 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import java.time.LocalDate;
 import java.util.List;
 
+@Component
+@Slf4j
 @AllArgsConstructor
 public class ScheduleState implements IDynamicBotState {
+    private final BotsManager botsManager;
 
     @Override
     public BotApiMethod<?> handle(DynamicMessageService context, Bot bot, Message message, CallbackQuery callbackData) {

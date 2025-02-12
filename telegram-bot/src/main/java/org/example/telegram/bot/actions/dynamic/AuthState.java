@@ -32,7 +32,7 @@ public class AuthState implements IDynamicBotState {
         }
         String response = execute(form, message, context);
         if (form.isCompleted()) {
-            context.setState(message.getFrom().getId(), new ScheduleOrCancelQuestionState());
+            context.setState(message.getFrom().getId(), context.getScheduleOrCancelQuestionState());
         }
         return new SendMessage(message.getChatId().toString(), response);
     }

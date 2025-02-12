@@ -1,17 +1,25 @@
 package org.example.telegram.bot.polling;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.example.data.layer.entities.Bot;
 import org.example.telegram.bot.services.dynamic.DynamicMessageService;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-@AllArgsConstructor
+@Component
+@Scope("prototype")
+@RequiredArgsConstructor
 public class DynamicBot extends TelegramLongPollingBot {
-    private final Bot bot;
+    private Bot bot;
     private final DynamicMessageService dynamicMessageService;
+
+    public void initialize(Bot bot) {
+        this.bot = bot;
+    }
 
     @Override
     public String getBotUsername() {

@@ -7,6 +7,7 @@ import org.example.data.layer.entities.Client;
 import org.example.telegram.bot.actions.dynamic.AuthState;
 import org.example.telegram.bot.actions.dynamic.IDynamicBotState;
 import org.example.telegram.bot.actions.dynamic.ScheduleOrCancelQuestionState;
+import org.example.telegram.bot.actions.dynamic.ScheduleState;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -21,6 +22,12 @@ public class DynamicMessageService {
     private final Map<Long, IDynamicBotState> userStates = new HashMap<>();
     @Getter
     private final ApiRequestHelper apiRequestHelper;
+    @Getter
+    private final AuthState authState;
+    @Getter
+    private final ScheduleOrCancelQuestionState scheduleOrCancelQuestionState;
+    @Getter
+    private final ScheduleState scheduleState;
 
     public void setState(Long userId, IDynamicBotState newState) {
         userStates.put(userId, newState);
@@ -73,8 +80,8 @@ public class DynamicMessageService {
 
     private IDynamicBotState determineInitialState(Long userId) {
         return (!userStates.containsKey(userId) && clientByTelegramId(userId) == null)
-                ? new AuthState()
-                : new ScheduleOrCancelQuestionState();
+                ? authState
+                : scheduleOrCancelQuestionState;
     }
 
     private String getChatId(Update update) {

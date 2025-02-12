@@ -27,7 +27,7 @@ public class ScheduleState implements IDynamicBotState {
     @Override
     public BotApiMethod<?> handle(DynamicMessageService context, Bot bot, Message message, CallbackQuery callbackData) {
         if (callbackData != null) {
-            return handleCallbackQuery(bot, message, callbackData.getData(), context.getApiRequestHelper());
+            return handleCallbackQuery(bot, message, callbackData, context);
         }
 
         if (message.hasText() && !message.getFrom().getIsBot()) {
@@ -41,9 +41,10 @@ public class ScheduleState implements IDynamicBotState {
         return List.of(apiRequestHelper.get("http://localhost:8080/api/bots/" + bot.getId() + "/jobs", Job[].class));
     }
 
-    private BotApiMethod<?> handleCallbackQuery(Bot bot, Message message, String callbackData, ApiRequestHelper apiRequestHelper) {
+    private BotApiMethod<?> handleCallbackQuery(Bot bot, Message message, CallbackQuery callback, DynamicMessageService context) {
         Long chatId = message.getChatId();
         Integer messageId = message.getMessageId();
+        String callbackData = callback.getData();
 
         if (callbackData.startsWith("date:")) {
             return sendHourSelection(chatId, messageId, callbackData.split(":")[1], bot.getWorkingHours());
@@ -55,7 +56,7 @@ public class ScheduleState implements IDynamicBotState {
             return updateHourSelection(chatId, messageId, callbackData, bot.getWorkingHours());
         }
         if (callbackData.startsWith("selectedTime:")) {
-            return processTimeSelection(chatId, messageId, bot, callbackData, apiRequestHelper);
+            return processTimeSelection(chatId, messageId, bot, callbackData, context.getApiRequestHelper());
         }
         if (callbackData.equals("backToDates")) {
             return sendCalendar(chatId, LocalDate.now().getYear(), LocalDate.now().getMonthValue(), message, bot.getWorkingHours());
@@ -65,6 +66,11 @@ public class ScheduleState implements IDynamicBotState {
         }
         if (callbackData.startsWith("jobSelected")) {
             return confirmJobSelection(chatId, callbackData, messageId);
+        }
+        if ("BackToMenu".equals(callbackData)) {
+            ScheduleOrCancelQuestionState scheduleOrCancelQuestionState = context.getScheduleOrCancelQuestionState();
+            context.setState(callback.getFrom().getId(), scheduleOrCancelQuestionState);
+            return scheduleOrCancelQuestionState.handle(context, bot, message, callback);
         }
 
         return null;
@@ -157,7 +163,7 @@ public class ScheduleState implements IDynamicBotState {
                 jobType, jobDuration, selectedDate, selectedTime
         );
         String[][] buttonConfig = {
-                {"<< Back To Menu:BACK"}
+                {"<< Back To Menu:BackToMenu"}
         };
         List<List<InlineKeyboardButton>> keyboard = ButtonsGenerator.createKeyboard(buttonConfig);
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();

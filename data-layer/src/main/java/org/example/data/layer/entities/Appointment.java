@@ -35,4 +35,15 @@ public class Appointment {
     @JsonIgnore
     @JoinColumn(name = "bot_id")
     private Bot bot;
+
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private AppointmentStatus status;
+
+    public enum AppointmentStatus {
+        PENDING,
+        SUCCESS,
+        DECLINED
+    }
 }

@@ -3,6 +3,7 @@ package org.example.client.api.controller;
 import lombok.AllArgsConstructor;
 import org.example.client.api.helper.ApiRequestHelper;
 import org.example.data.layer.entities.Bot;
+import org.example.data.layer.entities.BusinessOwner;
 import org.springframework.stereotype.Component;
 
 @AllArgsConstructor
@@ -24,6 +25,14 @@ public class BusinessOwnerApi {
                 BASE_URL + userId,
                 bot,
                 Bot.class
+        );
+    }
+
+    public BusinessOwner create(BusinessOwner businessOwner) {
+        return apiRequestHelper.post(
+                BASE_URL,
+                businessOwner,
+                BusinessOwner.class
         );
     }
 

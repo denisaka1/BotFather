@@ -60,9 +60,9 @@ public class CreateSlashCommand implements ISlashCommand {
                     Type any text to return to the menu.""";
         }
 
-        return businessOwnerApi.createBotIfNotPresent(userId)
-                .getCreationState()
-                .getMessage();
+        bot = businessOwnerApi.createBotIfNotPresent(userId);
+
+        return bot.getCreationState().getMessage();
     }
 
     public boolean isCompleted() {

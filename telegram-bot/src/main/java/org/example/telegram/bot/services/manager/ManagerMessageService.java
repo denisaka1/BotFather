@@ -1,15 +1,11 @@
 package org.example.telegram.bot.services.manager;
 
-import lombok.AllArgsConstructor;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import org.example.client.api.helper.ApiRequestHelper;
 import org.example.telegram.bot.actions.manager.*;
-import org.example.telegram.bot.services.dynamic.RegistrationService;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Message;
-
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -27,32 +23,36 @@ public class ManagerMessageService {
     public String processMessage(Message message) {
         userMessage = message.getText().toLowerCase();
         chatId = message.getChatId();
+        return renderSlashCommand(message);
+    }
+
+    @PostConstruct
+    public void init() {
         commands = new HashMap<>();
         commands.put("/cancel", Boolean.FALSE);
         commands.put("/start", Boolean.FALSE);
         commands.put("/create", Boolean.FALSE);
         commands.put("/bots", Boolean.FALSE);
-        return renderSlashCommand(message);
     }
 
     private String renderSlashCommand(Message message) {
         switch (userMessage) {
             case "/cancel" -> {
-                commands.put("/start", Boolean.FALSE);
-                commands.put("/create", Boolean.FALSE);
-                commands.put("/bots", Boolean.FALSE);
+                commands.replace("/start", Boolean.FALSE);
+                commands.replace("/create", Boolean.FALSE);
+                commands.replace("/bots", Boolean.FALSE);
                 return "❌ Command cancelled!" + "\n\n" + renderMainMenu(message);
             }
             case "/start" -> {
-                commands.put("/start", Boolean.TRUE);
+                commands.replace("/start", Boolean.TRUE);
                 return startSlashCommand.execute(message);
             }
             case "/create" -> {
-                commands.put("/create", Boolean.TRUE);
+                commands.replace("/create", Boolean.TRUE);
                 return createSlashCommand.execute(message);
             }
             case "/bots" -> {
-                commands.put("/bots", Boolean.TRUE);
+                commands.replace("/bots", Boolean.TRUE);
                 return botsSlashCommand.execute(message);
             }
             default -> {
@@ -68,7 +68,7 @@ public class ManagerMessageService {
 
         if (Objects.equals(startedCommand(), "/create")) {
             if (createSlashCommand.isCompleted()) {
-                commands.put("/create", Boolean.FALSE);
+                commands.replace("/create", Boolean.FALSE);
                 return renderMainMenu(message);
             } else {
                 return createSlashCommand.processUserResponse(message);

@@ -21,19 +21,23 @@ public class BusinessOwner {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column
+//    @Column(nullable = false, unique = true)
     private Long userTelegramId;
 
-    @Column(nullable = false)
+    @Column
+//    @Column(nullable = false)
     private String firstName;
 
     @Column
     private String lastName;
 
-    @Column(nullable = false, unique = true)
+    @Column
+//    @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
+    @Column
+//    @Column(nullable = false)
     private String phoneNumber;
 
     @Column
@@ -45,6 +49,11 @@ public class BusinessOwner {
 
     @OneToMany(mappedBy = "owner", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Bot> bots = new ArrayList<>();
+
+    @PostPersist
+    private void onCreate() {
+        registrationState = OwnerRegistrationState.ASK_PHONE;
+    }
 
     public Bot addBot(Bot bot) {
         bots.add(bot);

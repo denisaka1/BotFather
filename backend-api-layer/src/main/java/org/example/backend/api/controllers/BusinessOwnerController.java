@@ -21,7 +21,7 @@ public class BusinessOwnerController {
         return ResponseEntity.ok(businessOwnerService.saveBot(userTelegramId, bot));
     }
 
-    @GetMapping("{userTelegramId}")
+    @GetMapping("{userTelegramId}/bots")
     public ResponseEntity<List<Bot>> findAllBots(@PathVariable Long userTelegramId){
         return ResponseEntity.ok(businessOwnerService.findAllBots(userTelegramId));
     }
@@ -35,5 +35,15 @@ public class BusinessOwnerController {
     @PostMapping
     public ResponseEntity<BusinessOwner> createBusinessOwner(@RequestBody BusinessOwner businessOwner) {
         return ResponseEntity.ok(businessOwnerService.saveBusinessOwner(businessOwner));
+    }
+
+    @PutMapping("{id}")
+    public ResponseEntity<BusinessOwner> updateBusinessOwner(@PathVariable Long id, @RequestBody BusinessOwner businessOwner) {
+        return ResponseEntity.ok(businessOwnerService.updateBusinessOwner(id, businessOwner));
+    }
+
+    @GetMapping("{userTelegramId}")
+    public ResponseEntity<BusinessOwner> getOwner(@PathVariable Long userTelegramId) {
+        return ResponseEntity.ok(businessOwnerService.getOwner(userTelegramId));
     }
 }

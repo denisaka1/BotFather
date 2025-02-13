@@ -23,7 +23,11 @@ public class ClientController {
     }
 
     @PostMapping("{id}/appointment")
-    public ResponseEntity<Appointment> createAppointment(@RequestBody Long botId, @RequestBody Appointment appointment, @PathVariable Long id) {
-        return ResponseEntity.ok(clientService.createAppointment(id, appointment, botId));
+    public ResponseEntity<Appointment> createAppointment(
+            @RequestBody Appointment appointment,
+            @RequestParam Long botId,
+            @RequestParam Long jobId,
+            @PathVariable Long id) {
+        return ResponseEntity.ok(clientService.createAppointment(id, appointment, botId, jobId));
     }
 }

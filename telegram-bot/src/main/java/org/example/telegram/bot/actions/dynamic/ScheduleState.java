@@ -2,9 +2,8 @@ package org.example.telegram.bot.actions.dynamic;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.client.api.controller.BotApi;
-import org.example.data.layer.entities.Bot;
-import org.example.data.layer.entities.Job;
-import org.example.data.layer.entities.WorkingHours;
+import org.example.client.api.controller.ClientApi;
+import org.example.data.layer.entities.*;
 import org.example.telegram.bot.polling.BotsManager;
 import org.example.telegram.bot.services.dynamic.DynamicMessageService;
 import org.example.telegram.components.inline.keyboard.*;
@@ -16,6 +15,9 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Component
@@ -24,6 +26,7 @@ import java.util.List;
 public class ScheduleState implements IDynamicBotState {
     private final BotsManager botsManager;
     private final BotApi botApi;
+    private final ClientApi clientApi;
 
     @Override
     public BotApiMethod<?> handle(DynamicMessageService context, Bot bot, Message message, CallbackQuery callbackData) {
@@ -66,14 +69,13 @@ public class ScheduleState implements IDynamicBotState {
             return sendHourSelection(chatId, messageId, callbackData.split("@")[1], bot.getWorkingHours());
         }
         if (callbackData.startsWith("jobSelected")) {
-            return confirmJobSelection(chatId, callbackData, messageId);
+            return confirmJobSelection(chatId, callbackData, messageId, bot.getId());
         }
         if ("BackToMenu".equals(callbackData)) {
             ScheduleOrCancelQuestionState scheduleOrCancelQuestionState = context.getScheduleOrCancelQuestionState();
             context.setState(callback.getFrom().getId(), scheduleOrCancelQuestionState);
             return scheduleOrCancelQuestionState.handle(context, bot, message, callback);
         }
-
         return null;
     }
 
@@ -143,7 +145,21 @@ public class ScheduleState implements IDynamicBotState {
         );
     }
 
-    private BotApiMethod<?> confirmJobSelection(Long chatId, String callbackData, Integer messageId) {
+    private void saveAppointment(String selectedDate, String selectedTime, Long chatId, Long botId, String jobId) {
+        Client client = clientApi.getClient(chatId);
+        LocalDateTime selectedDateTime = LocalDateTime.of(
+                LocalDate.parse(selectedDate, DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                LocalTime.parse(selectedTime, DateTimeFormatter.ofPattern("HH:mm"))
+        );
+        Appointment appointment = Appointment.
+                builder().
+                appointmentDate(selectedDateTime).
+                status(Appointment.AppointmentStatus.PENDING).
+                build();
+        clientApi.createAppointment(appointment, client.getId(), botId, Long.parseLong(jobId));
+    }
+
+    private BotApiMethod<?> confirmJobSelection(Long chatId, String callbackData, Integer messageId, Long botId) {
         String[] parts = callbackData.split("@");
         if (parts.length < 4) {
             return new SendMessage(chatId.toString(), "⚠ Invalid service selection!");
@@ -159,6 +175,7 @@ public class ScheduleState implements IDynamicBotState {
         String jobDuration = jobParts[2];
         String selectedDate = parts[2];
         String selectedTime = parts[3];
+        saveAppointment(selectedDate, selectedTime, chatId, botId, jobId);
         String returnMessage = String.format(
                 "✅ Your appointment for a %s (%s h) on %s at %s is waiting for confirmation.\nYou'll receive a confirmation message here shortly.",
                 jobType, jobDuration, selectedDate, selectedTime

@@ -28,11 +28,8 @@ public class ClientApi {
         );
     }
 
-    public Appointment createAppointment(Appointment appointment, Long clientId, Long botId) {
-        return apiRequestHelper.post(
-                BASE_URL + "/" + clientId + "/appointment",
-                appointment,
-                Appointment.class
-        );
+    public Appointment createAppointment(Appointment appointment, Long clientId, Long botId, Long jobId) {
+        String url = BASE_URL + "/" + clientId + "/appointment" + "?botId=" + botId + "&jobId=" + jobId;
+        return apiRequestHelper.post(url, appointment, Appointment.class);
     }
 }

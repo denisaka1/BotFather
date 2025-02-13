@@ -43,4 +43,18 @@ public class BusinessOwnerApi {
         );
     }
 
+    public Bot createBotIfNotPresent(Long userId) {
+        // Get bot that has the stating creationState, can only have 1 at any given time
+        // In none present, create one
+        Bot[] botArray = apiRequestHelper.get(
+                BASE_URL + userId,
+                Bot[].class
+        );
+        Bot bot = new Bot();
+        for (Bot b : botArray) {
+            if (!b.getCreationState().isCompleted())
+                return b;
+        }
+        return addBot(userId, bot);
+    }
 }

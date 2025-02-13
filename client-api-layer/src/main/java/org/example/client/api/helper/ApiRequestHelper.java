@@ -61,4 +61,18 @@ public class ApiRequestHelper {
             throw new RuntimeException("DELETE request failed: " + e.getMessage(), e);
         }
     }
+
+    public <T, R> T put(String url, R requestBody, Class<T> responseType) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<R> entity = new HttpEntity<>(requestBody, headers);
+
+            ResponseEntity<T> responseEntity = restTemplate.exchange(url, org.springframework.http.HttpMethod.PUT, entity, responseType);
+            return responseEntity.getBody();
+        } catch (Exception e) {
+            // Handle exception (log it or rethrow)
+            throw new RuntimeException("PUT request failed: " + e.getMessage(), e);
+        }
+    }
 }

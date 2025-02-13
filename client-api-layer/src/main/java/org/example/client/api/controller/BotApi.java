@@ -20,6 +20,14 @@ public class BotApi {
         );
     }
 
+    public Bot updateBot(Long botId, Bot bot) {
+        return apiRequestHelper.put(
+                "http://localhost:8080/api/bots/" + botId,
+                bot,
+                Bot.class
+        );
+    }
+
     public WorkingHours addWorkingHours(Long botId, WorkingHours workingHour) {
         return apiRequestHelper.post(
                 BASE_URL + botId + "/working_hour",

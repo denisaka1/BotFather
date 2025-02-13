@@ -11,6 +11,7 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
                 "org.example.client.api.controller",
                 "org.example.data.layer.entities",
                 "org.example.telegram.bot.actions",
+                "org.example.telegram.bot.redis",
                 "org.example.telegram.bot.config",
                 "org.example.telegram.bot.polling",
                 "org.example.telegram.bot.services",

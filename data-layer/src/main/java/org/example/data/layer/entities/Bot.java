@@ -21,17 +21,24 @@ public class Bot {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column
+//    @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column
+//    @Column(nullable = false)
     private String username;
 
-    @Column(nullable = false, unique = true)
+    @Column
+//    @Column(nullable = false, unique = true)
     private String token;
 
     @Column
     private String welcomeMessage;
+
+    @Column
+    @Enumerated(EnumType.STRING)
+    private BotCreationState creationState;
 
     @ManyToOne
     @JsonIgnore
@@ -46,6 +53,11 @@ public class Bot {
 
     @OneToMany(mappedBy = "bot", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<WorkingHours> workingHours = new ArrayList<>();
+
+    @PostPersist
+    private void postCreate() {
+        creationState = BotCreationState.ASK_BOT_FATHER_BOT_CREATION_MESSAGE;
+    }
 
     public void addJob(Job job) {
         jobs.add(job);
@@ -69,8 +81,7 @@ public class Bot {
         workingHour.setBot(null);
     }
 
-    @Override
-    public String toString() {
+    public String botInfo() {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("Name: ").append(name).append("\n");
         stringBuilder.append("Username: ").append(username).append("\n");
@@ -100,5 +111,39 @@ public class Bot {
         stringBuilder.append("\n");
 
         return stringBuilder.toString();
+    }
+
+    @Override
+    public String toString() {
+        return "";
+//        StringBuilder stringBuilder = new StringBuilder();
+//        stringBuilder.append("Name: ").append(name).append("\n");
+//        stringBuilder.append("Username: ").append(username).append("\n");
+//        stringBuilder.append("Welcome message:").append("\n").append(welcomeMessage).append("\n\n");
+//
+//        stringBuilder.append("Working hours:").append("\n");
+//        for (WorkingHours workingHour : workingHours) {
+//            stringBuilder.append(workingHour);
+//        }
+//        stringBuilder.append("\n");
+//
+//        stringBuilder.append("Jobs:").append("\n");
+//        List<Job> sortedJobs = jobs.stream()
+//                .sorted(Comparator.comparing(Job::getType))
+//                .toList();
+//
+//        Job previousJob = sortedJobs.get(0);
+//        stringBuilder.append(previousJob);
+//        for (Job job : sortedJobs.subList(1, sortedJobs.size())) {
+//            if (Objects.equals(previousJob.getType(), job.getType())) {
+//                stringBuilder.append(", ").append(job.getDuration());
+//            } else {
+//                stringBuilder.append("\n").append(job);
+//            }
+//            previousJob = job;
+//        }
+//        stringBuilder.append("\n");
+//
+//        return stringBuilder.toString();
     }
 }

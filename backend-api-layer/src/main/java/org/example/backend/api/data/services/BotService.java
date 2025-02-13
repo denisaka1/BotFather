@@ -45,4 +45,24 @@ public class BotService {
     public Bot getBot(Long id) {
         return botRepository.findById(id).orElseThrow();
     }
+
+    public Bot updateBot(Long id, Bot bot) {
+        Bot oldBot = botRepository.findById(id).orElseThrow();
+        if (bot.getName() != null) {
+            oldBot.setName(bot.getName());
+        }
+        if (bot.getUsername() != null) {
+            oldBot.setUsername(bot.getUsername());
+        }
+        if (bot.getToken() != null) {
+            oldBot.setToken(bot.getToken());
+        }
+        if (bot.getWelcomeMessage() != null) {
+            oldBot.setWelcomeMessage(bot.getWelcomeMessage());
+        }
+        if (bot.getCreationState() != oldBot.getCreationState()) {
+            oldBot.setCreationState(bot.getCreationState());
+        }
+        return botRepository.save(oldBot);
+    }
 }

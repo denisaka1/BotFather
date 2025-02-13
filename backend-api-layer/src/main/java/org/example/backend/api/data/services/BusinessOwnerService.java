@@ -26,11 +26,11 @@ public class BusinessOwnerService {
 
     public Bot saveBot(Long userTelegramId, Bot bot) {
         BusinessOwner owner = businessOwnerRepository.findByUserTelegramId(userTelegramId).orElseThrow();
-        Bot savedBot = botRepository.save(bot);
-        owner.addBot(savedBot);
+//        Bot savedBot = botRepository.save(bot);
+        owner.addBot(bot);
         businessOwnerRepository.save(owner);
 
-        return savedBot;
+        return owner.getBots().get(owner.getBots().size() - 1);
     }
 
     public List<Bot> findAllBots(Long userTelegramId) {

@@ -3,6 +3,7 @@ package org.example.data.layer.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,12 +42,17 @@ public class BusinessOwner {
     @Column
     private String address;
 
+    @Column
+    @Enumerated(EnumType.STRING)
+    private OwnerRegistrationState registrationState;
+
     @OneToMany(mappedBy = "owner", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Bot> bots = new ArrayList<>();
 
-    public void addBot(Bot bot) {
+    public Bot addBot(Bot bot) {
         bots.add(bot);
         bot.setOwner(this);
+        return bots.get(bots.size() - 1);
     }
 
     public void removeBot(Bot bot) {

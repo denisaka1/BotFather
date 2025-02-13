@@ -27,11 +27,26 @@ public enum BotCreationState {
             { Day: HH:MM - HH:MM } (24-hour format) or "None" if you don't work on that day.
             ℹ️️ The last hour represents the latest time you are available to provide services.
             ℹ️️ Please ensure you use full hours or half-hour intervals only.
+            
+            Example:
+            Monday: 09:30 - 17:00
+            Tuesday: 09:00 - 17:00
+            Wednesday: 09:00 - 16:00, 17:00 - 20:00
+            Thursday: 09:00 - 17:00
+            Friday: 10:00 - 14:00
+            Saturday: None
+            Sunday: None
             """),
     ASK_JOBS("""
             📋 What are your working durations?
             Please provide a list of services with their respective durations in the following format:
             Service Name: HH:MM (or multiple time slots separated by commas)
+            
+            Example:
+            Men's haircut: 00:30
+            Women's haircut: 01:30
+            Lesson: 01:00, 02:00
+            Yoga class: 01:00
             """),
     COMPLETED("🎉 Your new bot has been created successfully!\nYou can now access it using the link from the first message.\n\n🙏 Thank you for creating new bot with us! Type any text to continue.");
 

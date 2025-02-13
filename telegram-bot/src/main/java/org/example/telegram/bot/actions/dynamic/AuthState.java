@@ -1,5 +1,7 @@
 package org.example.telegram.bot.actions.dynamic;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.client.api.controller.ClientApi;
 import org.example.data.layer.entities.Bot;
 import org.example.data.layer.entities.Client;
 import org.example.telegram.bot.services.dynamic.DynamicMessageService;
@@ -17,8 +19,10 @@ import java.util.HashMap;
 
 @Component
 @Slf4j
+@AllArgsConstructor
 public class AuthState implements IDynamicBotState {
     private final HashMap<Long, GenericForm> userForms = new HashMap<>();
+    private final ClientApi clientApi;
 
     @Override
     public BotApiMethod<?> handle(DynamicMessageService context, Bot bot, Message message, CallbackQuery callbackData) {
@@ -30,7 +34,7 @@ public class AuthState implements IDynamicBotState {
             form = createForm(bot);
             userForms.put(userId, form);
         }
-        String response = execute(form, message, context);
+        String response = execute(form, message);
         if (form.isCompleted()) {
             context.setState(message.getFrom().getId(), context.getScheduleOrCancelQuestionState());
         }
@@ -48,7 +52,7 @@ public class AuthState implements IDynamicBotState {
                 firstMessage, "🎉 Thank you for registering! Type any text to continue.");
     }
 
-    private String execute(GenericForm userForm, Message message, DynamicMessageService context) {
+    private String execute(GenericForm userForm, Message message) {
         String response = userForm.handleResponse(message.getText().toLowerCase());
         String clientName = message.getFrom().getFirstName();
         if (message.getFrom().getLastName() != null) clientName +=  " " + message.getFrom().getLastName();
@@ -60,11 +64,7 @@ public class AuthState implements IDynamicBotState {
                     .email(userForm.getUserResponses().get("email"))
                     .chatId(message.getChatId())
                     .build();
-            Client savedClient = context.getApiRequestHelper().post(
-                    "http://localhost:8080/api/client",
-                    client,
-                    Client.class
-            );
+            Client savedClient = clientApi.createClient(client);
             log.info("Client saved: {}", savedClient);
         }
         return response;

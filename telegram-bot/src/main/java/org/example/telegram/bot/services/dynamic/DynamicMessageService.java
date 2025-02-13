@@ -2,7 +2,6 @@ package org.example.telegram.bot.services.dynamic;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.example.client.api.controller.ClientApi;
-import org.example.client.api.helper.ApiRequestHelper;
 import org.example.data.layer.entities.Bot;
 import org.example.data.layer.entities.Client;
 import org.example.telegram.bot.actions.dynamic.AuthState;
@@ -21,8 +20,6 @@ import java.util.Map;
 @AllArgsConstructor
 public class DynamicMessageService {
     private final Map<Long, IDynamicBotState> userStates = new HashMap<>();
-    @Getter
-    private final ApiRequestHelper apiRequestHelper;
     @Getter
     private final AuthState authState;
     @Getter

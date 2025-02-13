@@ -18,4 +18,12 @@ public class ClientApi {
                 Client.class
         );
     }
+
+    public Client createClient(Client client) {
+        return apiRequestHelper.post(
+                BASE_URL,
+                client,
+                Client.class
+        );
+    }
 }

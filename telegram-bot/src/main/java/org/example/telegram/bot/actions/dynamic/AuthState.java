@@ -50,12 +50,15 @@ public class AuthState implements IDynamicBotState {
 
     private String execute(GenericForm userForm, Message message, DynamicMessageService context) {
         String response = userForm.handleResponse(message.getText().toLowerCase());
+        String clientName = message.getFrom().getFirstName();
+        if (message.getFrom().getLastName() != null) clientName +=  " " + message.getFrom().getLastName();
         if (userForm.isCompleted()) {
             Client client = Client.builder()
-                    .name(message.getFrom().getFirstName() + " " + message.getFrom().getLastName())
+                    .name(clientName)
                     .telegramId(message.getFrom().getId().toString())
                     .phoneNumber(userForm.getUserResponses().get("phoneNumber"))
                     .email(userForm.getUserResponses().get("email"))
+                    .chatId(message.getChatId())
                     .build();
             Client savedClient = context.getApiRequestHelper().post(
                     "http://localhost:8080/api/client",

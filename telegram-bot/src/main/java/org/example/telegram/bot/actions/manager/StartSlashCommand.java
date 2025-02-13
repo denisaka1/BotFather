@@ -44,6 +44,7 @@ public class StartSlashCommand implements ISlashCommand {
                     .phoneNumber(userInput.get("phoneNumber"))
                     .email(userInput.get("email").toLowerCase())
                     .address(userInput.get("address"))
+                    .chatId(message.getChatId())
                     .build();
             BusinessOwner savedBusinessOwner = businessOwnerApi.create(businessOwner);
             log.info("Saved business owner: {}", savedBusinessOwner);

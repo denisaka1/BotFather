@@ -1,6 +1,7 @@
 package org.example.telegram.bot.services.dynamic;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.example.client.api.controller.ClientApi;
 import org.example.client.api.helper.ApiRequestHelper;
 import org.example.data.layer.entities.Bot;
 import org.example.data.layer.entities.Client;
@@ -28,6 +29,7 @@ public class DynamicMessageService {
     private final ScheduleOrCancelQuestionState scheduleOrCancelQuestionState;
     @Getter
     private final ScheduleState scheduleState;
+    private final ClientApi clientApi;
 
     public void setState(Long userId, IDynamicBotState newState) {
         userStates.put(userId, newState);
@@ -45,10 +47,7 @@ public class DynamicMessageService {
 
     private Client clientByTelegramId(Long userId) {
         try {
-            return this.apiRequestHelper.get(
-                    "http://localhost:8080/api/client/" + userId.toString(),
-                    Client.class
-            );
+            return clientApi.getClient(userId);
         } catch (Exception e) {
             return null;
         }

@@ -1,7 +1,7 @@
 package org.example.telegram.bot.actions.dynamic;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.client.api.helper.ApiRequestHelper;
+import org.example.client.api.controller.BotApi;
 import org.example.data.layer.entities.Bot;
 import org.example.data.layer.entities.Job;
 import org.example.data.layer.entities.WorkingHours;
@@ -23,6 +23,7 @@ import java.util.List;
 @AllArgsConstructor
 public class ScheduleState implements IDynamicBotState {
     private final BotsManager botsManager;
+    private final BotApi botApi;
 
     @Override
     public BotApiMethod<?> handle(DynamicMessageService context, Bot bot, Message message, CallbackQuery callbackData) {
@@ -37,8 +38,8 @@ public class ScheduleState implements IDynamicBotState {
         return sendCalendar(message.getChatId(), LocalDate.now().getYear(), LocalDate.now().getMonthValue(), message, bot.getWorkingHours());
     }
 
-    private List<Job> fetchBotJobs(Bot bot, ApiRequestHelper apiRequestHelper) {
-        return List.of(apiRequestHelper.get("http://localhost:8080/api/bots/" + bot.getId() + "/jobs", Job[].class));
+    private List<Job> fetchBotJobs(Bot bot) {
+        return List.of(botApi.getJobs(bot.getId()));
     }
 
     private BotApiMethod<?> handleCallbackQuery(Bot bot, Message message, CallbackQuery callback, DynamicMessageService context) {
@@ -56,7 +57,7 @@ public class ScheduleState implements IDynamicBotState {
             return updateHourSelection(chatId, messageId, callbackData, bot.getWorkingHours());
         }
         if (callbackData.startsWith("selectedTime:")) {
-            return processTimeSelection(chatId, messageId, bot, callbackData, context.getApiRequestHelper());
+            return processTimeSelection(chatId, messageId, bot, callbackData);
         }
         if (callbackData.equals("backToDates")) {
             return sendCalendar(chatId, LocalDate.now().getYear(), LocalDate.now().getMonthValue(), message, bot.getWorkingHours());
@@ -119,7 +120,7 @@ public class ScheduleState implements IDynamicBotState {
         );
     }
 
-    private BotApiMethod<?> processTimeSelection(Long chatId, Integer messageId, Bot bot, String callbackData, ApiRequestHelper apiRequestHelper) {
+    private BotApiMethod<?> processTimeSelection(Long chatId, Integer messageId, Bot bot, String callbackData) {
         String[] parts = callbackData.split(":");
 
         if (parts.length < 3) {
@@ -129,11 +130,11 @@ public class ScheduleState implements IDynamicBotState {
         String selectedDate = parts[1];
         String selectedTime = parts[2] + ":" + parts[3];
 
-        return requestJobSelection(chatId, messageId, bot, selectedDate, selectedTime, apiRequestHelper);
+        return requestJobSelection(chatId, messageId, bot, selectedDate, selectedTime);
     }
 
-    private BotApiMethod<?> requestJobSelection(Long chatId, Integer messageId, Bot bot, String selectedDate, String selectedTime, ApiRequestHelper apiRequestHelper) {
-        List<Job> jobs = fetchBotJobs(bot, apiRequestHelper);
+    private BotApiMethod<?> requestJobSelection(Long chatId, Integer messageId, Bot bot, String selectedDate, String selectedTime) {
+        List<Job> jobs = fetchBotJobs(bot);
 
         InlineKeyboardMarkup jobKeyboard = JobKeyboardBuilder.createJobSelectionKeyboard(jobs, selectedDate, selectedTime);
         return MessageGenerator.createEditMessageWithMarkup(

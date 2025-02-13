@@ -11,17 +11,18 @@ import org.springframework.stereotype.Component;
 @Component
 public class BotApi {
     private final ApiRequestHelper apiRequestHelper;
+    private static final String BASE_URL = "http://localhost:8080/api/bots/";
 
     public Bot getBot(Long botId) {
         return apiRequestHelper.get(
-                "http://localhost:8080/api/bots/" + botId,
+                BASE_URL + botId,
                 Bot.class
         );
     }
 
     public WorkingHours addWorkingHours(Long botId, WorkingHours workingHour) {
         return apiRequestHelper.post(
-                "http://localhost:8080/api/bots/" + botId + "/working_hour",
+                BASE_URL + botId + "/working_hour",
                 workingHour,
                 WorkingHours.class
         );
@@ -29,9 +30,16 @@ public class BotApi {
 
     public Job addJob(Long botId, Job job) {
         return  apiRequestHelper.post(
-                "http://localhost:8080/api/bots/" + botId + "/job",
+                BASE_URL + botId + "/job",
                 job,
                 Job.class
+        );
+    }
+
+    public Job[] getJobs(Long botId) {
+        return apiRequestHelper.get(
+                BASE_URL + botId + "/jobs",
+                Job[].class
         );
     }
 }

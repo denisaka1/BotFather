@@ -75,7 +75,7 @@ public class CreateSlashCommand implements ISlashCommand {
         BotCreationState currentState = bot.getCreationState();
 
         if (!isValidInput(currentState, userInput)) {
-            return "❌ Invalid input!\n" + currentState.getMessage();
+            return "❌ Invalid input!\n" + currentState.getExampleMessage();
         }
 
         AtomicReference<String> response = new AtomicReference<>("");

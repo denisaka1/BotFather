@@ -3,6 +3,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +14,9 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class WorkingHours {
+public class WorkingHours implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 2405172041467251807L;
 
     @Setter(AccessLevel.NONE)
     @Id

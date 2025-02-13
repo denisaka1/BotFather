@@ -1,14 +1,16 @@
 package org.example.telegram.bot.actions.manager;
 
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.client.api.controller.BotApi;
 import org.example.client.api.controller.BusinessOwnerApi;
-import org.example.client.api.helper.ApiRequestHelper;
 import org.example.data.layer.entities.Bot;
+import org.example.data.layer.entities.BotCreationState;
 import org.example.data.layer.entities.Job;
 import org.example.data.layer.entities.WorkingHours;
+import org.example.telegram.bot.redis.entity.BotSession;
+import org.example.telegram.bot.redis.repository.BotSessionRepository;
+import org.example.telegram.bot.redis.service.BotSessionService;
 import org.example.telegram.bot.services.dynamic.RegistrationService;
 import org.example.telegram.components.forms.FormStep;
 import org.example.telegram.components.forms.GenericForm;
@@ -22,6 +24,8 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.example.telegram.bot.utils.MessageExtractor.*;
 
@@ -32,13 +36,23 @@ public class CreateSlashCommand implements ISlashCommand {
     private final BotApi botApi;
     private final BusinessOwnerApi businessOwnerApi;
     private final RegistrationService botsRegistryService;
+    private final BotSessionRepository botSessionRepository;
+    private final BotSessionService botSessionService;
 
     private GenericForm userForm;
+    private Long userId;
+    private String userInput;
+    private Long chatId;
+    private BotSession botSession;
+    private Bot bot;
 
     @Override
     public String execute(Message message) {
-        Long userId = message.getFrom().getId();
-        userForm = createForm();
+        userId = message.getFrom().getId();
+        userInput = message.getText();
+        chatId = message.getChatId();
+//        botSession = botSessionService.getBotSession(chatId);
+
         if (!businessOwnerApi.isPresent(userId)) {
             return """
                     👋 Welcome to the Bots Creator!
@@ -46,11 +60,53 @@ public class CreateSlashCommand implements ISlashCommand {
                     Type any text to return to the menu.""";
         }
 
-        String response = userForm.handleResponse(message.getText());
-        if (userForm.isCompleted()) {
-            buildAndSaveBot(userForm.getUserResponses(), userId);
+        return businessOwnerApi.createBotIfNotPresent(userId)
+                .getCreationState()
+                .getMessage();
+    }
+
+    public boolean isCompleted() {
+        return bot.getCreationState().isCompleted();
+    }
+
+    public String processUserResponse(Message message) {
+//        BotCreationState currentState = botSession.getCreationState();
+        userInput = message.getText();
+        BotCreationState currentState = bot.getCreationState();
+
+        if (!isValidInput(currentState, userInput)) {
+            return "❌ Invalid input!\n" + currentState.getMessage();
         }
-        return response;
+
+        AtomicReference<String> response = new AtomicReference<>("");
+        currentState.getNextState().ifPresentOrElse(nextState -> {
+            switch (currentState) {
+                case ASK_BOT_FATHER_BOT_CREATION_MESSAGE -> setTokenAndUsername(userInput);
+                case ASK_BOT_NAME -> setName(userInput);
+                case ASK_WELCOME_MESSAGE -> setWelcomeMessage(userInput);
+                case ASK_WORKING_HOURS -> buildAndSaveWorkingHours(userInput);
+                case ASK_JOBS -> buildAndSaveJobs(userInput);
+                default -> response.set(nextState.getMessage());
+            }
+            bot.setCreationState(nextState);
+            response.set(nextState.getMessage());
+        }, () -> {
+            // If no next state, user has completed registration
+//            botSessionService.finalizeBotSession(userId, botSession);
+            businessOwnerApi.addBot(userId, bot);
+            response.set("🎉 Your new bot has been created successfully!\nYou can now access it using the link from the first message.\n\n🙏 Thank you for creating new bot with us! Type any text to continue.");
+        });
+        return response.get();
+    }
+
+    private boolean isValidInput(BotCreationState state, String userMessage) {
+        return switch (state) {
+            case ASK_BOT_FATHER_BOT_CREATION_MESSAGE -> new BotMessageValidator().validate(userMessage);
+            case ASK_BOT_NAME, ASK_WELCOME_MESSAGE -> new StringValidator().validate(userMessage);
+            case ASK_WORKING_HOURS -> new WorkingHoursValidator().validate(userMessage);
+            case ASK_JOBS -> new WorkingDurationsValidator().validate(userMessage);
+            default -> true;
+        };
     }
 
     private GenericForm createForm() {
@@ -101,36 +157,52 @@ public class CreateSlashCommand implements ISlashCommand {
         ), firstMessage, "🎉 Your new bot has been created successfully!\nYou can now access it using the link from the first message.\n\n🙏 Thank you for creating new bot with us! Type any text to continue.");
     }
 
-    private void buildAndSaveBot(Map<String, String> userResponses, Long userId) {
-        String[] botInfo = extractBotInfoFromForwardedMsg(userResponses.get("forwardedMessage"));
-        String username = botInfo[0];
-        String token = botInfo[1];
-        Bot bot = Bot.builder()
-                .username(username)
-                .token(token)
-                .name(userResponses.get("name"))
-                .welcomeMessage(userResponses.get("welcomeMessage"))
-                .build();
-        Bot savedBot = businessOwnerApi.addBot(userId, bot);
-
-        buildAndSaveWorkingHours(userResponses.get("workingHours"), savedBot);
-        buildAndSaveJobs(userResponses.get("workingDurations"), savedBot);
-        Bot updatedBot = botApi.getBot(savedBot.getId());
-        botsRegistryService.registerBot(updatedBot);
-        log.info("Bot {} created and registered successfully!", savedBot.getName());
+    private void setTokenAndUsername(String userInput) {
+        bot.setToken(BotMessageValidator.extractToken(userInput));
+        bot.setUsername(BotMessageValidator.extractBotLink(userInput));
+        bot = botApi.updateBot(bot.getId(), bot);
     }
 
-    private void buildAndSaveWorkingHours(String workingHoursStr, Bot savedBot) {
-        List<WorkingHours> workingHours = extractWorkingHours(workingHoursStr, savedBot);
+    private void setName(String name) {
+        bot.setName(name);
+        bot = botApi.updateBot(bot.getId(), bot);
+    }
+
+    private void setWelcomeMessage(String welcomeMessage) {
+        bot.setWelcomeMessage(welcomeMessage);
+        bot = botApi.updateBot(bot.getId(), bot);
+    }
+
+//    private void buildAndSaveBot(Map<String, String> userResponses, Long userId) {
+//        String[] botInfo = extractBotInfoFromForwardedMsg(userResponses.get("forwardedMessage"));
+//        String username = botInfo[0];
+//        String token = botInfo[1];
+//        Bot bot = Bot.builder()
+//                .username(username)
+//                .token(token)
+//                .name(userResponses.get("name"))
+//                .welcomeMessage(userResponses.get("welcomeMessage"))
+//                .build();
+//        Bot savedBot = businessOwnerApi.addBot(userId, bot);
+//
+//        buildAndSaveWorkingHours(userResponses.get("workingHours"), savedBot);
+//        buildAndSaveJobs(userResponses.get("workingDurations"), savedBot);
+//        Bot updatedBot = botApi.getBot(savedBot.getId());
+//        botsRegistryService.registerBot(updatedBot);
+//        log.info("Bot {} created and registered successfully!", savedBot.getName());
+//    }
+
+    private void buildAndSaveWorkingHours(String workingHoursStr) {
+        List<WorkingHours> workingHours = extractWorkingHours(workingHoursStr, bot);
         for (WorkingHours workingHour : workingHours) {
-            botApi.addWorkingHours(savedBot.getId(), workingHour);
+            botApi.addWorkingHours(bot.getId(), workingHour);
         }
     }
 
-    private void buildAndSaveJobs(String workingDurationsStr, Bot savedBot) {
-        List<Job> jobs = extractJobs(workingDurationsStr, savedBot);
+    private void buildAndSaveJobs(String workingDurationsStr) {
+        List<Job> jobs = extractJobs(workingDurationsStr, bot);
         for (Job job : jobs) {
-            botApi.addJob(savedBot.getId(), job);
+            botApi.addJob(bot.getId(), job);
         }
     }
 }

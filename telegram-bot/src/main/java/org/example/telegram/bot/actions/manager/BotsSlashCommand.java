@@ -32,7 +32,8 @@ public class BotsSlashCommand implements ISlashCommand {
         StringBuilder result = new StringBuilder("Bots information:\n\n");
         for (int i = 0; i < ownerBots.length; i++) {
             result.append("Bot ").append(i + 1).append(":\n");
-            result.append(ownerBots[i]);
+            result.append(ownerBots[i].botInfo());
+            result.append("\n\n");
         }
 
         return result.toString();

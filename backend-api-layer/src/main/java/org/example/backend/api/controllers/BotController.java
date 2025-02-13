@@ -29,6 +29,11 @@ public class BotController {
         return ResponseEntity.ok(botService.saveBot(bot));
     }
 
+    @PutMapping("{id}")
+    public ResponseEntity<Bot> updateBot(@PathVariable Long id, @RequestBody Bot bot) {
+        return ResponseEntity.ok(botService.updateBot(id, bot));
+    }
+
     @PostMapping("{id}/job")
     public ResponseEntity<Job> createJob(@PathVariable Long id, @RequestBody Job job) {
         return ResponseEntity.ok(botService.saveJob(id, job));

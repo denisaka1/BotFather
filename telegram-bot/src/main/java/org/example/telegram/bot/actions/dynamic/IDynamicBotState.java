@@ -17,7 +17,7 @@ public interface IDynamicBotState {
     }
 
     default IDynamicBotState getPreviousState(DynamicMessageService context) {
-        return new ScheduleOrCancelQuestionState(); // Default fallback
+        return context.getScheduleOrCancelQuestionState(); // Default fallback
     }
 }
 

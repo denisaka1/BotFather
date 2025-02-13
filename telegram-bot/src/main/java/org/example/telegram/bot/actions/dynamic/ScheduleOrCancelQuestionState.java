@@ -1,6 +1,9 @@
 package org.example.telegram.bot.actions.dynamic;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.client.api.controller.ClientApi;
 import org.example.data.layer.entities.Bot;
+import org.example.data.layer.entities.Client;
 import org.example.telegram.bot.services.dynamic.DynamicMessageService;
 import org.example.telegram.components.inline.keyboard.ButtonsGenerator;
 import org.example.telegram.components.inline.keyboard.MessageGenerator;
@@ -15,7 +18,9 @@ import java.util.List;
 
 @Component
 @Slf4j
+@AllArgsConstructor
 public class ScheduleOrCancelQuestionState implements IDynamicBotState {
+    private final ClientApi clientApi;
 
     @Override
     public BotApiMethod<?> handle(DynamicMessageService context, Bot bot, Message message, CallbackQuery callbackData) {
@@ -37,12 +42,15 @@ public class ScheduleOrCancelQuestionState implements IDynamicBotState {
 
     private BotApiMethod<?> createScheduleOrCancelButtons(String chatId, Bot bot, Message message, boolean isBack) {
         String text = bot.getWelcomeMessage() + "\n\n" + "What would you like to do?";
-
+        Client currentClient = clientApi.getClient(Long.parseLong(chatId));
         // Create inline keyboard with two rows
-        String[][] buttonConfigs = {
+        String[][] buttonConfigs = currentClient.getAppointments().isEmpty()
+                ? new String[][]{{"📅 Schedule An Appointment:SCHEDULE"}}
+                : new String[][]{
                 {"📅 Schedule An Appointment:SCHEDULE"},
                 {"❌ Cancel An Existing Appointment:CANCEL"}
         };
+
         List<List<InlineKeyboardButton>> keyboard = ButtonsGenerator.createKeyboard(buttonConfigs);
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         markup.setKeyboard(keyboard);

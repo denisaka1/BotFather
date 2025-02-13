@@ -14,7 +14,7 @@ import java.util.List;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class BusinessOwner implements Serializable {
+public class BusinessOwner {
 
     @Setter(AccessLevel.NONE)
     @Id

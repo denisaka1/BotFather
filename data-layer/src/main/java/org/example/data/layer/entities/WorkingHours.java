@@ -14,9 +14,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class WorkingHours implements Serializable {
-    @Serial
-    private static final long serialVersionUID = 2405172041467251807L;
+public class WorkingHours {
 
     @Setter(AccessLevel.NONE)
     @Id

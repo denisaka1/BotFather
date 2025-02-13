@@ -15,7 +15,7 @@ public class BotsSlashCommand implements ISlashCommand {
 
     public String execute(Message message) {
         Long userId = message.getFrom().getId();
-        if (!businessOwnerApi.isPresent(userId)) {
+        if (!botsExist(userId)) {
             return """
                     👋 Welcome to the Bots Creator!
                     You don't have any bots created.
@@ -39,5 +39,8 @@ public class BotsSlashCommand implements ISlashCommand {
         return result.toString();
     }
 
+    private boolean botsExist(Long userId) {
+        return businessOwnerApi.isRegistered(userId) && businessOwnerApi.getBots(userId).length > 0;
+    }
 }
 

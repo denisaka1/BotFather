@@ -25,7 +25,7 @@ public class BusinessOwnerService {
     }
 
     public Bot saveBot(Long userTelegramId, Bot bot) {
-        BusinessOwner owner = businessOwnerRepository.findByUserTelegramId(userTelegramId).orElseThrow();
+        BusinessOwner owner = getOwner(userTelegramId);
 //        Bot savedBot = botRepository.save(bot);
         owner.addBot(bot);
         businessOwnerRepository.save(owner);
@@ -34,11 +34,41 @@ public class BusinessOwnerService {
     }
 
     public List<Bot> findAllBots(Long userTelegramId) {
-        BusinessOwner owner = businessOwnerRepository.findByUserTelegramId(userTelegramId).orElseThrow();
+        BusinessOwner owner = getOwner(userTelegramId);
         return owner.getBots();
     }
 
     public boolean existsByUserTelegramId(Long userTelegramId) {
         return businessOwnerRepository.existsByUserTelegramId(userTelegramId);
+    }
+
+    public BusinessOwner updateBusinessOwner(Long id, BusinessOwner businessOwner) {
+        BusinessOwner currentOwner = businessOwnerRepository.findById(id).orElseThrow();
+        if (businessOwner.getUserTelegramId() != null) {
+            currentOwner.setUserTelegramId(businessOwner.getUserTelegramId());
+        }
+        if (businessOwner.getFirstName() != null) {
+            currentOwner.setFirstName(businessOwner.getFirstName());
+        }
+        if (businessOwner.getLastName() != null) {
+            currentOwner.setLastName(businessOwner.getLastName());
+        }
+        if (businessOwner.getEmail() != null) {
+            currentOwner.setEmail(businessOwner.getEmail());
+        }
+        if (businessOwner.getPhoneNumber() != null) {
+            currentOwner.setPhoneNumber(businessOwner.getPhoneNumber());
+        }
+        if (businessOwner.getAddress() != null) {
+            currentOwner.setAddress(businessOwner.getAddress());
+        }
+        if (businessOwner.getRegistrationState() != currentOwner.getRegistrationState()) {
+            currentOwner.setRegistrationState(businessOwner.getRegistrationState());
+        }
+        return businessOwnerRepository.save(currentOwner);
+    }
+
+    public BusinessOwner getOwner(Long userTelegramId) {
+        return businessOwnerRepository.findByUserTelegramId(userTelegramId).orElseThrow();
     }
 }

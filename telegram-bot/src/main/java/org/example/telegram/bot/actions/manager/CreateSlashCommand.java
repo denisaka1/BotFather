@@ -42,7 +42,6 @@ public class CreateSlashCommand implements ISlashCommand {
     private GenericForm userForm;
     private Long userId;
     private String userInput;
-    private Long chatId;
     private BotSession botSession;
     private Bot bot;
 
@@ -50,15 +49,7 @@ public class CreateSlashCommand implements ISlashCommand {
     public String execute(Message message) {
         userId = message.getFrom().getId();
         userInput = message.getText();
-        chatId = message.getChatId();
 //        botSession = botSessionService.getBotSession(chatId);
-
-        if (!businessOwnerApi.isPresent(userId)) {
-            return """
-                    👋 Welcome to the Bots Creator!
-                    You need to register using the /start command to create a new bot.
-                    Type any text to return to the menu.""";
-        }
 
         bot = businessOwnerApi.createBotIfNotPresent(userId);
 
@@ -82,13 +73,14 @@ public class CreateSlashCommand implements ISlashCommand {
         currentState.getNextState().ifPresentOrElse(nextState -> {
             switch (currentState) {
                 case ASK_BOT_FATHER_BOT_CREATION_MESSAGE -> setTokenAndUsername(userInput);
-                case ASK_BOT_NAME -> setName(userInput);
-                case ASK_WELCOME_MESSAGE -> setWelcomeMessage(userInput);
+                case ASK_BOT_NAME -> bot.setName(userInput);
+                case ASK_WELCOME_MESSAGE -> bot.setWelcomeMessage(userInput);
                 case ASK_WORKING_HOURS -> buildAndSaveWorkingHours(userInput);
                 case ASK_JOBS -> buildAndSaveJobs(userInput);
-                default -> response.set(nextState.getMessage());
+                case COMPLETED -> botsRegistryService.registerBot(bot);
             }
             bot.setCreationState(nextState);
+            bot = botApi.updateBot(bot.getId(), bot);
             response.set(nextState.getMessage());
         }, () -> {
             // If no next state, user has completed registration
@@ -160,17 +152,6 @@ public class CreateSlashCommand implements ISlashCommand {
     private void setTokenAndUsername(String userInput) {
         bot.setToken(BotMessageValidator.extractToken(userInput));
         bot.setUsername(BotMessageValidator.extractBotLink(userInput));
-        bot = botApi.updateBot(bot.getId(), bot);
-    }
-
-    private void setName(String name) {
-        bot.setName(name);
-        bot = botApi.updateBot(bot.getId(), bot);
-    }
-
-    private void setWelcomeMessage(String welcomeMessage) {
-        bot.setWelcomeMessage(welcomeMessage);
-        bot = botApi.updateBot(bot.getId(), bot);
     }
 
 //    private void buildAndSaveBot(Map<String, String> userResponses, Long userId) {

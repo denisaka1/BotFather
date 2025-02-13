@@ -52,12 +52,12 @@ public class ManagerMessageService {
                     return "👋 Welcome back! You are already registered!\n Type any text to continue.";
                 }
                 commands.replace(SlashCommand.START, Boolean.TRUE);
-                return startSlashCommand.execute(message);
+                return SlashCommand.BACK_COMMAND_MESSAGE + startSlashCommand.execute(message);
             }
             case SlashCommand.CREATE -> {
                 if (isOwnerRegistered()) {
                     commands.replace(SlashCommand.CREATE, Boolean.TRUE);
-                    return createSlashCommand.execute(message);
+                    return SlashCommand.BACK_COMMAND_MESSAGE + createSlashCommand.execute(message);
                 }
                 return """
                     👋 Welcome to the Bots Creator!

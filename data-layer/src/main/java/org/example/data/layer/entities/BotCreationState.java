@@ -121,11 +121,11 @@ public enum BotCreationState {
 
     public Optional<BotCreationState> getPreviousState() {
         return switch (this) {
-            case ASK_BOT_FATHER_BOT_CREATION_MESSAGE, COMPLETED -> Optional.empty();
-            case ASK_BOT_NAME -> Optional.of(ASK_BOT_FATHER_BOT_CREATION_MESSAGE);
+            case ASK_BOT_FATHER_BOT_CREATION_MESSAGE, ASK_BOT_NAME -> Optional.of(ASK_BOT_FATHER_BOT_CREATION_MESSAGE);
             case ASK_WELCOME_MESSAGE -> Optional.of(ASK_BOT_NAME);
             case ASK_WORKING_HOURS -> Optional.of(ASK_WELCOME_MESSAGE);
             case ASK_JOBS -> Optional.of(ASK_WORKING_HOURS);
+            case COMPLETED -> Optional.empty();
         };
     }
 

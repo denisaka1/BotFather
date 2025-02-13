@@ -32,9 +32,9 @@ public enum OwnerRegistrationState {
 
     public Optional<OwnerRegistrationState> getPreviousState() {
         return switch (this) {
-            case ASK_PHONE, COMPLETED -> Optional.empty();
-            case ASK_EMAIL -> Optional.of(ASK_PHONE);
+            case ASK_PHONE, ASK_EMAIL -> Optional.of(ASK_PHONE);
             case ASK_ADDRESS -> Optional.of(ASK_EMAIL);
+            case COMPLETED -> Optional.empty();
         };
     }
 

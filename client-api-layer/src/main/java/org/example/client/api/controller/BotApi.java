@@ -28,9 +28,9 @@ public class BotApi {
         );
     }
 
-    public Bot updateBot(Long botId, Bot bot) {
+    public Bot updateBot(Bot bot) {
         return apiRequestHelper.put(
-                "http://localhost:8080/api/bots/" + botId,
+                BASE_URL + bot.getId(),
                 bot,
                 Bot.class
         );

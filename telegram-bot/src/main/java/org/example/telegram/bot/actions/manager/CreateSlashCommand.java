@@ -9,11 +9,8 @@ import org.example.data.layer.entities.BotCreationState;
 import org.example.data.layer.entities.Job;
 import org.example.data.layer.entities.WorkingHours;
 import org.example.telegram.bot.redis.entity.BotSession;
-import org.example.telegram.bot.redis.repository.BotSessionRepository;
 import org.example.telegram.bot.redis.service.BotSessionService;
 import org.example.telegram.bot.services.dynamic.RegistrationService;
-import org.example.telegram.components.forms.FormStep;
-import org.example.telegram.components.forms.GenericForm;
 import org.example.telegram.components.validators.BotMessageValidator;
 import org.example.telegram.components.validators.StringValidator;
 import org.example.telegram.components.validators.WorkingDurationsValidator;
@@ -27,6 +24,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static org.example.data.layer.entities.BotCreationState.ASK_BOT_FATHER_BOT_CREATION_MESSAGE;
 import static org.example.telegram.bot.utils.MessageExtractor.*;
 
 @Slf4j
@@ -60,10 +58,23 @@ public class CreateSlashCommand implements ISlashCommand {
         String userInput = message.getText();
         BotCreationState currentState = bot.getCreationState();
 
-        if (!isValidInput(currentState, userInput)) {
+        if (Objects.equals(userInput, SlashCommand.BACK)) {
+            BotCreationState previousState = currentState.getPreviousState().get();
+            if (previousState == currentState) {
+                return currentState.getMessage();
+            }
+            bot.setCreationState(previousState);
+            botApi.updateBot(bot);
+            return SlashCommand.RETURNING_TO_PREVIOUS_MESSAGE + previousState.getMessage();
+        } else if (!isValidInput(currentState, userInput)) {
             return "❌ Invalid input!\n\n" + currentState.getMessage();
         }
+//            return processPreviousState(currentState, userInput);
 
+        return processState(currentState, userInput);
+    }
+
+    private String processState(BotCreationState currentState, String userInput) {
         AtomicReference<String> response = new AtomicReference<>("");
         currentState.getNextState().ifPresentOrElse(nextState -> {
             switch (currentState) {
@@ -75,7 +86,7 @@ public class CreateSlashCommand implements ISlashCommand {
                 case COMPLETED -> botsRegistryService.registerBot(bot);
             }
             bot.setCreationState(nextState);
-            bot = botApi.updateBot(bot.getId(), bot);
+            bot = botApi.updateBot(bot);
             response.set(successMessage(currentState) + "\n\n" + nextState.getMessage());
         }, () -> {
             // If no next state, user has completed registration

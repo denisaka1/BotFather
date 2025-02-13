@@ -50,28 +50,28 @@ public class ScheduleState implements IDynamicBotState {
         Integer messageId = message.getMessageId();
         String callbackData = callback.getData();
 
-        if (callbackData.startsWith("date:")) {
-            return sendHourSelection(chatId, messageId, callbackData.split(":")[1], bot.getWorkingHours());
+        if (callbackData.startsWith(Appointment.AppointmentCreationStep.DATE_SELECTED.name())) {
+            return sendJobSelection(chatId, messageId, callbackData.split(":")[1], bot);
         }
-        if (callbackData.startsWith("month:")) {
+        if (callbackData.startsWith(Appointment.AppointmentCreationStep.UPDATE_DATES.name())) {
             return updateCalendar(chatId, messageId, callbackData, bot.getWorkingHours());
         }
-        if (callbackData.startsWith("hour:")) {
-            return updateHourSelection(chatId, messageId, callbackData, bot.getWorkingHours());
+        if (callbackData.startsWith(Appointment.AppointmentCreationStep.JOB_SELECTED.name())) {
+            return sendHourSelection(chatId, messageId, callbackData, bot.getWorkingHours());
         }
-        if (callbackData.startsWith("selectedTime:")) {
-            return processTimeSelection(chatId, messageId, bot, callbackData);
-        }
-        if (callbackData.equals("backToDates")) {
+        if (callbackData.equals(Appointment.AppointmentCreationStep.BACK_TO_DATES.name())) {
             return sendCalendar(chatId, LocalDate.now().getYear(), LocalDate.now().getMonthValue(), message, bot.getWorkingHours());
         }
-        if (callbackData.startsWith("backToTimeSelection")) {
-            return sendHourSelection(chatId, messageId, callbackData.split("@")[1], bot.getWorkingHours());
+        if (callbackData.startsWith(Appointment.AppointmentCreationStep.HOUR_SELECTED.name())) {
+            return handleAppointmentCreation(chatId, messageId, bot, callbackData);
         }
-        if (callbackData.startsWith("jobSelected")) {
-            return confirmJobSelection(chatId, callbackData, messageId, bot);
+        if (callbackData.startsWith(Appointment.AppointmentCreationStep.UPDATE_HOURS.name())) {
+            return updateHourSelection(chatId, messageId, callbackData, bot.getWorkingHours());
         }
-        if ("BackToMenu".equals(callbackData)) {
+        if (callbackData.startsWith(Appointment.AppointmentCreationStep.BACK_TO_JOBS.name())) {
+            return sendJobSelection(chatId, messageId, callbackData.split("@")[1], bot);
+        }
+        if (Appointment.AppointmentCreationStep.BACK_TO_MENU.name().equals(callbackData)) {
             ScheduleOrCancelQuestionState scheduleOrCancelQuestionState = context.getScheduleOrCancelQuestionState();
             context.setState(callback.getFrom().getId(), scheduleOrCancelQuestionState);
             return scheduleOrCancelQuestionState.handle(context, bot, message, callback);
@@ -79,13 +79,18 @@ public class ScheduleState implements IDynamicBotState {
         return null;
     }
 
-    private BotApiMethod<?> sendHourSelection(Long chatId, Integer messageId, String selectedDate, List<WorkingHours> workingHours) {
+    private BotApiMethod<?> sendHourSelection(Long chatId, Integer messageId, String callbackData, List<WorkingHours> workingHours) {
+        String[] parts = callbackData.split("@");
+        String selectedDate = parts[2];
+        String[] jobParts = parts[1].split(":");
+        String jobType = jobParts[1];
+        String jobDuration = jobParts[2];
         InlineKeyboardMarkup hourKeyboard = HourKeyboardGenerator.generateHourKeyboard(
-                selectedDate, null, workingHours
+                selectedDate, null, workingHours, parts[1]
         );
 
         return MessageGenerator.createEditMessageWithMarkup(
-                chatId.toString(), "📅 You selected: " + selectedDate + "\n\n⏳ Please select a time:",
+                chatId.toString(), "✅ You selected " + jobType + " (" + jobDuration + "h) at: " + selectedDate + "\n\n⏳ Please select a time:",
                 hourKeyboard, messageId
         );
     }
@@ -105,42 +110,33 @@ public class ScheduleState implements IDynamicBotState {
     }
 
     private BotApiMethod<?> updateHourSelection(Long chatId, Integer messageId, String callbackData, List<WorkingHours> workingHours) {
-        String[] parts = callbackData.split(":");
+        String[] parts = callbackData.split("@");
         if (parts.length < 4) {
             return new SendMessage(chatId.toString(), "⚠ Invalid hour selection!");
         }
         String selectedDate = parts[1];
-        String startHour = String.format("%02d:00", Integer.parseInt(parts[2]));
+        String[] jobParts = parts[2].split(":");
+        String jobType = jobParts[1];
+        String jobDuration = jobParts[2];
+        String[] hourParts = parts[3].split(":");
+        String startHour = String.format("%02d:00", Integer.parseInt(hourParts[0]));
 
         InlineKeyboardMarkup hourKeyboard = HourKeyboardGenerator.generateHourKeyboard(
-                selectedDate, startHour, workingHours
+                selectedDate, startHour, workingHours, parts[2]
         );
 
         return MessageGenerator.createEditMessageWithMarkup(
-                chatId.toString(), "📅 You selected: " + selectedDate + "\n\n⏳ Choose a time:",
+                chatId.toString(), "✅ You selected " + jobType + " (" + jobDuration + "h) at: " + selectedDate + "\n\n⏳ Please select a time:",
                 hourKeyboard, messageId
         );
     }
 
-    private BotApiMethod<?> processTimeSelection(Long chatId, Integer messageId, Bot bot, String callbackData) {
-        String[] parts = callbackData.split(":");
-
-        if (parts.length < 3) {
-            return new SendMessage(chatId.toString(), "⚠ Invalid time selection!");
-        }
-
-        String selectedDate = parts[1];
-        String selectedTime = parts[2] + ":" + parts[3];
-
-        return requestJobSelection(chatId, messageId, bot, selectedDate, selectedTime);
-    }
-
-    private BotApiMethod<?> requestJobSelection(Long chatId, Integer messageId, Bot bot, String selectedDate, String selectedTime) {
+    private BotApiMethod<?> sendJobSelection(Long chatId, Integer messageId, String dateSelected, Bot bot) {
         List<Job> jobs = fetchBotJobs(bot);
-
-        InlineKeyboardMarkup jobKeyboard = JobKeyboardBuilder.createJobSelectionKeyboard(jobs, selectedDate, selectedTime);
+        InlineKeyboardMarkup jobKeyboard = JobKeyboardBuilder.createJobSelectionKeyboard(jobs, dateSelected);
+        
         return MessageGenerator.createEditMessageWithMarkup(
-                chatId.toString(), "✅ You selected an appointment on " + selectedDate + " at " + selectedTime + "\n\n🛠 Please choose a service:",
+                chatId.toString(), "📅 You selected: " + dateSelected + "\n\n🛠 Please choose a service:",
                 jobKeyboard, messageId
         );
     }
@@ -173,21 +169,18 @@ public class ScheduleState implements IDynamicBotState {
         botsManager.sendMessage(confirmMsg);
     }
 
-    private BotApiMethod<?> confirmJobSelection(Long chatId, String callbackData, Integer messageId, Bot bot) {
+    private BotApiMethod<?> handleAppointmentCreation(Long chatId, Integer messageId, Bot bot, String callbackData) {
         String[] parts = callbackData.split("@");
+
         if (parts.length < 4) {
-            return new SendMessage(chatId.toString(), "⚠ Invalid service selection!");
+            return new SendMessage(chatId.toString(), "⚠ Invalid selection!");
         }
 
-        String[] jobParts = parts[1].split(":");
-        if (jobParts.length < 3) {
-            return new SendMessage(chatId.toString(), "⚠ Invalid service details!");
-        }
-
+        String selectedDate = parts[1];
+        String[] jobParts = parts[2].split(":");
         String jobId = jobParts[0];
         String jobType = jobParts[1];
         String jobDuration = jobParts[2];
-        String selectedDate = parts[2];
         String selectedTime = parts[3];
         saveAppointment(selectedDate, selectedTime, chatId, bot, jobId, jobType, jobDuration);
         String returnMessage = String.format(
@@ -195,7 +188,7 @@ public class ScheduleState implements IDynamicBotState {
                 jobType, jobDuration, selectedDate, selectedTime
         );
         String[][] buttonConfig = {
-                {"<< Back To Menu:BackToMenu"}
+                {"<< Back To Menu:" + Appointment.AppointmentCreationStep.BACK_TO_MENU.name()}
         };
         List<List<InlineKeyboardButton>> keyboard = ButtonsGenerator.createKeyboard(buttonConfig);
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();

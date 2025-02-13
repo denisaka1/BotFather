@@ -1,5 +1,5 @@
 package org.example.telegram.components.inline.keyboard;
-
+import org.example.data.layer.entities.Appointment;
 import org.example.data.layer.entities.WorkingHours;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -49,7 +49,7 @@ public class CalendarKeyboardGenerator {
             } else if (!currentDate.isAfter(lastAllowedDate) && workingDays.contains(currentDayOfWeek - 1)) {
                 row.add(InlineKeyboardButton.builder()
                         .text(String.valueOf(day))
-                        .callbackData("date:" + String.format("%02d/%02d/%04d", day, month, year))
+                        .callbackData(Appointment.AppointmentCreationStep.DATE_SELECTED.name() + ":" + String.format("%02d/%02d/%04d", day, month, year))
                         .build());
             } else {
                 row.add(InlineKeyboardButton.builder().text("❌").callbackData("noop").build());
@@ -87,7 +87,7 @@ public class CalendarKeyboardGenerator {
             int prevYear = month == 1 ? year - 1 : year;
             navRow.add(InlineKeyboardButton.builder()
                     .text("⬅️ Previous")
-                    .callbackData("month:" + prevYear + "-" + prevMonth)
+                    .callbackData(Appointment.AppointmentCreationStep.UPDATE_DATES.name() + ":" + prevYear + "-" + prevMonth)
                     .build());
         }
 
@@ -98,7 +98,7 @@ public class CalendarKeyboardGenerator {
             int nextYear = month == 12 ? year + 1 : year;
             navRow.add(InlineKeyboardButton.builder()
                     .text("Next ➡️")
-                    .callbackData("month:" + nextYear + "-" + nextMonth)
+                    .callbackData(Appointment.AppointmentCreationStep.UPDATE_DATES.name() + ":" + nextYear + "-" + nextMonth)
                     .build());
         }
 

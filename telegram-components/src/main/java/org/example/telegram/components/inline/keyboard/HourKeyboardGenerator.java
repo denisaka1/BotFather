@@ -1,4 +1,5 @@
 package org.example.telegram.components.inline.keyboard;
+import org.example.data.layer.entities.Appointment;
 import org.example.data.layer.entities.TimeRange;
 import org.example.data.layer.entities.WorkingHours;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -13,7 +14,7 @@ public class HourKeyboardGenerator {
     private static final int HOUR_DISPLAY_RANGE = 4;
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
 
-    public static InlineKeyboardMarkup generateHourKeyboard(String selectedDate, String startHour, List<WorkingHours> workingHours) {
+    public static InlineKeyboardMarkup generateHourKeyboard(String selectedDate, String startHour, List<WorkingHours> workingHours, String jobDetails) {
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
         LocalDate today = LocalDate.now();
         LocalTime now = LocalTime.now().plusMinutes(15 - (LocalTime.now().getMinute() % 15)); // Round up to the next 15-minute slot
@@ -50,7 +51,7 @@ public class HourKeyboardGenerator {
                 if (!isBetween(availableHoursList, time)) continue;
                 row.add(InlineKeyboardButton.builder()
                         .text(time)
-                        .callbackData("selectedTime:" + selectedDate + ":" + time)
+                        .callbackData(Appointment.AppointmentCreationStep.HOUR_SELECTED.name() + "@" + selectedDate + "@" + jobDetails + "@" + time)
                         .build());
             }
             if (!row.isEmpty()) {
@@ -59,13 +60,13 @@ public class HourKeyboardGenerator {
         }
 
         // Add navigation buttons if available
-        addNavigationButtons(rows, selectedDate, adjustedStartHour, parsedEndHour, parsedWorkingHoursStart, parsedWorkingHoursEnd);
+        addNavigationButtons(rows, selectedDate, adjustedStartHour, parsedEndHour, parsedWorkingHoursStart, parsedWorkingHoursEnd, jobDetails);
 
         // Add "Back" button
         rows.add(List.of(
                 InlineKeyboardButton.builder()
-                        .text("<< Back to Dates")
-                        .callbackData("backToDates")
+                        .text("<< Back to Jobs")
+                        .callbackData(Appointment.AppointmentCreationStep.BACK_TO_JOBS.name() + "@" + selectedDate)
                         .build()
         ));
 
@@ -98,14 +99,14 @@ public class HourKeyboardGenerator {
         return false;
     }
 
-    private static void addNavigationButtons(List<List<InlineKeyboardButton>> rows, String selectedDate, LocalTime adjustedStartHour, LocalTime parsedEndHour, LocalTime parsedWorkingHoursStart, LocalTime parsedWorkingHoursEnd) {
+    private static void addNavigationButtons(List<List<InlineKeyboardButton>> rows, String selectedDate, LocalTime adjustedStartHour, LocalTime parsedEndHour, LocalTime parsedWorkingHoursStart, LocalTime parsedWorkingHoursEnd, String jobDetails) {
         List<InlineKeyboardButton> navigationRow = new ArrayList<>();
 
         // Show "Previous" button if there's an earlier time available
         if (adjustedStartHour.isAfter(parsedWorkingHoursStart)) {
             navigationRow.add(InlineKeyboardButton.builder()
                     .text("⬅ Previous")
-                    .callbackData("hour:" + selectedDate + ":" + Math.max(adjustedStartHour.getHour() - HOUR_DISPLAY_RANGE, parsedWorkingHoursStart.getHour()) + ":" + adjustedStartHour.getHour())
+                    .callbackData(Appointment.AppointmentCreationStep.UPDATE_HOURS.name() + "@" + selectedDate + "@" + jobDetails + "@" + Math.max(adjustedStartHour.getHour() - HOUR_DISPLAY_RANGE, parsedWorkingHoursStart.getHour()) + ":" + adjustedStartHour.getHour())
                     .build());
         }
 
@@ -113,7 +114,7 @@ public class HourKeyboardGenerator {
         if (parsedEndHour.isBefore(parsedWorkingHoursEnd)) {
             navigationRow.add(InlineKeyboardButton.builder()
                     .text("Next ➡")
-                    .callbackData("hour:" + selectedDate + ":" + parsedEndHour.getHour() + ":" + Math.min(parsedEndHour.getHour() + HOUR_DISPLAY_RANGE, parsedWorkingHoursEnd.getHour()))
+                    .callbackData(Appointment.AppointmentCreationStep.UPDATE_HOURS.name() + "@" + selectedDate+ "@" + jobDetails + "@" + parsedEndHour.getHour() + ":" + Math.min(parsedEndHour.getHour() + HOUR_DISPLAY_RANGE, parsedWorkingHoursEnd.getHour()))
                     .build());
         }
 

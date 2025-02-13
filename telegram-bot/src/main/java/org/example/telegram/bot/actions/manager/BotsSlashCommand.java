@@ -19,7 +19,7 @@ public class BotsSlashCommand implements ISlashCommand {
             return """
                     👋 Welcome to the Bots Creator!
                     You don't have any bots created.
-                    You need to register using the /start command to create a new bot.
+                    You need to register using the /create command to create a new bot.
                     Type any text to return to the menu.""";
         }
 

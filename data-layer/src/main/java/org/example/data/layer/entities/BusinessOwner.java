@@ -21,6 +21,9 @@ public class BusinessOwner {
     private Long id;
 
     @Column(nullable = false, unique = true)
+    private Long chatId;
+
+    @Column(nullable = false, unique = true)
     private Long userTelegramId;
 
     @Column(nullable = false)

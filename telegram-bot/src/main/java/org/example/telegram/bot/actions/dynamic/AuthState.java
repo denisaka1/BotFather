@@ -62,7 +62,6 @@ public class AuthState implements IDynamicBotState {
                     .telegramId(message.getFrom().getId().toString())
                     .phoneNumber(userForm.getUserResponses().get("phoneNumber"))
                     .email(userForm.getUserResponses().get("email"))
-                    .chatId(message.getChatId())
                     .build();
             Client savedClient = clientApi.createClient(client);
             log.info("Client saved: {}", savedClient);

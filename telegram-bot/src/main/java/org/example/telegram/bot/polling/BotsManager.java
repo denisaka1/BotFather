@@ -6,6 +6,7 @@ import org.example.telegram.bot.config.ConfigLoader;
 import org.example.telegram.bot.services.manager.ManagerMessageService;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -34,21 +35,18 @@ public class BotsManager extends TelegramLongPollingBot {
             String chatId = update.getMessage().getChatId().toString();
 
             String response = managerMessageService.processMessage(update.getMessage());
-
-            sendMessage(chatId, response);
+            SendMessage message = new SendMessage();
+            message.setChatId(chatId);
+            message.setText(response);
+            sendMessage(message);
         }
     }
 
-    public void sendMessage(String chatId, String text) {
-        SendMessage message = new SendMessage();
-        message.setChatId(chatId);
-        message.setText(text);
-
+    public void sendMessage(BotApiMethod<?> message) {
         try {
             execute(message);
         } catch (TelegramApiException e) {
             e.printStackTrace();
-            log.error("Failed to send message {}, error: {}", message, e.getMessage());
         }
     }
 }

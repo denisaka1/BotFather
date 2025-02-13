@@ -69,7 +69,7 @@ public class ScheduleState implements IDynamicBotState {
             return sendHourSelection(chatId, messageId, callbackData.split("@")[1], bot.getWorkingHours());
         }
         if (callbackData.startsWith("jobSelected")) {
-            return confirmJobSelection(chatId, callbackData, messageId, bot.getId());
+            return confirmJobSelection(chatId, callbackData, messageId, bot);
         }
         if ("BackToMenu".equals(callbackData)) {
             ScheduleOrCancelQuestionState scheduleOrCancelQuestionState = context.getScheduleOrCancelQuestionState();
@@ -145,7 +145,7 @@ public class ScheduleState implements IDynamicBotState {
         );
     }
 
-    private void saveAppointment(String selectedDate, String selectedTime, Long chatId, Long botId, String jobId) {
+    private void saveAppointment(String selectedDate, String selectedTime, Long chatId, Bot bot, String jobId, String jobType, String jobDuration) {
         Client client = clientApi.getClient(chatId);
         LocalDateTime selectedDateTime = LocalDateTime.of(
                 LocalDate.parse(selectedDate, DateTimeFormatter.ofPattern("dd/MM/yyyy")),
@@ -156,10 +156,24 @@ public class ScheduleState implements IDynamicBotState {
                 appointmentDate(selectedDateTime).
                 status(Appointment.AppointmentStatus.PENDING).
                 build();
-        clientApi.createAppointment(appointment, client.getId(), botId, Long.parseLong(jobId));
+        Appointment savedAppointment = clientApi.createAppointment(appointment, client.getId(), bot.getId(), Long.parseLong(jobId));
+        BusinessOwner botOwner = botApi.getOwner(bot.getId());
+        String confirmationMessage = "Hi " + botOwner.getFirstName() + " 👋\nA new " + jobType + " (" + jobDuration + "h) appointment has been scheduled for "
+                + selectedDate + " at " + selectedTime + ".\nWhat would you like to do?";
+        String[][] buttonConfig = {
+                {"CONFIRM ✅:confirmAppointment" + savedAppointment.getId(), "DECLINE ❌:declineAppointment" + savedAppointment.getId()}
+        };
+        List<List<InlineKeyboardButton>> keyboard = ButtonsGenerator.createKeyboard(buttonConfig);
+        InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+        markup.setKeyboard(keyboard);
+        SendMessage confirmMsg =  MessageGenerator.createSendMessageWithMarkup(
+                botOwner.getUserTelegramId().toString(), confirmationMessage,
+                markup
+        );
+        botsManager.sendMessage(confirmMsg);
     }
 
-    private BotApiMethod<?> confirmJobSelection(Long chatId, String callbackData, Integer messageId, Long botId) {
+    private BotApiMethod<?> confirmJobSelection(Long chatId, String callbackData, Integer messageId, Bot bot) {
         String[] parts = callbackData.split("@");
         if (parts.length < 4) {
             return new SendMessage(chatId.toString(), "⚠ Invalid service selection!");
@@ -175,7 +189,7 @@ public class ScheduleState implements IDynamicBotState {
         String jobDuration = jobParts[2];
         String selectedDate = parts[2];
         String selectedTime = parts[3];
-        saveAppointment(selectedDate, selectedTime, chatId, botId, jobId);
+        saveAppointment(selectedDate, selectedTime, chatId, bot, jobId, jobType, jobDuration);
         String returnMessage = String.format(
                 "✅ Your appointment for a %s (%s h) on %s at %s is waiting for confirmation.\nYou'll receive a confirmation message here shortly.",
                 jobType, jobDuration, selectedDate, selectedTime

@@ -3,6 +3,7 @@ package org.example.client.api.controller;
 import lombok.AllArgsConstructor;
 import org.example.client.api.helper.ApiRequestHelper;
 import org.example.data.layer.entities.Bot;
+import org.example.data.layer.entities.BusinessOwner;
 import org.example.data.layer.entities.Job;
 import org.example.data.layer.entities.WorkingHours;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,13 @@ public class BotApi {
         return apiRequestHelper.get(
                 BASE_URL + botId,
                 Bot.class
+        );
+    }
+
+    public BusinessOwner getOwner(Long botId) {
+        return apiRequestHelper.get(
+                BASE_URL + botId + "/owner",
+                BusinessOwner.class
         );
     }
 

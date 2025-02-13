@@ -3,6 +3,7 @@ package org.example.backend.api.data.services;
 import lombok.AllArgsConstructor;
 import org.example.backend.api.data.repositories.BotRepository;
 import org.example.data.layer.entities.Bot;
+import org.example.data.layer.entities.BusinessOwner;
 import org.example.data.layer.entities.Job;
 import org.example.data.layer.entities.WorkingHours;
 import org.springframework.stereotype.Service;
@@ -64,5 +65,10 @@ public class BotService {
             oldBot.setCreationState(bot.getCreationState());
         }
         return botRepository.save(oldBot);
+    }
+
+    public BusinessOwner getBotOwner(Long id) {
+        Bot bot = botRepository.findById(id).orElseThrow();
+        return bot.getOwner();
     }
 }

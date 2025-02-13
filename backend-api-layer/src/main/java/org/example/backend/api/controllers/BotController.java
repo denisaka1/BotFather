@@ -2,6 +2,7 @@ package org.example.backend.api.controllers;
 import lombok.AllArgsConstructor;
 import org.example.backend.api.data.services.BotService;
 import org.example.data.layer.entities.Bot;
+import org.example.data.layer.entities.BusinessOwner;
 import org.example.data.layer.entities.Job;
 import org.example.data.layer.entities.WorkingHours;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,9 @@ public class BotController {
 
     @GetMapping("{id}")
     public ResponseEntity<Bot> getBot(@PathVariable Long id) { return ResponseEntity.ok(botService.getBot(id)); }
+
+    @GetMapping("{id}/owner")
+    public ResponseEntity<BusinessOwner> getBotOwner(@PathVariable Long id) { return ResponseEntity.ok(botService.getBotOwner(id)); }
 
     @GetMapping
     public ResponseEntity<List<Bot>> getAllBots() {

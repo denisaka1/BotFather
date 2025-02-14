@@ -3,9 +3,15 @@ package org.example.telegram.bot.services.manager;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.example.client.api.controller.BusinessOwnerApi;
-import org.example.telegram.bot.actions.manager.*;
+import org.example.telegram.bot.actions.manager.BotsSlashCommand;
+import org.example.telegram.bot.actions.manager.CreateSlashCommand;
+import org.example.telegram.bot.actions.manager.SlashCommand;
+import org.example.telegram.bot.actions.manager.StartSlashCommand;
+import org.example.telegram.components.inline.keyboard.MessageGenerator;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -13,7 +19,7 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class ManagerMessageService {
-    
+
     private final StartSlashCommand startSlashCommand;
     private final CreateSlashCommand createSlashCommand;
     private final BotsSlashCommand botsSlashCommand;
@@ -24,7 +30,7 @@ public class ManagerMessageService {
     private Map<String, Boolean> commands;
     private Long userId;
 
-    public String processMessage(Message message) {
+    public SendMessage processMessage(Message message) {
         userMessage = message.getText().toLowerCase();
         userId = message.getFrom().getId();
         return renderSlashCommand(message);
@@ -39,34 +45,34 @@ public class ManagerMessageService {
         commands.put(SlashCommand.BOTS, Boolean.FALSE);
     }
 
-    private String renderSlashCommand(Message message) {
+    private SendMessage renderSlashCommand(Message message) {
         switch (userMessage) {
             case SlashCommand.CANCEL -> {
                 commands.replace(SlashCommand.START, Boolean.FALSE);
                 commands.replace(SlashCommand.CREATE, Boolean.FALSE);
                 commands.replace(SlashCommand.BOTS, Boolean.FALSE);
-                return "❌ Command cancelled!" + "\n\n" + renderMainMenu(message);
+                return createSimpleMessage("❌ Command cancelled!" + "\n\n" + renderMainMenu(message));
             }
             case SlashCommand.START -> {
                 if (isOwnerRegistered()) {
-                    return "👋 Welcome back! You are already registered!\n Type any text to continue.";
+                    return createSimpleMessage("👋 Welcome back! You are already registered!\n Type any text to continue.");
                 }
                 commands.replace(SlashCommand.START, Boolean.TRUE);
-                return SlashCommand.BACK_COMMAND_MESSAGE + startSlashCommand.execute(message);
+                return createSimpleMessage(SlashCommand.BACK_COMMAND_MESSAGE + startSlashCommand.execute(message));
             }
             case SlashCommand.CREATE -> {
                 if (isOwnerRegistered()) {
                     commands.replace(SlashCommand.CREATE, Boolean.TRUE);
-                    return SlashCommand.BACK_COMMAND_MESSAGE + createSlashCommand.execute(message);
+                    return createSimpleMessage(SlashCommand.BACK_COMMAND_MESSAGE + createSlashCommand.execute(message));
                 }
-                return """
-                    👋 Welcome to the Bots Creator!
-                    You need to register using the /start command to create a new bot.
-                    Type any text to return to the menu.""";
+
+                return createSimpleMessage("""
+                        👋 Welcome to the Bots Creator!
+                        You need to register using the /start command to create a new bot.
+                        Type any text to return to the menu.""");
             }
             case SlashCommand.BOTS -> {
-//                commands.replace(SlashCommand.BOTS, Boolean.TRUE);
-                return botsSlashCommand.execute(message);
+                return createSimpleMessage(botsSlashCommand.execute(message));
             }
             default -> {
                 return handleUserResponse(message);
@@ -74,17 +80,21 @@ public class ManagerMessageService {
         }
     }
 
-    private String handleUserResponse(Message message) {
+    private SendMessage createSimpleMessage(String message) {
+        return MessageGenerator.createSimpleTextMessage(userId, message);
+    }
+
+    private SendMessage handleUserResponse(Message message) {
         if (!isSlashCommandStarted()) {
-            return renderMainMenu(message);
+            return createSimpleMessage(renderMainMenu(message));
         }
 
         if (Objects.equals(startedCommand(), SlashCommand.CREATE)) {
-            return processCreateCommand(message);
+            return createSimpleMessage(processCreateCommand(message));
         } else if (Objects.equals(startedCommand(), SlashCommand.START)) {
-            return processStartCommand(message);
+            return createSimpleMessage(processStartCommand(message));
         } else { // /cancel
-            return renderMainMenu(message);
+            return createSimpleMessage(renderMainMenu(message));
         }
     }
 
@@ -131,17 +141,17 @@ public class ManagerMessageService {
     private String renderMainMenu(Message message) {
         String userFirstName = message.getFrom().getFirstName();
         return String.format("""
-            Hello %s! 👋
-            🌟 Welcome to Our Bot! 🌟
-
-            🏠 Main Menu:
-            
-            🔹 /start - 🚀 Create a new user
-            🔹 /create - 🤖 Create a new bot
-            🔹 /bots - 📋 List all your bots
-
-            ℹ️ You can return to this menu anytime by typing /cancel. ❌
-            """, userFirstName);
+                Hello %s! 👋
+                🌟 Welcome to Our Bot! 🌟
+                
+                🏠 Main Menu:
+                
+                🔹 /start - 🚀 Create a new user
+                🔹 /create - 🤖 Create a new bot
+                🔹 /bots - 📋 List all your bots
+                
+                ℹ️ You can return to this menu anytime by typing /cancel. ❌
+                """, userFirstName);
     }
 
 }

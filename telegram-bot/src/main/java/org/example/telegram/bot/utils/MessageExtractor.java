@@ -1,6 +1,5 @@
 package org.example.telegram.bot.utils;
 
-import org.example.data.layer.entities.Bot;
 import org.example.data.layer.entities.Job;
 import org.example.data.layer.entities.TimeRange;
 import org.example.data.layer.entities.WorkingHours;
@@ -28,7 +27,7 @@ public class MessageExtractor {
         return new String[]{username, token};
     }
 
-    public static List<WorkingHours> extractWorkingHours(String input, Bot bot) {
+    public static List<WorkingHours> extractWorkingHours(String input) {
         List<WorkingHours> workingHoursList = new ArrayList<>();
 
         String[] lines = input.split("\n");
@@ -57,7 +56,6 @@ public class MessageExtractor {
             }
             WorkingHours workingHours = WorkingHours.builder()
                     .day(day)
-                    .bot(bot)
                     .timeRanges(timeRanges)
                     .build();
 
@@ -66,7 +64,7 @@ public class MessageExtractor {
         return workingHoursList;
     }
 
-    public static List<Job> extractJobs(String input, Bot bot) {
+    public static List<Job> extractJobs(String input) {
         List<Job> jobs = new ArrayList<>();
         String[] lines = input.split("\\n");
 
@@ -83,7 +81,6 @@ public class MessageExtractor {
                     Job job = Job.builder()
                             .type(type)
                             .duration(parseDurationToHours(duration))
-                            .owner(bot)
                             .build();
                     jobs.add(job);
                 }

@@ -18,13 +18,10 @@ import org.example.telegram.components.validators.WorkingHoursValidator;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.example.data.layer.entities.BotCreationState.ASK_BOT_FATHER_BOT_CREATION_MESSAGE;
 import static org.example.telegram.bot.utils.MessageExtractor.*;
 
 @Slf4j
@@ -124,14 +121,14 @@ public class CreateSlashCommand implements ISlashCommand {
     }
 
     private void buildAndSaveWorkingHours(String workingHoursStr) {
-        List<WorkingHours> workingHours = extractWorkingHours(workingHoursStr, bot);
+        List<WorkingHours> workingHours = extractWorkingHours(workingHoursStr);
         for (WorkingHours workingHour : workingHours) {
             botApi.addWorkingHours(bot.getId(), workingHour);
         }
     }
 
     private void buildAndSaveJobs(String workingDurationsStr) {
-        List<Job> jobs = extractJobs(workingDurationsStr, bot);
+        List<Job> jobs = extractJobs(workingDurationsStr);
         for (Job job : jobs) {
             botApi.addJob(bot.getId(), job);
         }

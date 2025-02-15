@@ -41,8 +41,8 @@ public class Appointment {
 
     public enum AppointmentStatus {
         PENDING,
-        SUCCESS,
-        DECLINED
+        APPROVED,
+        CANCELED
     }
 
     public enum AppointmentCreationStep {

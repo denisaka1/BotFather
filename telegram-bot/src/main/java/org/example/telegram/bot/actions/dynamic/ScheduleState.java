@@ -38,7 +38,7 @@ public class ScheduleState implements IDynamicBotState {
             return null;
         }
 
-        return sendCalendar(message.getChatId(), LocalDate.now().getYear(), LocalDate.now().getMonthValue(), message, bot.getWorkingHours());
+        return sendCalendar(message.getChatId(), LocalDate.now().getYear(), LocalDate.now().getMonthValue(), message, bot);
     }
 
     private List<Job> fetchBotJobs(Bot bot) {
@@ -57,16 +57,16 @@ public class ScheduleState implements IDynamicBotState {
             return updateCalendar(chatId, messageId, callbackData, bot.getWorkingHours());
         }
         if (callbackData.startsWith(Appointment.AppointmentCreationStep.JOB_SELECTED.name())) {
-            return sendHourSelection(chatId, messageId, callbackData, bot.getWorkingHours());
+            return sendHourSelection(chatId, messageId, callbackData, bot);
         }
         if (callbackData.equals(Appointment.AppointmentCreationStep.BACK_TO_DATES.name())) {
-            return sendCalendar(chatId, LocalDate.now().getYear(), LocalDate.now().getMonthValue(), message, bot.getWorkingHours());
+            return sendCalendar(chatId, LocalDate.now().getYear(), LocalDate.now().getMonthValue(), message, bot);
         }
         if (callbackData.startsWith(Appointment.AppointmentCreationStep.HOUR_SELECTED.name())) {
             return handleAppointmentCreation(chatId, messageId, bot, callbackData);
         }
         if (callbackData.startsWith(Appointment.AppointmentCreationStep.UPDATE_HOURS.name())) {
-            return updateHourSelection(chatId, messageId, callbackData, bot.getWorkingHours());
+            return updateHourSelection(chatId, messageId, callbackData, bot);
         }
         if (callbackData.startsWith(Appointment.AppointmentCreationStep.BACK_TO_JOBS.name())) {
             return sendJobSelection(chatId, messageId, callbackData.split("@")[1], bot);
@@ -79,14 +79,15 @@ public class ScheduleState implements IDynamicBotState {
         return null;
     }
 
-    private BotApiMethod<?> sendHourSelection(Long chatId, Integer messageId, String callbackData, List<WorkingHours> workingHours) {
+    private BotApiMethod<?> sendHourSelection(Long chatId, Integer messageId, String callbackData, Bot bot) {
         String[] parts = callbackData.split("@");
         String selectedDate = parts[2];
         String[] jobParts = parts[1].split(":");
         String jobType = jobParts[1];
         String jobDuration = jobParts[2];
-        InlineKeyboardMarkup hourKeyboard = HourKeyboardGenerator.generateHourKeyboard(
-                selectedDate, null, workingHours, parts[1]
+        Bot updatedBot = botApi.getBot(bot.getId());
+        InlineKeyboardMarkup hourKeyboard = HourKeyboardGenerator.generateHoursKeyboard(
+                selectedDate, null, updatedBot.getWorkingHours(), parts[1], updatedBot.getAppointments()
         );
 
         return MessageGenerator.createEditMessageWithMarkup(
@@ -95,8 +96,9 @@ public class ScheduleState implements IDynamicBotState {
         );
     }
 
-    private BotApiMethod<?> sendCalendar(Long chatId, int year, int month, Message message, List<WorkingHours> workingHours) {
-        InlineKeyboardMarkup calendar = CalendarKeyboardGenerator.generateCalendar(year, month, workingHours);
+    private BotApiMethod<?> sendCalendar(Long chatId, int year, int month, Message message, Bot bot) {
+        Bot updatedBot = botApi.getBot(bot.getId());
+        InlineKeyboardMarkup calendar = CalendarKeyboardGenerator.generateCalendar(year, month, updatedBot.getWorkingHours());
         return MessageGenerator.createEditMessageWithMarkup(chatId.toString(), "📅 Please select a date:", calendar, message.getMessageId());
     }
 
@@ -109,7 +111,7 @@ public class ScheduleState implements IDynamicBotState {
         return MessageGenerator.createEditMessageReplyMarkup(chatId.toString(), messageId, calendar);
     }
 
-    private BotApiMethod<?> updateHourSelection(Long chatId, Integer messageId, String callbackData, List<WorkingHours> workingHours) {
+    private BotApiMethod<?> updateHourSelection(Long chatId, Integer messageId, String callbackData, Bot bot) {
         String[] parts = callbackData.split("@");
         if (parts.length < 4) {
             return new SendMessage(chatId.toString(), "⚠ Invalid hour selection!");
@@ -118,11 +120,10 @@ public class ScheduleState implements IDynamicBotState {
         String[] jobParts = parts[2].split(":");
         String jobType = jobParts[1];
         String jobDuration = jobParts[2];
-        String[] hourParts = parts[3].split(":");
-        String startHour = String.format("%02d:00", Integer.parseInt(hourParts[0]));
-
-        InlineKeyboardMarkup hourKeyboard = HourKeyboardGenerator.generateHourKeyboard(
-                selectedDate, startHour, workingHours, parts[2]
+        String startHour =  parts[3];
+        Bot updatedBot = botApi.getBot(bot.getId());
+        InlineKeyboardMarkup hourKeyboard = HourKeyboardGenerator.generateHoursKeyboard(
+                selectedDate, startHour, updatedBot.getWorkingHours(), parts[2], updatedBot.getAppointments()
         );
 
         return MessageGenerator.createEditMessageWithMarkup(

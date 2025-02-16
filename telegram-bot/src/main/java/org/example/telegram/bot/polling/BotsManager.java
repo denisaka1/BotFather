@@ -1,6 +1,5 @@
 package org.example.telegram.bot.polling;
 
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.telegram.bot.config.ConfigLoader;
 import org.example.telegram.bot.services.manager.ManagerMessageService;
@@ -13,22 +12,22 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 @Slf4j
 @Component
-@AllArgsConstructor
 public class BotsManager extends TelegramLongPollingBot {
 
-    private final DynamicBot dynamicBot;
     private final ManagerMessageService managerMessageService;
     private final ConfigLoader configLoader;
+
+    public BotsManager(ManagerMessageService managerMessageService, ConfigLoader configLoader) {
+        super(configLoader.getToken());
+        this.managerMessageService = managerMessageService;
+        this.configLoader = configLoader;
+    }
 
     @Override
     public String getBotUsername() {
         return configLoader.getUsername();
     }
 
-    @Override
-    public String getBotToken() {
-        return configLoader.getToken();
-    }
 
     @Override
     public void onUpdateReceived(Update update) {
@@ -50,9 +49,8 @@ public class BotsManager extends TelegramLongPollingBot {
     }
 
     private boolean isAppointmentConfirmations(Update update) {
-        boolean isAppointment = update.getCallbackQuery().getData().startsWith("confirmAppointment") ||
-                update.getCallbackQuery().getData().startsWith("declineAppointment");
-        return update.hasCallbackQuery() && isAppointment;
+        return update.hasCallbackQuery() && (update.getCallbackQuery().getData().startsWith("confirmAppointment") ||
+                update.getCallbackQuery().getData().startsWith("declineAppointment"));
     }
 
     private void sendMessage(BotApiMethod<?> message) {

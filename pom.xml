@@ -20,7 +20,8 @@
         <module>client-api-layer</module>
         <module>telegram-components</module>
         <module>backend-api-layer</module>
-        <module>telegram-bot</module>
+        <module>dynamic-bot</module>
+        <module>bots-manager</module>
     </modules>
 
     <url/>

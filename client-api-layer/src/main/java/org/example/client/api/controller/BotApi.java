@@ -12,25 +12,32 @@ import org.springframework.stereotype.Component;
 @Component
 public class BotApi {
     private final ApiRequestHelper apiRequestHelper;
-    private static final String BASE_URL = "http://localhost:8080/api/bots/";
+    private static final String BASE_URL = "http://localhost:8080/api/bots";
 
     public Bot getBot(Long botId) {
         return apiRequestHelper.get(
-                BASE_URL + botId,
+                BASE_URL + "/" + botId,
                 Bot.class
+        );
+    }
+
+    public Bot[] getBots() {
+        return apiRequestHelper.get(
+                BASE_URL,
+                Bot[].class
         );
     }
 
     public BusinessOwner getOwner(Long botId) {
         return apiRequestHelper.get(
-                BASE_URL + botId + "/owner",
+                BASE_URL + "/" + botId + "/owner",
                 BusinessOwner.class
         );
     }
 
     public Bot updateBot(Bot bot) {
         return apiRequestHelper.put(
-                BASE_URL + bot.getId(),
+                BASE_URL + "/" + bot.getId(),
                 bot,
                 Bot.class
         );
@@ -38,7 +45,7 @@ public class BotApi {
 
     public WorkingHours addWorkingHours(Long botId, WorkingHours workingHour) {
         return apiRequestHelper.post(
-                BASE_URL + botId + "/working_hour",
+                BASE_URL + "/" + botId + "/working_hour",
                 workingHour,
                 WorkingHours.class
         );
@@ -46,7 +53,7 @@ public class BotApi {
 
     public Job addJob(Long botId, Job job) {
         return  apiRequestHelper.post(
-                BASE_URL + botId + "/job",
+                BASE_URL + "/" + botId + "/job",
                 job,
                 Job.class
         );
@@ -54,7 +61,7 @@ public class BotApi {
 
     public Job[] getJobs(Long botId) {
         return apiRequestHelper.get(
-                BASE_URL + botId + "/jobs",
+                BASE_URL + "/" + botId + "/jobs",
                 Job[].class
         );
     }

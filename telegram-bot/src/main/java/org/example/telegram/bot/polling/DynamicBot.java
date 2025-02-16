@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
@@ -35,6 +36,10 @@ public class DynamicBot extends TelegramLongPollingBot {
     public void onUpdateReceived(Update update) {
         BotApiMethod<?> response = dynamicMessageService.processMessage(bot, update);
         if (response != null) sendMessage(response);
+    }
+
+    public void handleAppointmentResponse(SendMessage message) {
+        sendMessage(message);
     }
 
     private void sendMessage(BotApiMethod<?> message) {

@@ -1,4 +1,5 @@
 package org.example.telegram.bot.actions.dynamic;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.client.api.controller.BotApi;
@@ -14,6 +15,7 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -120,7 +122,7 @@ public class ScheduleState implements IDynamicBotState {
         String[] jobParts = parts[2].split(":");
         String jobType = jobParts[1];
         String jobDuration = jobParts[2];
-        String startHour =  parts[3];
+        String startHour = parts[3];
         Bot updatedBot = botApi.getBot(bot.getId());
         InlineKeyboardMarkup hourKeyboard = HourKeyboardGenerator.generateHoursKeyboard(
                 selectedDate, startHour, updatedBot.getWorkingHours(), parts[2], updatedBot.getAppointments()
@@ -135,7 +137,7 @@ public class ScheduleState implements IDynamicBotState {
     private BotApiMethod<?> sendJobSelection(Long chatId, Integer messageId, String dateSelected, Bot bot) {
         List<Job> jobs = fetchBotJobs(bot);
         InlineKeyboardMarkup jobKeyboard = JobKeyboardBuilder.createJobSelectionKeyboard(jobs, dateSelected);
-        
+
         return MessageGenerator.createEditMessageWithMarkup(
                 chatId.toString(), "📅 You selected: " + dateSelected + "\n\n🛠 Please choose a service:",
                 jobKeyboard, messageId
@@ -163,11 +165,11 @@ public class ScheduleState implements IDynamicBotState {
         List<List<InlineKeyboardButton>> keyboard = ButtonsGenerator.createKeyboard(buttonConfig);
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         markup.setKeyboard(keyboard);
-        SendMessage confirmMsg =  MessageGenerator.createSendMessageWithMarkup(
+        SendMessage confirmMsg = MessageGenerator.createSendMessageWithMarkup(
                 botOwner.getUserTelegramId().toString(), confirmationMessage,
                 markup
         );
-        botsManager.sendMessage(confirmMsg);
+        botsManager.sendMessageToUser(confirmMsg);
     }
 
     private BotApiMethod<?> handleAppointmentCreation(Long chatId, Integer messageId, Bot bot, String callbackData) {

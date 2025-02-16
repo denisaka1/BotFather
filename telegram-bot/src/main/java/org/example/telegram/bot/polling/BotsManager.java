@@ -16,6 +16,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 @AllArgsConstructor
 public class BotsManager extends TelegramLongPollingBot {
 
+    private final DynamicBot dynamicBot;
     private final ManagerMessageService managerMessageService;
     private final ConfigLoader configLoader;
 
@@ -31,13 +32,30 @@ public class BotsManager extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        if (update.hasMessage() && update.getMessage().hasText()) {
-            SendMessage response = managerMessageService.processMessage(update);
+        if (isAppointmentConfirmations(update)) {
+//            handleAppointmentMessage(update); // adjust message to correct state
+            // edit the markup correctly
+//            SendMessage response = SendMessage.builder()
+//                    .chatId(update.getCallbackQuery().getMessage().getChatId())
+//                    .text("Confirmed");
+//            dynamicBot.handleAppointmentResponse()
+        } else if (update.hasMessage() && update.getMessage().hasText()) {
+            BotApiMethod<?> response = managerMessageService.processMessage(update);
             sendMessage(response);
         }
     }
 
-    public void sendMessage(BotApiMethod<?> message) {
+    public void sendMessageToUser(SendMessage message) {
+        sendMessage(message);
+    }
+
+    private boolean isAppointmentConfirmations(Update update) {
+        boolean isAppointment = update.getCallbackQuery().getData().startsWith("confirmAppointment") ||
+                update.getCallbackQuery().getData().startsWith("declineAppointment");
+        return update.hasCallbackQuery() && isAppointment;
+    }
+
+    private void sendMessage(BotApiMethod<?> message) {
         try {
             execute(message);
         } catch (TelegramApiException e) {

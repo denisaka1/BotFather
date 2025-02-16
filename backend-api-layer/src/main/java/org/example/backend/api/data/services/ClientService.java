@@ -1,4 +1,5 @@
 package org.example.backend.api.data.services;
+
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.example.backend.api.data.repositories.BotRepository;
@@ -10,6 +11,7 @@ import org.example.data.layer.entities.Job;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.Optional;
 
 @Service
@@ -41,9 +43,8 @@ public class ClientService {
                 appointment::setJob,
                 () -> System.out.println("Job not found")
         );
-        appointment.setBot(bot);
-        client.addAppointment(appointment);
-        clientRepository.save(client);
-        return appointment;
+//        appointment.setBot(bot);
+        client.addAppointment(appointment, bot);
+        return clientRepository.save(client).getLastAppointment();
     }
 }

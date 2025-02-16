@@ -74,10 +74,14 @@ public class CreateSlashCommand implements ISlashCommand {
                 case ASK_WELCOME_MESSAGE -> bot.setWelcomeMessage(userInput);
                 case ASK_WORKING_HOURS -> buildAndSaveWorkingHours(userInput);
                 case ASK_JOBS -> buildAndSaveJobs(userInput);
-                case COMPLETED -> dynamicBotApi.registerBot(bot);
+                default -> {
+                }
             }
             bot.setCreationState(nextState);
             bot = botApi.updateBot(bot);
+            if (nextState == BotCreationState.COMPLETED) {
+                dynamicBotApi.registerBot(bot);
+            }
             response.set(successMessage(currentState) + "\n\n" + nextState.getMessage());
         }, () -> {
             // If no next state, user has completed registration

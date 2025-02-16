@@ -11,6 +11,7 @@ import org.example.telegram.components.inline.keyboard.MessageGenerator;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,17 +24,20 @@ public class ManagerMessageService {
     private final StartSlashCommand startSlashCommand;
     private final CreateSlashCommand createSlashCommand;
     private final BotsSlashCommand botsSlashCommand;
-
     private final BusinessOwnerApi businessOwnerApi;
 
     private String userMessage;
+    private Update update;
+    private Message message;
     private Map<String, Boolean> commands;
     private Long userId;
 
-    public SendMessage processMessage(Message message) {
+    public SendMessage processMessage(Update update) {
+        this.update = update;
+        message = update.getMessage();
         userMessage = message.getText().toLowerCase();
         userId = message.getFrom().getId();
-        return renderSlashCommand(message);
+        return renderSlashCommand();
     }
 
     @PostConstruct
@@ -45,13 +49,13 @@ public class ManagerMessageService {
         commands.put(SlashCommand.BOTS, Boolean.FALSE);
     }
 
-    private SendMessage renderSlashCommand(Message message) {
+    private SendMessage renderSlashCommand() {
         switch (userMessage) {
             case SlashCommand.CANCEL -> {
                 commands.replace(SlashCommand.START, Boolean.FALSE);
                 commands.replace(SlashCommand.CREATE, Boolean.FALSE);
                 commands.replace(SlashCommand.BOTS, Boolean.FALSE);
-                return createSimpleMessage("❌ Command cancelled!" + "\n\n" + renderMainMenu(message));
+                return createSimpleMessage("❌ Command cancelled!" + "\n\n" + renderMainMenu());
             }
             case SlashCommand.START -> {
                 if (isOwnerRegistered()) {
@@ -72,10 +76,11 @@ public class ManagerMessageService {
                         Type any text to return to the menu.""");
             }
             case SlashCommand.BOTS -> {
+                commands.replace(SlashCommand.BOTS, Boolean.TRUE);
                 return createSimpleMessage(botsSlashCommand.execute(message));
             }
             default -> {
-                return handleUserResponse(message);
+                return handleUserResponse();
             }
         }
     }
@@ -84,36 +89,47 @@ public class ManagerMessageService {
         return MessageGenerator.createSimpleTextMessage(userId, message);
     }
 
-    private SendMessage handleUserResponse(Message message) {
+    private SendMessage handleUserResponse() {
         if (!isSlashCommandStarted()) {
-            return createSimpleMessage(renderMainMenu(message));
+            return createSimpleMessage(renderMainMenu());
         }
 
         if (Objects.equals(startedCommand(), SlashCommand.CREATE)) {
-            return createSimpleMessage(processCreateCommand(message));
+            return createSimpleMessage(processCreateCommand());
         } else if (Objects.equals(startedCommand(), SlashCommand.START)) {
-            return createSimpleMessage(processStartCommand(message));
+            return createSimpleMessage(processStartCommand());
+        } else if (Objects.equals(startedCommand(), SlashCommand.BOTS)) {
+            return processBotsCommand();
         } else { // /cancel
-            return createSimpleMessage(renderMainMenu(message));
+            return createSimpleMessage(renderMainMenu());
         }
     }
 
-    private String processCreateCommand(Message message) {
+    private SendMessage processBotsCommand() {
+        if (!botsSlashCommand.isCompleted()) {
+            return botsSlashCommand.processUserResponse(update);
+        }
+
+        commands.replace(SlashCommand.CREATE, Boolean.FALSE);
+        return createSimpleMessage(renderMainMenu());
+    }
+
+    private String processCreateCommand() {
         if (!createSlashCommand.isCompleted()) {
             return createSlashCommand.processUserResponse(message);
         }
 
         commands.replace(SlashCommand.CREATE, Boolean.FALSE);
-        return renderMainMenu(message);
+        return renderMainMenu();
     }
 
-    private String processStartCommand(Message message) {
+    private String processStartCommand() {
         if (!startSlashCommand.isCompleted()) {
             return startSlashCommand.processUserResponse(message);
         }
 
         commands.replace(SlashCommand.START, Boolean.FALSE);
-        return renderMainMenu(message);
+        return renderMainMenu();
     }
 
     private boolean isSlashCommandStarted() {
@@ -138,7 +154,7 @@ public class ManagerMessageService {
         return businessOwnerApi.isRegistered(userId);
     }
 
-    private String renderMainMenu(Message message) {
+    private String renderMainMenu() {
         String userFirstName = message.getFrom().getFirstName();
         return String.format("""
                 Hello %s! 👋

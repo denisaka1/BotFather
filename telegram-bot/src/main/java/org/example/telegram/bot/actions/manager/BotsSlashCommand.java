@@ -2,10 +2,11 @@ package org.example.telegram.bot.actions.manager;
 
 import lombok.AllArgsConstructor;
 import org.example.client.api.controller.BusinessOwnerApi;
-import org.example.client.api.helper.ApiRequestHelper;
 import org.example.data.layer.entities.Bot;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.Update;
 
 @AllArgsConstructor
 @Component
@@ -41,6 +42,27 @@ public class BotsSlashCommand implements ISlashCommand {
 
     private boolean botsExist(Long userId) {
         return businessOwnerApi.isRegistered(userId) && businessOwnerApi.getBots(userId).length > 0;
+    }
+
+    public boolean isCompleted() {
+        return true;
+    }
+
+    public SendMessage processUserResponse(Update update) {
+        if (hasCallback(update)) {
+            return processCallbackResponse(update);
+        }
+
+        
+        return null;
+    }
+
+    private SendMessage processCallbackResponse(Update update) {
+        return null;
+    }
+
+    private boolean hasCallback(Update update) {
+        return update.hasCallbackQuery();
     }
 }
 

@@ -32,7 +32,7 @@ public class BotsManager extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
-            SendMessage response = managerMessageService.processMessage(update.getMessage());
+            SendMessage response = managerMessageService.processMessage(update);
             sendMessage(response);
         }
     }

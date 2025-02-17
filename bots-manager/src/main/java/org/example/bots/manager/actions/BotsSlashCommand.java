@@ -1,6 +1,6 @@
 package org.example.bots.manager.actions;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.example.client.api.controller.BusinessOwnerApi;
 import org.example.data.layer.entities.Bot;
 import org.springframework.stereotype.Component;
@@ -8,23 +8,48 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Component
 public class BotsSlashCommand implements ISlashCommand {
 
     private final BusinessOwnerApi businessOwnerApi;
+    private Long userId;
 
-    public String execute(Message message) {
-        Long userId = message.getFrom().getId();
+    public SendMessage execute(Message message) {
+        userId = message.getFrom().getId();
         if (!botsExist(userId)) {
-            return """
+            String text = """
                     👋 Welcome to the Bots Creator!
                     You don't have any bots created.
                     You need to register using the /create command to create a new bot.
                     Type any text to return to the menu.""";
+            return SendMessage.builder()
+                    .chatId(userId)
+                    .text(text)
+                    .build();
         }
 
-        return renderBotsInfo(userId);
+        return showBotsList(message);
+    }
+
+    public SendMessage processCallbackResponse(Update update) {
+
+        return null;
+    }
+
+    private SendMessage showBotsList(Message message) {
+//        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
+//        List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
+//        return null;
+        return SendMessage.builder()
+                .chatId(message.getChatId())
+                .text(renderBotsInfo(message.getChatId()))
+                .build();
+    }
+
+    private SendMessage renderBotsKeyboard() {
+
+        return null;
     }
 
     private String renderBotsInfo(Long userId) {
@@ -42,23 +67,6 @@ public class BotsSlashCommand implements ISlashCommand {
 
     private boolean botsExist(Long userId) {
         return businessOwnerApi.isRegistered(userId) && businessOwnerApi.getBots(userId).length > 0;
-    }
-
-    public boolean isCompleted() {
-        return true;
-    }
-
-    public SendMessage processUserResponse(Update update) {
-        if (hasCallback(update)) {
-            return processCallbackResponse(update);
-        }
-
-        
-        return null;
-    }
-
-    private SendMessage processCallbackResponse(Update update) {
-        return null;
     }
 
     private boolean hasCallback(Update update) {

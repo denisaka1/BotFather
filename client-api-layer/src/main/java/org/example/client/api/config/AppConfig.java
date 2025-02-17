@@ -13,9 +13,4 @@ public class AppConfig {
     protected RestTemplate restTemplate() {
         return new RestTemplate();
     }
-
-//    @Bean
-//    public ApiRequestHelper apiRequestHelper() {
-//        return new ApiRequestHelper(restTemplate());
-//    }
 }

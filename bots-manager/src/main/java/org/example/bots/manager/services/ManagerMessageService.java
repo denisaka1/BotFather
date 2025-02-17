@@ -2,13 +2,14 @@ package org.example.bots.manager.services;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import org.example.client.api.controller.BusinessOwnerApi;
 import org.example.bots.manager.actions.BotsSlashCommand;
 import org.example.bots.manager.actions.CreateSlashCommand;
 import org.example.bots.manager.actions.SlashCommand;
 import org.example.bots.manager.actions.StartSlashCommand;
+import org.example.client.api.controller.BusinessOwnerApi;
 import org.example.telegram.components.inline.keyboard.MessageGenerator;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -32,7 +33,7 @@ public class ManagerMessageService {
     private Map<String, Boolean> commands;
     private Long userId;
 
-    public SendMessage processMessage(Update update) {
+    public BotApiMethod<?> processTextMessage(Update update) {
         this.update = update;
         message = update.getMessage();
         userMessage = message.getText().toLowerCase();
@@ -40,16 +41,29 @@ public class ManagerMessageService {
         return renderSlashCommand();
     }
 
+    public BotApiMethod<?> processCallbackCommand(Update update) {
+        if (isAppointmentConfirmation(update)) {
+            //            handleAppointmentMessage(update); // adjust message to correct state
+            // edit the markup correctly
+//            SendMessage response = SendMessage.builder()
+//                    .chatId(update.getCallbackQuery().getMessage().getChatId())
+//                    .text("Confirmed");
+//            dynamicBot.handleAppointmentResponse()
+//            TODO: finish it
+            return null;
+        }
+        return botsSlashCommand.processCallbackResponse(update);
+    }
+
     @PostConstruct
-    public void init() {
+    private void init() {
         commands = new HashMap<>();
         commands.put(SlashCommand.CANCEL, Boolean.FALSE);
         commands.put(SlashCommand.START, Boolean.FALSE);
         commands.put(SlashCommand.CREATE, Boolean.FALSE);
-        commands.put(SlashCommand.BOTS, Boolean.FALSE);
     }
 
-    private SendMessage renderSlashCommand() {
+    private BotApiMethod<?> renderSlashCommand() {
         switch (userMessage) {
             case SlashCommand.CANCEL -> {
                 commands.replace(SlashCommand.START, Boolean.FALSE);
@@ -62,12 +76,12 @@ public class ManagerMessageService {
                     return createSimpleMessage("👋 Welcome back! You are already registered!\n Type any text to continue.");
                 }
                 commands.replace(SlashCommand.START, Boolean.TRUE);
-                return createSimpleMessage(SlashCommand.BACK_COMMAND_MESSAGE + startSlashCommand.execute(message));
+                return createSimpleMessage(SlashCommand.BACK_COMMAND_MESSAGE + startSlashCommand.execute(message).getText());
             }
             case SlashCommand.CREATE -> {
                 if (isOwnerRegistered()) {
                     commands.replace(SlashCommand.CREATE, Boolean.TRUE);
-                    return createSimpleMessage(SlashCommand.BACK_COMMAND_MESSAGE + createSlashCommand.execute(message));
+                    return createSimpleMessage(SlashCommand.BACK_COMMAND_MESSAGE + createSlashCommand.execute(message).getText());
                 }
 
                 return createSimpleMessage("""
@@ -76,8 +90,7 @@ public class ManagerMessageService {
                         Type any text to return to the menu.""");
             }
             case SlashCommand.BOTS -> {
-                commands.replace(SlashCommand.BOTS, Boolean.TRUE);
-                return createSimpleMessage(botsSlashCommand.execute(message));
+                return botsSlashCommand.execute(message);
             }
             default -> {
                 return handleUserResponse();
@@ -85,11 +98,7 @@ public class ManagerMessageService {
         }
     }
 
-    private SendMessage createSimpleMessage(String message) {
-        return MessageGenerator.createSimpleTextMessage(userId, message);
-    }
-
-    private SendMessage handleUserResponse() {
+    private BotApiMethod<?> handleUserResponse() {
         if (!isSlashCommandStarted()) {
             return createSimpleMessage(renderMainMenu());
         }
@@ -98,20 +107,9 @@ public class ManagerMessageService {
             return createSimpleMessage(processCreateCommand());
         } else if (Objects.equals(startedCommand(), SlashCommand.START)) {
             return createSimpleMessage(processStartCommand());
-        } else if (Objects.equals(startedCommand(), SlashCommand.BOTS)) {
-            return processBotsCommand();
         } else { // /cancel
             return createSimpleMessage(renderMainMenu());
         }
-    }
-
-    private SendMessage processBotsCommand() {
-        if (!botsSlashCommand.isCompleted()) {
-            return botsSlashCommand.processUserResponse(update);
-        }
-
-        commands.replace(SlashCommand.CREATE, Boolean.FALSE);
-        return createSimpleMessage(renderMainMenu());
     }
 
     private String processCreateCommand() {
@@ -170,4 +168,12 @@ public class ManagerMessageService {
                 """, userFirstName);
     }
 
+    private SendMessage createSimpleMessage(String message) {
+        return MessageGenerator.createSimpleTextMessage(userId, message);
+    }
+
+    private boolean isAppointmentConfirmation(Update update) {
+        return update.getCallbackQuery().getData().startsWith("confirmAppointment") ||
+                update.getCallbackQuery().getData().startsWith("declineAppointment");
+    }
 }

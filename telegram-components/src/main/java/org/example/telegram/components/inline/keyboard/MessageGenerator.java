@@ -11,28 +11,28 @@ public class MessageGenerator {
     }
 
     public static EditMessageText createEditMessageWithMarkup(String chatId, String text, InlineKeyboardMarkup markup, Integer messageId) {
-        EditMessageText editMessage = new EditMessageText();
-        editMessage.setChatId(chatId);
-        editMessage.setMessageId(messageId);
-        editMessage.setText(text);
-        editMessage.setReplyMarkup(markup);
-        return editMessage;
+        return EditMessageText.builder()
+                .chatId(chatId)
+                .text(text)
+                .replyMarkup(markup)
+                .messageId(messageId)
+                .build();
     }
 
     public static SendMessage createSendMessageWithMarkup(String chatId, String text, InlineKeyboardMarkup markup) {
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(chatId);
-        sendMessage.setText(text);
-        sendMessage.setReplyMarkup(markup);
-        return sendMessage;
+        return SendMessage.builder()
+                .chatId(chatId)
+                .text(text)
+                .replyMarkup(markup)
+                .build();
     }
 
     public static EditMessageReplyMarkup createEditMessageReplyMarkup(String chatId, Integer messageId, InlineKeyboardMarkup markup) {
-        EditMessageReplyMarkup editMessageReplyMarkup = new EditMessageReplyMarkup();
-        editMessageReplyMarkup.setChatId(chatId);
-        editMessageReplyMarkup.setMessageId(messageId);
-        editMessageReplyMarkup.setReplyMarkup(markup);
-        return editMessageReplyMarkup;
+        return EditMessageReplyMarkup.builder()
+                .chatId(chatId)
+                .messageId(messageId)
+                .replyMarkup(markup)
+                .build();
     }
 
     public static SendMessage createSimpleTextMessage(Long chatId, String text) {

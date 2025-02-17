@@ -22,6 +22,13 @@ public class ClientApi {
         );
     }
 
+    public Appointment[] findAppointments(Long userId, Long botId) {
+        return apiRequestHelper.get(
+                BASE_URL + "/" + userId + "/appointments" + "?botId=" + botId,
+                Appointment[].class
+        );
+    }
+
     public Client createClient(Client client) {
         return apiRequestHelper.post(
                 BASE_URL,

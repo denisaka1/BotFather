@@ -9,7 +9,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -63,5 +65,16 @@ public class ClientService {
             oldClient.setPhoneNumber(client.getPhoneNumber());
         }
         return clientRepository.save(oldClient);
+    }
+
+    public ResponseEntity<List<Appointment>> findAppointments(String telegramId, Long botId) {
+        Client client = clientRepository.findByTelegramId(telegramId)
+                .orElseThrow(() -> new EntityNotFoundException("Client not found with telegramId: " + telegramId));
+
+        List<Appointment> appointmentsByBot = client.getAppointments().stream()
+                .filter(appointment -> appointment.getBot().getId().equals(botId))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(appointmentsByBot);
     }
 }

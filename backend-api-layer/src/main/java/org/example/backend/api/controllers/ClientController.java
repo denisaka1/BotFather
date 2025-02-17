@@ -8,6 +8,8 @@ import org.example.data.layer.entities.ClientScheduleState;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @AllArgsConstructor
 @RestController
 @RequestMapping("api/client")
@@ -17,6 +19,11 @@ public class ClientController {
     @GetMapping("{telegramId}")
     public ResponseEntity<Client> findByTelegramId(@PathVariable String telegramId) {
         return clientService.findByTelegramId(telegramId);
+    }
+
+    @GetMapping("{telegramId}/appointments")
+    public ResponseEntity<List<Appointment>> findAppointments(@PathVariable String telegramId, @RequestParam Long botId) {
+        return clientService.findAppointments(telegramId, botId);
     }
 
     @PostMapping

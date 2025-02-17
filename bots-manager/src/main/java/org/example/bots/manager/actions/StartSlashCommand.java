@@ -2,6 +2,7 @@ package org.example.bots.manager.actions;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.bots.manager.services.MessageBatchProcessor;
 import org.example.client.api.controller.BusinessOwnerApi;
 import org.example.data.layer.entities.BusinessOwner;
 import org.example.data.layer.entities.OwnerRegistrationState;
@@ -22,11 +23,12 @@ import java.util.concurrent.atomic.AtomicReference;
 public class StartSlashCommand implements ISlashCommand {
 
     private final BusinessOwnerApi businessOwnerApi;
+    private final MessageBatchProcessor messageBatchProcessor;
 
     private BusinessOwner businessOwner;
 
     @Override
-    public SendMessage execute(Message message) {
+    public void execute(Message message) {
         User telegramUser = message.getFrom();
         BusinessOwner incomingOwner = BusinessOwner.builder()
                 .firstName(telegramUser.getFirstName())
@@ -34,10 +36,12 @@ public class StartSlashCommand implements ISlashCommand {
                 .userTelegramId(telegramUser.getId())
                 .build();
         businessOwner = businessOwnerApi.createIfNotPresent(incomingOwner);
-        return SendMessage.builder()
-                .chatId(telegramUser.getId())
-                .text(businessOwner.getRegistrationState().getMessage())
-                .build();
+        messageBatchProcessor.addMessage(
+                SendMessage.builder()
+                        .chatId(telegramUser.getId())
+                        .text(SlashCommand.BACK_COMMAND_MESSAGE + businessOwner.getRegistrationState().getMessage())
+                        .build()
+        );
     }
 
     public boolean isCompleted() {

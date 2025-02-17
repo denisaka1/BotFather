@@ -26,7 +26,7 @@ public class MessageGenerator {
                 .replyMarkup(markup)
                 .build();
     }
-
+    
     public static EditMessageReplyMarkup createEditMessageReplyMarkup(String chatId, Integer messageId, InlineKeyboardMarkup markup) {
         return EditMessageReplyMarkup.builder()
                 .chatId(chatId)

@@ -2,6 +2,7 @@ package org.example.bots.manager.actions;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.bots.manager.services.MessageBatchProcessor;
 import org.example.bots.manager.utils.MessageExtractor;
 import org.example.client.api.controller.BotApi;
 import org.example.client.api.controller.BusinessOwnerApi;
@@ -29,19 +30,22 @@ public class CreateSlashCommand implements ISlashCommand {
     private final BotApi botApi;
     private final BusinessOwnerApi businessOwnerApi;
     private final DynamicBotApi dynamicBotApi;
+    private final MessageBatchProcessor messageBatchProcessor;
     private Bot bot;
 
     @Override
-    public SendMessage execute(Message message) {
+    public void execute(Message message) {
         Long userId = message.getFrom().getId();
 //        botSession = botSessionService.getBotSession(chatId);
 
         bot = businessOwnerApi.createBotIfNotPresent(userId);
 
-        return SendMessage.builder()
-                .chatId(userId)
-                .text(bot.getCreationState().getMessage())
-                .build();
+        messageBatchProcessor.addMessage(
+                SendMessage.builder()
+                        .chatId(userId)
+                        .text(SlashCommand.BACK_COMMAND_MESSAGE + bot.getCreationState().getMessage())
+                        .build()
+        );
     }
 
     public boolean isCompleted() {

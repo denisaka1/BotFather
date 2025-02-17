@@ -9,8 +9,6 @@ import org.example.bots.manager.actions.StartSlashCommand;
 import org.example.client.api.controller.BusinessOwnerApi;
 import org.example.telegram.components.inline.keyboard.MessageGenerator;
 import org.springframework.stereotype.Service;
-import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
@@ -27,21 +25,21 @@ public class ManagerMessageService {
     private final BotsSlashCommand botsSlashCommand;
     private final BusinessOwnerApi businessOwnerApi;
 
+    private final MessageBatchProcessor messageBatchProcessor;
+
     private String userMessage;
-    private Update update;
     private Message message;
     private Map<String, Boolean> commands;
     private Long userId;
 
-    public BotApiMethod<?> processTextMessage(Update update) {
-        this.update = update;
+    public void processTextMessage(Update update) {
         message = update.getMessage();
         userMessage = message.getText().toLowerCase();
         userId = message.getFrom().getId();
-        return renderSlashCommand();
+        renderSlashCommand();
     }
 
-    public BotApiMethod<?> processCallbackCommand(Update update) {
+    public void processCallbackCommand(Update update) {
         if (isAppointmentConfirmation(update)) {
             //            handleAppointmentMessage(update); // adjust message to correct state
             // edit the markup correctly
@@ -50,9 +48,9 @@ public class ManagerMessageService {
 //                    .text("Confirmed");
 //            dynamicBot.handleAppointmentResponse()
 //            TODO: finish it
-            return null;
+        } else {
+            botsSlashCommand.processCallbackResponse(update);
         }
-        return botsSlashCommand.processCallbackResponse(update);
     }
 
     @PostConstruct
@@ -63,52 +61,51 @@ public class ManagerMessageService {
         commands.put(SlashCommand.CREATE, Boolean.FALSE);
     }
 
-    private BotApiMethod<?> renderSlashCommand() {
+    private void renderSlashCommand() {
         switch (userMessage) {
             case SlashCommand.CANCEL -> {
                 commands.replace(SlashCommand.START, Boolean.FALSE);
                 commands.replace(SlashCommand.CREATE, Boolean.FALSE);
                 commands.replace(SlashCommand.BOTS, Boolean.FALSE);
-                return createSimpleMessage("❌ Command cancelled!" + "\n\n" + renderMainMenu());
+                addSimpleMessage("❌ Command cancelled!" + "\n\n" + renderMainMenu());
             }
             case SlashCommand.START -> {
                 if (isOwnerRegistered()) {
-                    return createSimpleMessage("👋 Welcome back! You are already registered!\n Type any text to continue.");
+                    addSimpleMessage("👋 Welcome back! You are already registered!\n Type any text to continue.");
+                    return;
                 }
                 commands.replace(SlashCommand.START, Boolean.TRUE);
-                return createSimpleMessage(SlashCommand.BACK_COMMAND_MESSAGE + startSlashCommand.execute(message).getText());
+                startSlashCommand.execute(message);
             }
             case SlashCommand.CREATE -> {
                 if (isOwnerRegistered()) {
                     commands.replace(SlashCommand.CREATE, Boolean.TRUE);
-                    return createSimpleMessage(SlashCommand.BACK_COMMAND_MESSAGE + createSlashCommand.execute(message).getText());
+                    createSlashCommand.execute(message);
+                    return;
                 }
 
-                return createSimpleMessage("""
+                addSimpleMessage("""
                         👋 Welcome to the Bots Creator!
                         You need to register using the /start command to create a new bot.
                         Type any text to return to the menu.""");
             }
-            case SlashCommand.BOTS -> {
-                return botsSlashCommand.execute(message);
-            }
-            default -> {
-                return handleUserResponse();
-            }
+            case SlashCommand.BOTS -> botsSlashCommand.execute(message);
+            default -> handleUserResponse();
         }
     }
 
-    private BotApiMethod<?> handleUserResponse() {
+    private void handleUserResponse() {
         if (!isSlashCommandStarted()) {
-            return createSimpleMessage(renderMainMenu());
+            addSimpleMessage(renderMainMenu());
+            return;
         }
 
         if (Objects.equals(startedCommand(), SlashCommand.CREATE)) {
-            return createSimpleMessage(processCreateCommand());
+            addSimpleMessage(processCreateCommand());
         } else if (Objects.equals(startedCommand(), SlashCommand.START)) {
-            return createSimpleMessage(processStartCommand());
+            addSimpleMessage(processStartCommand());
         } else { // /cancel
-            return createSimpleMessage(renderMainMenu());
+            addSimpleMessage(renderMainMenu());
         }
     }
 
@@ -168,8 +165,10 @@ public class ManagerMessageService {
                 """, userFirstName);
     }
 
-    private SendMessage createSimpleMessage(String message) {
-        return MessageGenerator.createSimpleTextMessage(userId, message);
+    private void addSimpleMessage(String message) {
+        messageBatchProcessor.addMessage(
+                MessageGenerator.createSimpleTextMessage(userId, message)
+        );
     }
 
     private boolean isAppointmentConfirmation(Update update) {

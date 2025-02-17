@@ -1,6 +1,7 @@
 package org.example.bots.manager.actions;
 
 import lombok.RequiredArgsConstructor;
+import org.example.bots.manager.services.MessageBatchProcessor;
 import org.example.client.api.controller.BotApi;
 import org.example.client.api.controller.BusinessOwnerApi;
 import org.example.data.layer.entities.Bot;
@@ -8,7 +9,7 @@ import org.example.telegram.components.inline.keyboard.ButtonsGenerator;
 import org.example.telegram.components.inline.keyboard.MessageGenerator;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -24,9 +25,10 @@ import java.util.Map;
 public class BotsSlashCommand implements ISlashCommand {
 
     private final BusinessOwnerApi businessOwnerApi;
+    private final MessageBatchProcessor messageBatchProcessor;
     private final BotApi botApi;
 
-    public SendMessage execute(Message message) {
+    public void execute(Message message) {
         Long userId = message.getFrom().getId();
         if (!botsExist(userId)) {
             String text = """
@@ -34,25 +36,53 @@ public class BotsSlashCommand implements ISlashCommand {
                     You don't have any bots created.
                     You need to register using the /create command to create a new bot.
                     Type any text to return to the menu.""";
-            return SendMessage.builder()
-                    .chatId(userId)
-                    .text(text)
-                    .build();
+            messageBatchProcessor.addMessage(
+                    SendMessage.builder()
+                            .chatId(userId)
+                            .text(text)
+                            .build()
+            );
+            return;
         }
 
-        return showBotsList(message);
+        messageBatchProcessor.addMessage(showBotsList(message));
     }
 
-    public SendMessage processCallbackResponse(Update update) {
-        if (update.getCallbackQuery().getData().startsWith("select_bot_")) {
-//            return showBotActions(update);
+    public void processCallbackResponse(Update update) {
+        String callbackData = update.getCallbackQuery().getData();
+        Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
+        Long chatId = update.getCallbackQuery().getMessage().getChatId();
+        if (callbackData.startsWith("select_bot_")) {
+            String botId = callbackData.replace("select_bot_", "");
+            showBotActions(update.getCallbackQuery(), botId);
         }
-        return null;
     }
 
-    private EditMessageReplyMarkup showBotActions(Update update) {
-        return null;
-//        EditMessageReplyMarkup
+    private void showBotActions(CallbackQuery callbackQuery, String botId) {
+        String callbackData = callbackQuery.getData();
+        Integer messageId = callbackQuery.getMessage().getMessageId();
+        Long chatId = callbackQuery.getMessage().getChatId();
+
+        Map<String, String> config = new LinkedHashMap<>();
+        config.put("✏️ Edit Name", "edit_name_" + botId);
+        config.put("✏️ Edit Username", "edit_token_" + botId);
+        config.put("✏️ Edit Working Hours", "edit_working_hours_" + botId);
+        config.put("\uD83D\uDD11 Edit Token", "edit_token_" + botId);
+        config.put("\uD83D\uDC4B Edit Welcome Message", "edit_welcome_message_" + botId);
+        config.put("❌ Cancel Appointment", "cancel_appointment_" + botId);
+
+        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> keyboard = createKeyboard(config);
+        keyboard.add(backToBotsListButton());
+        keyboardMarkup.setKeyboard(keyboard);
+
+        messageBatchProcessor.addTextUpdate(
+                MessageGenerator.createEditMessageWithMarkup(
+                        chatId.toString(),
+                        "What would you like to do with the bot?",
+                        keyboardMarkup,
+                        messageId)
+        );
     }
 
     private SendMessage showBotsList(Message message) {
@@ -65,7 +95,7 @@ public class BotsSlashCommand implements ISlashCommand {
         }
 
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
-        keyboardMarkup.setKeyboard(createShowBotKeyboard(config));
+        keyboardMarkup.setKeyboard(createKeyboard(config));
         return MessageGenerator.createSendMessageWithMarkup(
                 userId.toString(),
                 "Select a bot from the bots list:",
@@ -90,7 +120,7 @@ public class BotsSlashCommand implements ISlashCommand {
         return businessOwnerApi.isRegistered(userId) && businessOwnerApi.getBots(userId).length > 0;
     }
 
-    private List<List<InlineKeyboardButton>> createShowBotKeyboard(Map<String, String> buttonConfigs) {
+    private List<List<InlineKeyboardButton>> createKeyboard(Map<String, String> buttonConfigs) {
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         List<InlineKeyboardButton> row = new ArrayList<>();
 
@@ -108,6 +138,15 @@ public class BotsSlashCommand implements ISlashCommand {
 //        keyboard.add(cancelActionButton());
 
         return keyboard;
+    }
+
+    private List<InlineKeyboardButton> backToBotsListButton() {
+        List<InlineKeyboardButton> backToBotsListButton = new ArrayList<>();
+        backToBotsListButton.add(ButtonsGenerator.createButton(
+                "\uD83D\uDD19 Back",
+                "back_to_bots_list")
+        );
+        return backToBotsListButton;
     }
 
 //    private List<InlineKeyboardButton> cancelActionButton() {

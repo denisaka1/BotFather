@@ -137,9 +137,10 @@ public class ScheduleState implements IDynamicBotState {
     private BotApiMethod<?> sendJobSelection(Long chatId, Integer messageId, String dateSelected, Bot bot) {
         List<Job> jobs = fetchBotJobs(bot);
         InlineKeyboardMarkup jobKeyboard = JobKeyboardBuilder.createJobSelectionKeyboard(jobs, dateSelected);
-
+        String dayOfWeek = LocalDate.parse(dateSelected, DateTimeFormatter.ofPattern("dd/MM/yyyy")).getDayOfWeek().name();
+        String formattedDayOfWeek = dayOfWeek.substring(0, 1).toUpperCase() + dayOfWeek.substring(1).toLowerCase();
         return MessageGenerator.createEditMessageWithMarkup(
-                chatId.toString(), "📅 You selected: " + dateSelected + "\n\n🛠 Please choose a service:",
+                chatId.toString(), "📅 You selected: " + dateSelected + " (" + formattedDayOfWeek + ").\n\n🛠 Please choose a service:",
                 jobKeyboard, messageId
         );
     }

@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Getter
 @Setter
@@ -20,21 +21,23 @@ public class Client {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String telegramId;
 
-    @Column(nullable = false)
+    @Column
     private String name;
 
-    @Column(nullable = false)
+    @Column
     private String email;
 
-    @Column(nullable = false)
+    @Column
     private String phoneNumber;
 
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Appointment> appointments;
 
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ClientScheduleState> scheduleStates;
 
     @PostPersist
     private void onCreate() {
@@ -47,6 +50,27 @@ public class Client {
         appointment.setBot(bot);
     }
 
+    public void addScheduleState(Long key, AppointmentScheduleState state) {
+        ClientScheduleState scheduleState = new ClientScheduleState();
+        scheduleState.setBotId(key);
+        scheduleState.setState(state);
+        scheduleState.setClient(this);
+        scheduleStates.add(scheduleState);
+    }
+
+    public void updateScheduleState(ClientScheduleState clientScheduleState) {
+        Long key = clientScheduleState.getBotId();
+        AppointmentScheduleState state = clientScheduleState.getState();
+        Optional<ClientScheduleState> existingState = scheduleStates.stream()
+                .filter(s -> s.getBotId().equals(key))
+                .findFirst();
+        if (existingState.isPresent()) {
+            existingState.get().setState(state);
+        } else {
+            addScheduleState(key, state);
+        }
+    }
+
     public Appointment removeAppointment(Appointment appointment) {
         appointments.remove(appointment);
         appointment.setClient(null);
@@ -55,7 +79,9 @@ public class Client {
     }
 
     public Appointment getLastAppointment() {
+        if (appointments == null || appointments.isEmpty()) return null;
         return appointments.get(appointments.size() - 1);
     }
 
+    public enum AppointmentScheduleState {AuthState, ScheduleOrCancelQuestionState, ScheduleState}
 }

@@ -1,8 +1,10 @@
 package org.example.client.api.controller;
+
 import lombok.AllArgsConstructor;
 import org.example.client.api.helper.ApiRequestHelper;
 import org.example.data.layer.entities.Appointment;
 import org.example.data.layer.entities.Client;
+import org.example.data.layer.entities.ClientScheduleState;
 import org.springframework.stereotype.Component;
 
 @AllArgsConstructor
@@ -31,5 +33,23 @@ public class ClientApi {
     public Appointment createAppointment(Appointment appointment, Long clientId, Long botId, Long jobId) {
         String url = BASE_URL + "/" + clientId + "/appointment" + "?botId=" + botId + "&jobId=" + jobId;
         return apiRequestHelper.post(url, appointment, Appointment.class);
+    }
+
+    public Client updateScheduleState(ClientScheduleState clientScheduleState, String userTelegramId) {
+        String url = BASE_URL + "/" + userTelegramId + "/schedule_state";
+        return apiRequestHelper.put(
+                url,
+                clientScheduleState,
+                Client.class
+        );
+    }
+
+    public Client updateClient(Client client, String userTelegramId) {
+        String url = BASE_URL + "/" + userTelegramId;
+        return apiRequestHelper.put(
+                url,
+                client,
+                Client.class
+        );
     }
 }

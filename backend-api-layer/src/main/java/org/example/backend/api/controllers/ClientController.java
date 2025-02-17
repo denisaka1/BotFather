@@ -1,8 +1,10 @@
 package org.example.backend.api.controllers;
+
 import lombok.AllArgsConstructor;
 import org.example.backend.api.data.services.ClientService;
 import org.example.data.layer.entities.Appointment;
 import org.example.data.layer.entities.Client;
+import org.example.data.layer.entities.ClientScheduleState;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,5 +31,15 @@ public class ClientController {
             @RequestParam Long jobId,
             @PathVariable Long id) {
         return ResponseEntity.ok(clientService.createAppointment(id, appointment, botId, jobId));
+    }
+
+    @PutMapping("{userTelegramId}/schedule_state")
+    public ResponseEntity<Client> updateScheduleState(@PathVariable String userTelegramId, @RequestBody ClientScheduleState clientScheduleState) {
+        return ResponseEntity.ok(clientService.updateScheduleState(userTelegramId, clientScheduleState));
+    }
+
+    @PutMapping("{userTelegramId}")
+    public ResponseEntity<Client> updateClient(@PathVariable String userTelegramId, @RequestBody Client client) {
+        return ResponseEntity.ok(clientService.updateClient(userTelegramId, client));
     }
 }

@@ -1,4 +1,5 @@
 package org.example.dynamic.bot.actions;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.client.api.controller.ClientApi;
@@ -14,6 +15,7 @@ import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
+
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -36,7 +38,7 @@ public class AuthState implements IDynamicBotState {
         }
         String response = execute(form, message);
         if (form.isCompleted()) {
-            context.setState(message.getFrom().getId(), context.getScheduleOrCancelQuestionState());
+            context.setState(message.getFrom().getId().toString(), bot.getId(), context.getScheduleOrCancelQuestionState());
         }
         return new SendMessage(message.getChatId().toString(), response);
     }
@@ -55,15 +57,15 @@ public class AuthState implements IDynamicBotState {
     private String execute(GenericForm userForm, Message message) {
         String response = userForm.handleResponse(message.getText().toLowerCase());
         String clientName = message.getFrom().getFirstName();
-        if (message.getFrom().getLastName() != null) clientName +=  " " + message.getFrom().getLastName();
+        String telegramId = message.getFrom().getId().toString();
+        if (message.getFrom().getLastName() != null) clientName += " " + message.getFrom().getLastName();
         if (userForm.isCompleted()) {
             Client client = Client.builder()
                     .name(clientName)
-                    .telegramId(message.getFrom().getId().toString())
                     .phoneNumber(userForm.getUserResponses().get("phoneNumber"))
                     .email(userForm.getUserResponses().get("email"))
                     .build();
-            Client savedClient = clientApi.createClient(client);
+            Client savedClient = clientApi.updateClient(client, telegramId);
             log.info("Client saved: {}", savedClient);
         }
         return response;

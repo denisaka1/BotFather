@@ -1,4 +1,5 @@
 package org.example.dynamic.bot.actions;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.client.api.controller.ClientApi;
@@ -14,6 +15,7 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+
 import java.util.List;
 
 @Component
@@ -29,7 +31,7 @@ public class ScheduleOrCancelQuestionState implements IDynamicBotState {
             String data = callbackData.getData();
             if ("SCHEDULE".equals(data)) {
                 ScheduleState scheduleState = context.getScheduleState();
-                context.setState(callbackData.getFrom().getId(), scheduleState);
+                context.setState(callbackData.getFrom().getId().toString(), bot.getId(), scheduleState);
                 return scheduleState.handle(context, bot, message);
             } else if ("CANCEL".equals(data)) {
                 return new SendMessage(chatId, "You've selected: Delete an existing appointment.");

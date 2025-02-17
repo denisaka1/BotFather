@@ -75,7 +75,7 @@ public class ScheduleState implements IDynamicBotState {
         }
         if (Appointment.AppointmentCreationStep.BACK_TO_MENU.name().equals(callbackData)) {
             ScheduleOrCancelQuestionState scheduleOrCancelQuestionState = context.getScheduleOrCancelQuestionState();
-            context.setState(callback.getFrom().getId(), scheduleOrCancelQuestionState);
+            context.setState(callback.getFrom().getId().toString(), bot.getId(), scheduleOrCancelQuestionState);
             return scheduleOrCancelQuestionState.handle(context, bot, message, callback);
         }
         return null;

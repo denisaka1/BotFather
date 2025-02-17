@@ -45,7 +45,7 @@ public class CancelAppointmentsState implements IDynamicBotState {
                 appointments, 0
         );
         return MessageGenerator.createEditMessageWithMarkup(
-                chatId.toString(), "Please select the appointment you would like to cancel:",
+                chatId.toString(), "❗️Please select the appointment you would like to cancel:",
                 appointmentsKeyboard, message.getMessageId()
         );
     }

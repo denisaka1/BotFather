@@ -15,6 +15,7 @@ import org.example.telegram.components.validators.StringValidator;
 import org.example.telegram.components.validators.WorkingDurationsValidator;
 import org.example.telegram.components.validators.WorkingHoursValidator;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
 import java.util.List;
@@ -31,13 +32,16 @@ public class CreateSlashCommand implements ISlashCommand {
     private Bot bot;
 
     @Override
-    public String execute(Message message) {
+    public SendMessage execute(Message message) {
         Long userId = message.getFrom().getId();
 //        botSession = botSessionService.getBotSession(chatId);
 
         bot = businessOwnerApi.createBotIfNotPresent(userId);
 
-        return bot.getCreationState().getMessage();
+        return SendMessage.builder()
+                .chatId(userId)
+                .text(bot.getCreationState().getMessage())
+                .build();
     }
 
     public boolean isCompleted() {

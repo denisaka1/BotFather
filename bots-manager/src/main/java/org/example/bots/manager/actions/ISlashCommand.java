@@ -1,6 +1,8 @@
 package org.example.bots.manager.actions;
+
+import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
 public interface ISlashCommand {
-    String execute(Message message);
+    BotApiMethod<?> execute(Message message);
 }

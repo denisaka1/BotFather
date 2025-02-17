@@ -5,8 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.client.api.controller.BusinessOwnerApi;
 import org.example.data.layer.entities.BusinessOwner;
 import org.example.data.layer.entities.OwnerRegistrationState;
-import org.example.telegram.components.validators.*;
+import org.example.telegram.components.validators.EmailValidator;
+import org.example.telegram.components.validators.PhoneNumberValidator;
+import org.example.telegram.components.validators.StringValidator;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.User;
 
@@ -23,7 +26,7 @@ public class StartSlashCommand implements ISlashCommand {
     private BusinessOwner businessOwner;
 
     @Override
-    public String execute(Message message) {
+    public SendMessage execute(Message message) {
         User telegramUser = message.getFrom();
         BusinessOwner incomingOwner = BusinessOwner.builder()
                 .firstName(telegramUser.getFirstName())
@@ -31,7 +34,10 @@ public class StartSlashCommand implements ISlashCommand {
                 .userTelegramId(telegramUser.getId())
                 .build();
         businessOwner = businessOwnerApi.createIfNotPresent(incomingOwner);
-        return businessOwner.getRegistrationState().getMessage();
+        return SendMessage.builder()
+                .chatId(telegramUser.getId())
+                .text(businessOwner.getRegistrationState().getMessage())
+                .build();
     }
 
     public boolean isCompleted() {

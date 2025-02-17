@@ -1,6 +1,9 @@
 package org.example.bots.manager.actions;
 
 public final class SlashCommand {
+    private SlashCommand() {
+    }
+
     public static final String CANCEL = "/cancel";
     public static final String CREATE = "/create";
     public static final String START = "/start";

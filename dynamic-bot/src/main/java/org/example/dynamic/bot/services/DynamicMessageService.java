@@ -6,10 +6,7 @@ import org.example.client.api.controller.ClientApi;
 import org.example.data.layer.entities.Bot;
 import org.example.data.layer.entities.Client;
 import org.example.data.layer.entities.ClientScheduleState;
-import org.example.dynamic.bot.actions.AuthState;
-import org.example.dynamic.bot.actions.IDynamicBotState;
-import org.example.dynamic.bot.actions.ScheduleOrCancelQuestionState;
-import org.example.dynamic.bot.actions.ScheduleState;
+import org.example.dynamic.bot.actions.*;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -27,6 +24,8 @@ public class DynamicMessageService {
     private final ScheduleOrCancelQuestionState scheduleOrCancelQuestionState;
     @Getter
     private final ScheduleState scheduleState;
+    @Getter
+    private final CancelAppointmentsState cancelAppointmentsState;
     private final ClientApi clientApi;
 
     public void setState(String userTelegramId, Long botId, IDynamicBotState newState) {
@@ -61,6 +60,7 @@ public class DynamicMessageService {
         return switch (stateName) {
             case "AuthState" -> authState;
             case "ScheduleState" -> scheduleState;
+            case "CancelAppointmentsState" -> cancelAppointmentsState;
             default -> scheduleOrCancelQuestionState;
         };
     }

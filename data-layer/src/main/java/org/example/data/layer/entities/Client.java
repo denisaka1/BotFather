@@ -83,5 +83,5 @@ public class Client {
         return appointments.get(appointments.size() - 1);
     }
 
-    public enum AppointmentScheduleState {AuthState, ScheduleOrCancelQuestionState, ScheduleState}
+    public enum AppointmentScheduleState {AuthState, ScheduleOrCancelQuestionState, ScheduleState, CancelAppointmentsState}
 }

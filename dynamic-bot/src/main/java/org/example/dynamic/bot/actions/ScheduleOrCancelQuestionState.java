@@ -11,7 +11,6 @@ import org.example.telegram.components.inline.keyboard.ButtonsGenerator;
 import org.example.telegram.components.inline.keyboard.MessageGenerator;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -35,7 +34,9 @@ public class ScheduleOrCancelQuestionState implements IDynamicBotState {
                 context.setState(callbackData.getFrom().getId().toString(), bot.getId(), scheduleState);
                 return scheduleState.handle(context, bot, message);
             } else if ("CANCEL".equals(data)) {
-                return new SendMessage(chatId, "You've selected: Delete an existing appointment.");
+                CancelAppointmentsState cancelAppointmentsState = context.getCancelAppointmentsState();
+                context.setState(callbackData.getFrom().getId().toString(), bot.getId(), cancelAppointmentsState);
+                return cancelAppointmentsState.handle(context, bot, message);
             } else if ("BACK".equals(data)) {
                 return createScheduleOrCancelButtons(chatId, bot, message, true);
             } else if (Appointment.AppointmentCreationStep.BACK_TO_MENU.name().equals(data)) {

@@ -157,8 +157,9 @@ public class ScheduleState implements IDynamicBotState {
                 build();
         Appointment savedAppointment = clientApi.createAppointment(appointment, client.getId(), bot.getId(), Long.parseLong(jobId));
         BusinessOwner botOwner = botApi.getOwner(bot.getId());
-        String confirmationMessage = "Hi " + botOwner.getFirstName() + " 👋\nA new " + jobType + " (" + jobDuration + "h) appointment has been scheduled for "
-                + selectedDate + " at " + selectedTime + ".\nWhat would you like to do?";
+        String confirmationMessage = "Hi " + botOwner.getFirstName() +
+                " 👋\nA new " + jobType + " appointment (" + jobDuration + "h) has been scheduled for " + selectedDate + " at " + selectedTime
+                + " by " + client.getName() + ". Phone number: " + client.getPhoneNumber() + ".\nWhat would you like to do?";
         String[][] buttonConfig = {
                 {"CONFIRM ✅:confirmAppointment" + savedAppointment.getId(), "DECLINE ❌:declineAppointment" + savedAppointment.getId()}
         };

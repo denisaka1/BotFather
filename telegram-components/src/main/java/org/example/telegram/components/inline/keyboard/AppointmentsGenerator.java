@@ -4,7 +4,10 @@ import org.example.data.layer.entities.Appointment;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class AppointmentsGenerator {
@@ -12,18 +15,19 @@ public class AppointmentsGenerator {
 
     public static InlineKeyboardMarkup generateAppointmentsKeyboard(List<Appointment> appointments, int page) {
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
-
-        // Calculate the start and end indices for the current page
+        List<Appointment> upcomingAppointments = appointments.stream()
+                .filter(appointment -> appointment.getAppointmentDate().isAfter(LocalDateTime.now()))
+                .toList();
         int start = page * PAGE_SIZE;
-        int end = Math.min(start + PAGE_SIZE, appointments.size());
-
-        // Create buttons for each appointment on the current page
+        int end = Math.min(start + PAGE_SIZE, upcomingAppointments.size());
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
         for (int i = start; i < end; i++) {
-            Appointment appointment = appointments.get(i);
-            String buttonText = String.format("Appointment #%d: %s %s, %s",
-                    appointment.getId(),
-                    appointment.getAppointmentDate().toLocalDate(),
-                    appointment.getAppointmentDate().toLocalTime(),
+            Appointment appointment = upcomingAppointments.get(i);
+            String buttonText = String.format("📅 Appointment #%d: %s at ⏰ %s, Status: %s",
+                    i + 1,
+                    appointment.getAppointmentDate().toLocalDate().format(dateFormatter),
+                    appointment.getAppointmentDate().toLocalTime().format(timeFormatter),
                     appointment.getStatus());
 
             String callbackData = String.format("APPOINTMENT_%d", appointment.getId());
@@ -37,8 +41,6 @@ public class AppointmentsGenerator {
             row.add(button);
             rows.add(row);
         }
-
-        // Add navigation buttons if needed
         List<InlineKeyboardButton> navigationButtons = new ArrayList<>();
         if (page > 0) {
             navigationButtons.add(InlineKeyboardButton.builder()
@@ -46,7 +48,7 @@ public class AppointmentsGenerator {
                     .callbackData("PAGE_" + (page - 1))
                     .build());
         }
-        if (end < appointments.size()) {
+        if (end < upcomingAppointments.size()) {
             navigationButtons.add(InlineKeyboardButton.builder()
                     .text("Next ➡")
                     .callbackData("PAGE_" + (page + 1))
@@ -55,6 +57,8 @@ public class AppointmentsGenerator {
         if (!navigationButtons.isEmpty()) {
             rows.add(navigationButtons);
         }
+
+        rows.add(Collections.singletonList(InlineKeyboardButton.builder().text("<< Back To Menu").callbackData("BACK").build()));
 
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         markup.setKeyboard(rows);

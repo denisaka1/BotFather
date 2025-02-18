@@ -3,12 +3,12 @@ package org.example.dynamic.bot.services;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.example.client.api.controller.ClientApi;
+import org.example.client.api.processor.MessageBatchProcessor;
 import org.example.data.layer.entities.Bot;
 import org.example.data.layer.entities.Client;
 import org.example.data.layer.entities.ClientScheduleState;
 import org.example.dynamic.bot.actions.*;
 import org.springframework.stereotype.Service;
-import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -27,6 +27,7 @@ public class DynamicMessageService {
     @Getter
     private final CancelAppointmentsState cancelAppointmentsState;
     private final ClientApi clientApi;
+    private final MessageBatchProcessor messageBatchProcessor;
 
     public void setState(String userTelegramId, Long botId, IDynamicBotState newState) {
         ClientScheduleState clientScheduleState = ClientScheduleState.builder()
@@ -65,14 +66,14 @@ public class DynamicMessageService {
         };
     }
 
-    public BotApiMethod<?> processMessage(Bot bot, Update update) {
+    public void processMessage(Bot bot, Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
-            return handleTextMessage(update.getMessage(), bot);
+            handleTextMessage(update.getMessage(), bot);
+        } else if (update.hasCallbackQuery()) {
+            handleCallbackQuery(update, bot);
+        } else {
+            messageBatchProcessor.addMessage(new SendMessage(getChatId(update), "I only understand text messages."));
         }
-        if (update.hasCallbackQuery()) {
-            return handleCallbackQuery(update, bot);
-        }
-        return new SendMessage(getChatId(update), "I only understand text messages.");
     }
 
     private Client clientByTelegramId(Long userId) {
@@ -83,7 +84,7 @@ public class DynamicMessageService {
         }
     }
 
-    private BotApiMethod<?> handleCallbackQuery(Update update, Bot bot) {
+    private void handleCallbackQuery(Update update, Bot bot) {
         Message message = update.getCallbackQuery().getMessage();
         Long userId = update.getCallbackQuery().getFrom().getId();
         Client client = clientByTelegramId(userId);
@@ -91,17 +92,17 @@ public class DynamicMessageService {
         if (currentState.isBackCommand(update.getCallbackQuery())) {
             IDynamicBotState previousState = currentState.getPreviousState(this);
             setState(userId.toString(), bot.getId(), previousState);
-            return previousState.handle(this, bot, message, update.getCallbackQuery());
+            previousState.handle(this, bot, message, update.getCallbackQuery());
+        } else {
+            currentState.handle(this, bot, message, update.getCallbackQuery());
         }
-
-        return currentState.handle(this, bot, message, update.getCallbackQuery());
     }
 
-    private BotApiMethod<?> handleTextMessage(Message message, Bot bot) {
+    private void handleTextMessage(Message message, Bot bot) {
         Long userId = message.getFrom().getId();
         Client client = clientByTelegramId(userId);
         IDynamicBotState currentState = getCurrentUserState(client, bot.getId(), userId);
-        return currentState.handle(this, bot, message);
+        currentState.handle(this, bot, message);
     }
 
     private String getChatId(Update update) {

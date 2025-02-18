@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.client.api.controller.BotApi;
 import org.example.client.api.controller.BotsManagerApi;
 import org.example.client.api.controller.ClientApi;
+import org.example.client.api.processor.MessageBatchProcessor;
 import org.example.data.layer.entities.Appointment;
 import org.example.data.layer.entities.Bot;
 import org.example.data.layer.entities.BusinessOwner;
@@ -14,7 +15,6 @@ import org.example.telegram.components.inline.keyboard.AppointmentsGenerator;
 import org.example.telegram.components.inline.keyboard.ButtonsGenerator;
 import org.example.telegram.components.inline.keyboard.MessageGenerator;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -30,35 +30,33 @@ public class CancelAppointmentsState implements IDynamicBotState {
     private final ClientApi clientApi;
     private final BotsManagerApi botsManagerApi;
     private final BotApi botApi;
+    private final MessageBatchProcessor messageBatchProcessor;
     private static final String DELIMITER = "@";
 
     @Override
-    public BotApiMethod<?> handle(DynamicMessageService context, Bot bot, Message message, CallbackQuery callbackData) {
+    public void handle(DynamicMessageService context, Bot bot, Message message, CallbackQuery callbackData) {
+        if (message.hasText() && !message.getFrom().getIsBot()) return;
         if (callbackData != null) {
-            return handleCallbackQuery(bot, message, callbackData, context);
+            handleCallbackQuery(bot, message, callbackData);
+        } else {
+            sendAppointmentsList(message.getChatId(), message, bot);
         }
-        if (message.hasText() && !message.getFrom().getIsBot()) return null;
-
-        return sendAppointmentsList(message.getChatId(), message, bot);
     }
 
-    private BotApiMethod<?> handleCallbackQuery(Bot bot, Message message, CallbackQuery callbackData, DynamicMessageService context) {
+    private void handleCallbackQuery(Bot bot, Message message, CallbackQuery callbackData) {
         Long chatId = message.getChatId();
         Integer messageId = message.getMessageId();
         String data = callbackData.getData();
         if (data.startsWith(Appointment.AppointmentCreationStep.CANCEL_APPOINTMENT.name())) {
-            return sendAreYouSureMessage(chatId, messageId, data);
+            sendAreYouSureMessage(chatId, messageId, data);
+        } else if (data.startsWith("Yes")) {
+            sendCancellationMessage(chatId, messageId, data, bot);
+        } else if (data.equals("No") || data.equals("BackToAppointments")) {
+            sendAppointmentsList(message.getChatId(), message, bot);
         }
-        if (data.startsWith("Yes")) {
-            return sendCancellationMessage(chatId, messageId, data, bot);
-        }
-        if (data.equals("No") || data.equals("BackToAppointments")) {
-            return sendAppointmentsList(message.getChatId(), message, bot);
-        }
-        return null;
     }
 
-    private BotApiMethod<?> sendCancellationMessage(Long chatId, Integer messageId, String appointmentData, Bot bot) {
+    private void sendCancellationMessage(Long chatId, Integer messageId, String appointmentData, Bot bot) {
         String[] appointmentParts = appointmentData.split(DELIMITER);
         String appointmentId = appointmentParts[2];
         String appointmentDate = appointmentParts[3];
@@ -93,10 +91,10 @@ public class CancelAppointmentsState implements IDynamicBotState {
         List<List<InlineKeyboardButton>> keyboard = ButtonsGenerator.createKeyboard(buttonConfig);
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         markup.setKeyboard(keyboard);
-        return MessageGenerator.createEditMessageWithMarkup(chatId.toString(), returnMessage, markup, messageId);
+        messageBatchProcessor.addTextUpdate(MessageGenerator.createEditMessageWithMarkup(chatId.toString(), returnMessage, markup, messageId));
     }
 
-    private BotApiMethod<?> sendAreYouSureMessage(Long chatId, Integer messageId, String appointmentData) {
+    private void sendAreYouSureMessage(Long chatId, Integer messageId, String appointmentData) {
         String[] appointmentParts = appointmentData.split(DELIMITER);
         String appointmentDate = appointmentParts[2];
         String appointmentTime = appointmentParts[3];
@@ -109,17 +107,17 @@ public class CancelAppointmentsState implements IDynamicBotState {
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         markup.setKeyboard(keyboard);
         String text = "You are about to cancel your appointment at " + appointmentDate + ", " + appointmentTime + ".\nIs that correct?";
-        return MessageGenerator.createEditMessageWithMarkup(chatId.toString(), text, markup, messageId);
+        messageBatchProcessor.addTextUpdate(MessageGenerator.createEditMessageWithMarkup(chatId.toString(), text, markup, messageId));
     }
 
-    private BotApiMethod<?> sendAppointmentsList(Long chatId, Message message, Bot bot) {
+    private void sendAppointmentsList(Long chatId, Message message, Bot bot) {
         List<Appointment> appointments = List.of(clientApi.findAppointments(chatId, bot.getId()));
         InlineKeyboardMarkup appointmentsKeyboard = AppointmentsGenerator.generateAppointmentsKeyboard(
                 appointments, 0
         );
-        return MessageGenerator.createEditMessageWithMarkup(
+        messageBatchProcessor.addTextUpdate(MessageGenerator.createEditMessageWithMarkup(
                 chatId.toString(), "❗️Please select the appointment you would like to cancel:",
                 appointmentsKeyboard, message.getMessageId()
-        );
+        ));
     }
 }

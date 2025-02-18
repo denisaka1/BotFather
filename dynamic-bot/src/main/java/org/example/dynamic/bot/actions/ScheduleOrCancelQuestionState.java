@@ -3,13 +3,13 @@ package org.example.dynamic.bot.actions;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.client.api.controller.ClientApi;
+import org.example.client.api.processor.MessageBatchProcessor;
 import org.example.data.layer.entities.Bot;
 import org.example.data.layer.entities.Client;
 import org.example.dynamic.bot.services.DynamicMessageService;
 import org.example.telegram.components.inline.keyboard.ButtonsGenerator;
 import org.example.telegram.components.inline.keyboard.MessageGenerator;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -22,28 +22,32 @@ import java.util.List;
 @AllArgsConstructor
 public class ScheduleOrCancelQuestionState implements IDynamicBotState {
     private final ClientApi clientApi;
+    private final MessageBatchProcessor messageBatchProcessor;
 
     @Override
-    public BotApiMethod<?> handle(DynamicMessageService context, Bot bot, Message message, CallbackQuery callbackData) {
+    public void handle(DynamicMessageService context, Bot bot, Message message, CallbackQuery callbackData) {
         String chatId = message.getChatId().toString();
         if (callbackData != null) {
             String data = callbackData.getData();
             if ("SCHEDULE".equals(data)) {
                 ScheduleState scheduleState = context.getScheduleState();
                 context.setState(callbackData.getFrom().getId().toString(), bot.getId(), scheduleState);
-                return scheduleState.handle(context, bot, message);
+                scheduleState.handle(context, bot, message);
+                return;
             } else if ("CANCEL".equals(data)) {
                 CancelAppointmentsState cancelAppointmentsState = context.getCancelAppointmentsState();
                 context.setState(callbackData.getFrom().getId().toString(), bot.getId(), cancelAppointmentsState);
-                return cancelAppointmentsState.handle(context, bot, message);
+                cancelAppointmentsState.handle(context, bot, message);
+                return;
             } else if ("BACK".equals(data)) {
-                return createScheduleOrCancelButtons(chatId, bot, message, true);
+                createScheduleOrCancelButtons(chatId, bot, message, true);
+                return;
             }
         }
-        return createScheduleOrCancelButtons(chatId, bot, message, false);
+        createScheduleOrCancelButtons(chatId, bot, message, false);
     }
 
-    private BotApiMethod<?> createScheduleOrCancelButtons(String chatId, Bot bot, Message message, boolean isBack) {
+    private void createScheduleOrCancelButtons(String chatId, Bot bot, Message message, boolean isBack) {
         String text = bot.getWelcomeMessage() + "\n\n" + "What would you like to do?";
         Client currentClient = clientApi.getClient(Long.parseLong(chatId));
         // Create inline keyboard with two rows
@@ -59,9 +63,9 @@ public class ScheduleOrCancelQuestionState implements IDynamicBotState {
         markup.setKeyboard(keyboard);
 
         if (isBack) {
-            return MessageGenerator.createEditMessageWithMarkup(chatId, text, markup, message.getMessageId());
+            messageBatchProcessor.addTextUpdate(MessageGenerator.createEditMessageWithMarkup(chatId, text, markup, message.getMessageId()));
         } else {
-            return MessageGenerator.createSendMessageWithMarkup(chatId, text, markup);
+            messageBatchProcessor.addMessage(MessageGenerator.createSendMessageWithMarkup(chatId, text, markup));
         }
     }
 }

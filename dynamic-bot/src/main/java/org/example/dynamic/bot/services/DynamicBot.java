@@ -1,21 +1,28 @@
 package org.example.dynamic.bot.services;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.example.client.api.processor.MessageBatchProcessor;
 import org.example.data.layer.entities.Bot;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
-import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.util.List;
+
+@Slf4j
 @Component
 @Scope("prototype")
 @RequiredArgsConstructor
 public class DynamicBot extends TelegramLongPollingBot {
     private Bot bot;
     private final DynamicMessageService dynamicMessageService;
+    private final MessageBatchProcessor messageBatchProcessor;
 
     public void initialize(Bot bot) {
         this.bot = bot;
@@ -33,20 +40,43 @@ public class DynamicBot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        BotApiMethod<?> response = dynamicMessageService.processMessage(bot, update);
-        if (response != null) sendMessage(response);
+        dynamicMessageService.processMessage(bot, update);
+        sendMessage(getChatId(update));
     }
 
     public void handleAppointmentResponse(SendMessage message) {
-        sendMessage(message);
+        messageBatchProcessor.addMessage(message);
+        sendMessage(message.getChatId());
     }
 
-    private void sendMessage(BotApiMethod<?> message) {
+    public void sendMessage(String chatId) {
+        Long chatIdValue = Long.valueOf(chatId);
+
         try {
-            execute(message);
+            List<SendMessage> messages = messageBatchProcessor.getMessages().getOrDefault(chatIdValue, List.of());
+            List<EditMessageText> textUpdates = messageBatchProcessor.getTextUpdates().getOrDefault(chatIdValue, List.of());
+            List<EditMessageReplyMarkup> buttonUpdates = messageBatchProcessor.getButtonUpdates().getOrDefault(chatIdValue, List.of());
+
+            for (SendMessage sendMessage : messages) execute(sendMessage);
+            for (EditMessageText editMessageText : textUpdates) execute(editMessageText);
+            for (EditMessageReplyMarkup editMessageReplyMarkup : buttonUpdates) execute(editMessageReplyMarkup);
+
+            messageBatchProcessor.clear(chatIdValue);
+
         } catch (TelegramApiException e) {
-            e.printStackTrace();
+            messageBatchProcessor.clear(chatIdValue);
+            log.error("Failed to send message for chatId {}: {}", chatIdValue, e.getMessage(), e);
         }
+    }
+
+    private String getChatId(Update update) {
+        if (update.hasMessage()) {
+            return update.getMessage().getChatId().toString();
+        }
+        if (update.hasCallbackQuery()) {
+            return update.getCallbackQuery().getMessage().getChatId().toString();
+        }
+        return "Unknown Chat";
     }
 }
 

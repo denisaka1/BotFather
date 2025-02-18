@@ -3,6 +3,7 @@ package org.example.dynamic.bot.actions;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.client.api.controller.ClientApi;
+import org.example.client.api.processor.MessageBatchProcessor;
 import org.example.data.layer.entities.Bot;
 import org.example.data.layer.entities.Client;
 import org.example.dynamic.bot.services.DynamicMessageService;
@@ -11,7 +12,6 @@ import org.example.telegram.components.forms.GenericForm;
 import org.example.telegram.components.validators.EmailValidator;
 import org.example.telegram.components.validators.PhoneNumberValidator;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -25,9 +25,10 @@ import java.util.HashMap;
 public class AuthState implements IDynamicBotState {
     private final HashMap<Long, GenericForm> userForms = new HashMap<>();
     private final ClientApi clientApi;
+    private final MessageBatchProcessor messageBatchProcessor;
 
     @Override
-    public BotApiMethod<?> handle(DynamicMessageService context, Bot bot, Message message, CallbackQuery callbackData) {
+    public void handle(DynamicMessageService context, Bot bot, Message message, CallbackQuery callbackData) {
         Long userId = message.getFrom().getId();
         GenericForm form;
         if (userForms.containsKey(userId)) {
@@ -40,7 +41,7 @@ public class AuthState implements IDynamicBotState {
         if (form.isCompleted()) {
             context.setState(message.getFrom().getId().toString(), bot.getId(), context.getScheduleOrCancelQuestionState());
         }
-        return new SendMessage(message.getChatId().toString(), response);
+        messageBatchProcessor.addMessage(new SendMessage(message.getChatId().toString(), response));
     }
 
     private GenericForm createForm(Bot bot) {

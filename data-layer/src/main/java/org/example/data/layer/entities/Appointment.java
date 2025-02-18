@@ -1,7 +1,9 @@
 package org.example.data.layer.entities;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDateTime;
 
 @Setter
@@ -53,6 +55,7 @@ public class Appointment {
         HOUR_SELECTED,
         UPDATE_HOURS,
         BACK_TO_JOBS,
-        BACK_TO_MENU
+        BACK_TO_MENU,
+        CANCEL_APPOINTMENT
     }
 }

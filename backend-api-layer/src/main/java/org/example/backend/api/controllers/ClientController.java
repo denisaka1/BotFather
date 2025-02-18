@@ -40,6 +40,11 @@ public class ClientController {
         return ResponseEntity.ok(clientService.createAppointment(id, appointment, botId, jobId));
     }
 
+    @PutMapping("{id}/appointment/{appointmentId}")
+    public ResponseEntity<Appointment> deleteAppointment(@PathVariable String appointmentId, @PathVariable String id) {
+        return ResponseEntity.ok(clientService.deleteAppointment(id, appointmentId));
+    }
+
     @PutMapping("{userTelegramId}/schedule_state")
     public ResponseEntity<Client> updateScheduleState(@PathVariable String userTelegramId, @RequestBody ClientScheduleState clientScheduleState) {
         return ResponseEntity.ok(clientService.updateScheduleState(userTelegramId, clientScheduleState));

@@ -75,6 +75,7 @@ public class Client {
         appointments.remove(appointment);
         appointment.setClient(null);
         appointment.setBot(null);
+        appointment.setStatus(Appointment.AppointmentStatus.CANCELED);
         return appointment;
     }
 

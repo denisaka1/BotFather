@@ -77,4 +77,16 @@ public class ClientService {
 
         return ResponseEntity.ok(appointmentsByBot);
     }
+
+    public Appointment deleteAppointment(String id, String appointmentId) {
+        Client client = clientRepository.findByTelegramId(id)
+                .orElseThrow(() -> new EntityNotFoundException("Client not found with telegramId: " + id));
+        Appointment appointment = client.getAppointments().stream()
+                .filter(a -> a.getId().toString().equals(appointmentId))
+                .findFirst()
+                .orElseThrow(() -> new EntityNotFoundException("Appointment not found with id: " + appointmentId));
+        client.removeAppointment(appointment);
+        clientRepository.save(client);
+        return appointment;
+    }
 }

@@ -51,6 +51,16 @@ public class ClientApi {
         );
     }
 
+    public Appointment deleteAppointment(String appointmentId, String userTelegramId) {
+        String url = BASE_URL + "/" + userTelegramId + "/appointment/" + appointmentId;
+        return apiRequestHelper.put(
+                url,
+                null,
+                Appointment.class
+        );
+    }
+
+
     public Client updateClient(Client client, String userTelegramId) {
         String url = BASE_URL + "/" + userTelegramId;
         return apiRequestHelper.put(

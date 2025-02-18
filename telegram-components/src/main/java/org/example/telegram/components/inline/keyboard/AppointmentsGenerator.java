@@ -12,6 +12,7 @@ import java.util.List;
 
 public class AppointmentsGenerator {
     private static final int PAGE_SIZE = 10;
+    private static final String DELIMITER = "@";
 
     public static InlineKeyboardMarkup generateAppointmentsKeyboard(List<Appointment> appointments, int page) {
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
@@ -24,13 +25,19 @@ public class AppointmentsGenerator {
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
         for (int i = start; i < end; i++) {
             Appointment appointment = upcomingAppointments.get(i);
-            String buttonText = String.format("📅 Appointment #%d: %s at ⏰ %s, Status: %s",
-                    i + 1,
-                    appointment.getAppointmentDate().toLocalDate().format(dateFormatter),
-                    appointment.getAppointmentDate().toLocalTime().format(timeFormatter),
+            String appointmentDate = appointment.getAppointmentDate().toLocalDate().format(dateFormatter);
+            String appointmentTime = appointment.getAppointmentDate().toLocalTime().format(timeFormatter);
+            String jobType = appointment.getJob().getType();
+            String jobDuration = appointment.getJob().getDuration() + "h";
+            String buttonText = String.format("%s (%s): %s at %s, Status: %s",
+                    jobType,
+                    jobDuration,
+                    appointmentDate,
+                    appointmentTime,
                     appointment.getStatus());
 
-            String callbackData = String.format("APPOINTMENT_%d", appointment.getId());
+            String callbackData = String.format(Appointment.AppointmentCreationStep.CANCEL_APPOINTMENT.name() + DELIMITER +
+                    appointment.getId() + DELIMITER + appointmentDate + DELIMITER + appointmentTime + DELIMITER + jobType + DELIMITER + jobDuration);
 
             InlineKeyboardButton button = InlineKeyboardButton.builder()
                     .text(buttonText)

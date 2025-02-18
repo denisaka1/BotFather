@@ -2,11 +2,11 @@ package org.example.bots.manager.actions;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.bots.manager.services.MessageBatchProcessor;
 import org.example.bots.manager.utils.MessageExtractor;
 import org.example.client.api.controller.BotApi;
 import org.example.client.api.controller.BusinessOwnerApi;
 import org.example.client.api.controller.DynamicBotApi;
+import org.example.client.api.processor.MessageBatchProcessor;
 import org.example.data.layer.entities.Bot;
 import org.example.data.layer.entities.BotCreationState;
 import org.example.data.layer.entities.Job;

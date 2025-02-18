@@ -2,9 +2,9 @@ package org.example.bots.manager.actions;
 
 import lombok.RequiredArgsConstructor;
 import org.example.bots.manager.constants.Callback;
-import org.example.bots.manager.services.MessageBatchProcessor;
 import org.example.client.api.controller.BotApi;
 import org.example.client.api.controller.BusinessOwnerApi;
+import org.example.client.api.processor.MessageBatchProcessor;
 import org.example.data.layer.entities.Bot;
 import org.example.telegram.components.inline.keyboard.ButtonsGenerator;
 import org.example.telegram.components.inline.keyboard.MessageGenerator;

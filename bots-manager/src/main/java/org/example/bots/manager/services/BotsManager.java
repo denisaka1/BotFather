@@ -2,6 +2,7 @@ package org.example.bots.manager.services;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.bots.manager.config.ConfigLoader;
+import org.example.client.api.processor.MessageBatchProcessor;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;

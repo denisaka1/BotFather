@@ -9,6 +9,7 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
                 "org.example.client.api.config",
                 "org.example.client.api.helper",
                 "org.example.client.api.controller",
+                "org.example.client.api.processor",
                 "org.example.data.layer.entities",
                 "org.example.bots.manager.config",
                 "org.example.bots.manager.actions",

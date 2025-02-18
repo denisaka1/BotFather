@@ -7,6 +7,7 @@ import org.example.bots.manager.actions.CreateSlashCommand;
 import org.example.bots.manager.actions.SlashCommand;
 import org.example.bots.manager.actions.StartSlashCommand;
 import org.example.client.api.controller.BusinessOwnerApi;
+import org.example.client.api.processor.MessageBatchProcessor;
 import org.example.telegram.components.inline.keyboard.MessageGenerator;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Message;

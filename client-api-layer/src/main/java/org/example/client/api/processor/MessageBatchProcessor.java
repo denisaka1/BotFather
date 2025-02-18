@@ -1,4 +1,4 @@
-package org.example.bots.manager.services;
+package org.example.client.api.processor;
 
 import lombok.Getter;
 import org.springframework.stereotype.Component;

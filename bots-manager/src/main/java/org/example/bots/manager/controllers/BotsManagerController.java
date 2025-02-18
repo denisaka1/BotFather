@@ -2,7 +2,7 @@ package org.example.bots.manager.controllers;
 
 import lombok.AllArgsConstructor;
 import org.example.bots.manager.services.BotsManager;
-import org.example.bots.manager.services.MessageBatchProcessor;
+import org.example.client.api.processor.MessageBatchProcessor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

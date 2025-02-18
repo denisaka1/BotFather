@@ -2,8 +2,8 @@ package org.example.bots.manager.actions;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.bots.manager.services.MessageBatchProcessor;
 import org.example.client.api.controller.BusinessOwnerApi;
+import org.example.client.api.processor.MessageBatchProcessor;
 import org.example.data.layer.entities.BusinessOwner;
 import org.example.data.layer.entities.OwnerRegistrationState;
 import org.example.telegram.components.validators.EmailValidator;

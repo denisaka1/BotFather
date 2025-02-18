@@ -11,7 +11,7 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageTe
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.util.Arrays;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -41,27 +41,26 @@ public class BotsManager extends TelegramLongPollingBot {
         } else {
             messageBatchProcessor.addMessage(new SendMessage(getChatId(update), "I only understand text messages."));
         }
-        sendMessage();
+        sendMessage(getChatId(update));
     }
 
-    public void sendMessage() {
+    public void sendMessage(String chatId) {
+        Long chatIdValue = Long.valueOf(chatId);
+
         try {
-            for (SendMessage messages : messageBatchProcessor.getMessages()) {
-                execute(messages);
-            }
+            List<SendMessage> messages = messageBatchProcessor.getMessages().getOrDefault(chatIdValue, List.of());
+            List<EditMessageText> textUpdates = messageBatchProcessor.getTextUpdates().getOrDefault(chatIdValue, List.of());
+            List<EditMessageReplyMarkup> buttonUpdates = messageBatchProcessor.getButtonUpdates().getOrDefault(chatIdValue, List.of());
 
-            for (EditMessageText textUpdates : messageBatchProcessor.getTextUpdates()) {
-                execute(textUpdates);
-            }
+            for (SendMessage sendMessage : messages) execute(sendMessage);
+            for (EditMessageText editMessageText : textUpdates) execute(editMessageText);
+            for (EditMessageReplyMarkup editMessageReplyMarkup : buttonUpdates) execute(editMessageReplyMarkup);
 
-            for (EditMessageReplyMarkup buttonUpdates : messageBatchProcessor.getButtonUpdates()) {
-                execute(buttonUpdates);
-            }
-            messageBatchProcessor.clear();
+            messageBatchProcessor.clear(chatIdValue);
+
         } catch (TelegramApiException e) {
-            messageBatchProcessor.clear();
-            log.error(e.getMessage());
-            log.error(Arrays.toString(e.getStackTrace()));
+            messageBatchProcessor.clear(chatIdValue);
+            log.error("Failed to send message for chatId {}: {}", chatIdValue, e.getMessage(), e);
         }
     }
 

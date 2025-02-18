@@ -2,7 +2,6 @@ package org.example.dynamic.bot.services;
 
 import lombok.RequiredArgsConstructor;
 import org.example.data.layer.entities.Bot;
-import org.example.dynamic.bot.services.DynamicMessageService;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;

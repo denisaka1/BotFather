@@ -7,30 +7,35 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageRe
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @Component
 public class MessageBatchProcessor {
-    private final List<EditMessageText> textUpdates = new ArrayList<>();
-    private final List<EditMessageReplyMarkup> buttonUpdates = new ArrayList<>();
-    private final List<SendMessage> messages = new ArrayList<>();
+    private final Map<Long, List<EditMessageText>> textUpdates = new HashMap<>();
+    private final Map<Long, List<EditMessageReplyMarkup>> buttonUpdates = new HashMap<>();
+    private final Map<Long, List<SendMessage>> messages = new HashMap<>();
 
     public void addTextUpdate(EditMessageText editMessageText) {
-        textUpdates.add(editMessageText);
+        Long chatId = Long.valueOf(editMessageText.getChatId());
+        textUpdates.computeIfAbsent(chatId, k -> new ArrayList<>()).add(editMessageText);
     }
 
     public void addButtonUpdate(EditMessageReplyMarkup editMessageReplyMarkup) {
-        buttonUpdates.add(editMessageReplyMarkup);
+        Long chatId = Long.valueOf(editMessageReplyMarkup.getChatId());
+        buttonUpdates.computeIfAbsent(chatId, k -> new ArrayList<>()).add(editMessageReplyMarkup);
     }
 
     public void addMessage(SendMessage sendMessage) {
-        messages.add(sendMessage);
+        Long chatId = Long.valueOf(sendMessage.getChatId());
+        messages.computeIfAbsent(chatId, k -> new ArrayList<>()).add(sendMessage);
     }
 
-    public void clear() {
-        textUpdates.clear();
-        buttonUpdates.clear();
-        messages.clear();
+    public void clear(Long chatId) {
+        textUpdates.remove(chatId);
+        buttonUpdates.remove(chatId);
+        messages.remove(chatId);
     }
 }

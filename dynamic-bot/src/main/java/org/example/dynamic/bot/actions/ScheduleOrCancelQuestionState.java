@@ -3,7 +3,6 @@ package org.example.dynamic.bot.actions;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.client.api.controller.ClientApi;
-import org.example.data.layer.entities.Appointment;
 import org.example.data.layer.entities.Bot;
 import org.example.data.layer.entities.Client;
 import org.example.dynamic.bot.services.DynamicMessageService;
@@ -39,8 +38,6 @@ public class ScheduleOrCancelQuestionState implements IDynamicBotState {
                 return cancelAppointmentsState.handle(context, bot, message);
             } else if ("BACK".equals(data)) {
                 return createScheduleOrCancelButtons(chatId, bot, message, true);
-            } else if (Appointment.AppointmentCreationStep.BACK_TO_MENU.name().equals(data)) {
-                return null;
             }
         }
         return createScheduleOrCancelButtons(chatId, bot, message, false);

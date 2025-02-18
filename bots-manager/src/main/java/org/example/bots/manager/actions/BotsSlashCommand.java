@@ -1,6 +1,7 @@
 package org.example.bots.manager.actions;
 
 import lombok.RequiredArgsConstructor;
+import org.example.bots.manager.constants.Callback;
 import org.example.bots.manager.services.MessageBatchProcessor;
 import org.example.client.api.controller.BotApi;
 import org.example.client.api.controller.BusinessOwnerApi;
@@ -52,27 +53,48 @@ public class BotsSlashCommand implements ISlashCommand {
         String callbackData = update.getCallbackQuery().getData();
         Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
         Long chatId = update.getCallbackQuery().getMessage().getChatId();
-        if (callbackData.startsWith("select_bot_")) {
-            String botId = callbackData.replace("select_bot_", "");
+        if (callbackData.startsWith(Callback.SELECT_BOT)) {
+            String botId = callbackData.replace(Callback.SELECT_BOT, "");
             showBotActions(update.getCallbackQuery(), botId);
+        } else if (callbackData.startsWith(Callback.EDIT_BOT_NAME)) {
+            String botId = callbackData.replace(Callback.EDIT_BOT_NAME, "");
+//            sendEditBotName(update.getCallbackQuery(), botId);
+        } else if (callbackData.startsWith(Callback.EDIT_BOT_WORKING_HOURS)) {
+            String botId = callbackData.replace(Callback.EDIT_BOT_WORKING_HOURS, "");
+//            sendEditWorkingHours(update.getCallbackQuery(), botId);
+        } else if (callbackData.startsWith(Callback.EDIT_BOT_TOKEN)) {
+            String botId = callbackData.replace(Callback.EDIT_BOT_TOKEN, "");
+//            sendEditBotToken(update.getCallbackQuery(), botId);
+        } else if (callbackData.startsWith(Callback.EDIT_BOT_WELCOME_MESSAGE)) {
+            String botId = callbackData.replace(Callback.EDIT_BOT_WELCOME_MESSAGE, "");
+//            sendEditBotWelcomeMessage(update.getCallbackQuery(), botId);
+        } else if (callbackData.startsWith(Callback.CANCEL_BOT_APPOINTMENT)) {
+            String botId = callbackData.replace(Callback.CANCEL_BOT_APPOINTMENT, "");
+//            showBotAppointments(update.getCallbackQuery(), botId);
+        } else if (callbackData.startsWith(Callback.DELETE_BOT)) {
+            String botId = callbackData.replace(Callback.DELETE_BOT, "");
+//            sendDeleteBot(update.getCallbackQuery(), botId);
+        } else if (callbackData.startsWith(Callback.BACK_TO_BOTS_LIST)) {
+            String botId = callbackData.replace(Callback.BACK_TO_BOTS_LIST, "");
+//            backToBotsList(update.getCallbackQuery(), botId);
         }
     }
 
     private void showBotActions(CallbackQuery callbackQuery, String botId) {
-        String callbackData = callbackQuery.getData();
         Integer messageId = callbackQuery.getMessage().getMessageId();
         Long chatId = callbackQuery.getMessage().getChatId();
 
         Map<String, String> config = new LinkedHashMap<>();
-        config.put("✏️ Edit Name", "edit_name_" + botId);
-        config.put("✏️ Edit Username", "edit_token_" + botId);
-        config.put("✏️ Edit Working Hours", "edit_working_hours_" + botId);
-        config.put("\uD83D\uDD11 Edit Token", "edit_token_" + botId);
-        config.put("\uD83D\uDC4B Edit Welcome Message", "edit_welcome_message_" + botId);
-        config.put("❌ Cancel Appointment", "cancel_appointment_" + botId);
+        config.put("✏️ Edit Name", Callback.EDIT_BOT_NAME + botId);
+        config.put("✏️ Edit Working Hours", Callback.EDIT_BOT_WORKING_HOURS + botId);
+        config.put("\uD83D\uDD11 Edit Token", Callback.EDIT_BOT_TOKEN + botId);
+        config.put("\uD83D\uDC4B Edit Welcome Message", Callback.EDIT_BOT_WELCOME_MESSAGE + botId);
+        config.put("❌ Cancel Appointment", Callback.CANCEL_BOT_APPOINTMENT + botId);
+        config.put("\uD83D\uDCA3 Delete Bot", Callback.DELETE_BOT + botId);
 
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> keyboard = createKeyboard(config);
+
         keyboard.add(backToBotsListButton());
         keyboardMarkup.setKeyboard(keyboard);
 
@@ -91,7 +113,7 @@ public class BotsSlashCommand implements ISlashCommand {
         List<Bot> bots = List.of(businessOwnerApi.getBots(userId));
         Map<String, String> config = new LinkedHashMap<>();
         for (Bot bot : bots) {
-            config.put("@" + bot.getUsername(), "select_bot_" + bot.getId());
+            config.put("@" + bot.getUsername(), Callback.SELECT_BOT + bot.getId());
         }
 
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
@@ -144,7 +166,7 @@ public class BotsSlashCommand implements ISlashCommand {
         List<InlineKeyboardButton> backToBotsListButton = new ArrayList<>();
         backToBotsListButton.add(ButtonsGenerator.createButton(
                 "\uD83D\uDD19 Back",
-                "back_to_bots_list")
+                Callback.BACK_TO_BOTS_LIST)
         );
         return backToBotsListButton;
     }

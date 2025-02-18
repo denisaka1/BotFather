@@ -41,13 +41,13 @@ public class ManagerMessageService {
 
     public void processCallbackCommand(Update update) {
         if (isAppointmentConfirmation(update)) {
-            //            handleAppointmentMessage(update); // adjust message to correct state
+            // TODO: finish appointment handling
+//            handleAppointmentMessage(update); // adjust message to correct state
             // edit the markup correctly
 //            SendMessage response = SendMessage.builder()
 //                    .chatId(update.getCallbackQuery().getMessage().getChatId())
 //                    .text("Confirmed");
 //            dynamicBot.handleAppointmentResponse()
-//            TODO: finish it
         } else {
             botsSlashCommand.processCallbackResponse(update);
         }

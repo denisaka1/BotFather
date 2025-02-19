@@ -39,33 +39,23 @@ public class ScheduleOrCancelQuestionState implements IDynamicBotState {
                 context.setState(callbackData.getFrom().getId().toString(), bot.getId(), cancelAppointmentsState);
                 cancelAppointmentsState.handle(context, bot, message);
                 return;
-            } else if ("BACK".equals(data)) {
-                createScheduleOrCancelButtons(chatId, bot, message, true);
-                return;
             }
         }
-        createScheduleOrCancelButtons(chatId, bot, message, false);
+        createScheduleOrCancelButtons(chatId, bot, message);
     }
 
-    private void createScheduleOrCancelButtons(String chatId, Bot bot, Message message, boolean isBack) {
+    private void createScheduleOrCancelButtons(String chatId, Bot bot, Message message) {
         String text = bot.getWelcomeMessage() + "\n\n" + "What would you like to do?";
         Client currentClient = clientApi.getClient(Long.parseLong(chatId));
-        // Create inline keyboard with two rows
         String[][] buttonConfigs = currentClient.getAppointments().isEmpty()
                 ? new String[][]{{"📅 Schedule An Appointment:SCHEDULE"}}
                 : new String[][]{
                 {"📅 Schedule An Appointment:SCHEDULE"},
                 {"❌ Cancel An Existing Appointment:CANCEL"}
         };
-
         List<List<InlineKeyboardButton>> keyboard = ButtonsGenerator.createKeyboard(buttonConfigs);
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         markup.setKeyboard(keyboard);
-
-        if (isBack) {
-            messageBatchProcessor.addTextUpdate(MessageGenerator.createEditMessageWithMarkup(chatId, text, markup, message.getMessageId()));
-        } else {
-            messageBatchProcessor.addMessage(MessageGenerator.createSendMessageWithMarkup(chatId, text, markup));
-        }
+        messageBatchProcessor.addTextUpdate(MessageGenerator.createEditMessageWithMarkup(chatId, text, markup, message.getMessageId()));
     }
 }

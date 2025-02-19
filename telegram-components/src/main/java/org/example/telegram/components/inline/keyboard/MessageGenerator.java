@@ -1,6 +1,7 @@
 package org.example.telegram.components.inline.keyboard;
 
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -19,6 +20,13 @@ public class MessageGenerator {
                 .build();
     }
 
+    public static DeleteMessage deleteMessage(String chatId, Integer messageId) {
+        return DeleteMessage.builder()
+                .chatId(chatId)
+                .messageId(messageId)
+                .build();
+    }
+
     public static SendMessage createSendMessageWithMarkup(String chatId, String text, InlineKeyboardMarkup markup) {
         return SendMessage.builder()
                 .chatId(chatId)
@@ -26,7 +34,7 @@ public class MessageGenerator {
                 .replyMarkup(markup)
                 .build();
     }
-    
+
     public static EditMessageReplyMarkup createEditMessageReplyMarkup(String chatId, Integer messageId, InlineKeyboardMarkup markup) {
         return EditMessageReplyMarkup.builder()
                 .chatId(chatId)

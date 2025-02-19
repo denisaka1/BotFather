@@ -190,9 +190,13 @@ public class ScheduleState implements IDynamicBotState {
         List<List<InlineKeyboardButton>> keyboard = ButtonsGenerator.createKeyboard(buttonConfig);
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         markup.setKeyboard(keyboard);
-        messageBatchProcessor.addTextUpdate(MessageGenerator.createEditMessageWithMarkup(
-                chatId.toString(), returnMessage,
-                markup, messageId
+        messageBatchProcessor.addDeleteMessage(MessageGenerator.deleteMessage(chatId.toString(), messageId));
+        messageBatchProcessor.addMessage(MessageGenerator.createSimpleTextMessage(
+                chatId, returnMessage
+        ));
+
+        messageBatchProcessor.addMessage(MessageGenerator.createSendMessageWithMarkup(
+                chatId.toString(), "⬅ Back", markup
         ));
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -54,9 +55,11 @@ public class DynamicBot extends TelegramLongPollingBot {
 
         try {
             List<SendMessage> messages = messageBatchProcessor.getMessages().getOrDefault(chatIdValue, List.of());
+            List<DeleteMessage> deleteMessages = messageBatchProcessor.getDeleteMessages().getOrDefault(chatIdValue, List.of());
             List<EditMessageText> textUpdates = messageBatchProcessor.getTextUpdates().getOrDefault(chatIdValue, List.of());
             List<EditMessageReplyMarkup> buttonUpdates = messageBatchProcessor.getButtonUpdates().getOrDefault(chatIdValue, List.of());
 
+            for (DeleteMessage deleteMessage : deleteMessages) execute(deleteMessage);
             for (SendMessage sendMessage : messages) execute(sendMessage);
             for (EditMessageText editMessageText : textUpdates) execute(editMessageText);
             for (EditMessageReplyMarkup editMessageReplyMarkup : buttonUpdates) execute(editMessageReplyMarkup);

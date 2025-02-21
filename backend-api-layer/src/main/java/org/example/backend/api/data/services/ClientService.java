@@ -9,6 +9,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -88,5 +91,16 @@ public class ClientService {
         client.removeAppointment(appointment);
         clientRepository.save(client);
         return appointment;
+    }
+
+    public ResponseEntity<List<Appointment>> findAppointmentsByDate(String telegramId, String botId, String date) {
+        Client client = clientRepository.findByTelegramId(telegramId)
+                .orElseThrow(() -> new EntityNotFoundException("Client not found with telegramId: " + telegramId));
+        LocalDateTime targetDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("dd/MM/yyyy")).atStartOfDay();
+        List<Appointment> appointmentsByDate = client.getAppointments().stream()
+                .filter(appointment -> appointment.getBot().getId().toString().equals(botId) &&
+                        appointment.getAppointmentDate().toLocalDate().equals(targetDate.toLocalDate()))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(appointmentsByDate);
     }
 }

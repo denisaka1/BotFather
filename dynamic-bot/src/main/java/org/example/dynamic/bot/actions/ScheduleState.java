@@ -20,7 +20,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+
+import static org.example.data.layer.entities.Appointment.MAX_NUM_OF_APPOINTMENTS_PER_DAY;
 
 @Component
 @Slf4j
@@ -126,14 +131,36 @@ public class ScheduleState implements IDynamicBotState {
     }
 
     private void sendJobSelection(Long chatId, Integer messageId, String dateSelected, Bot bot) {
-        List<Job> jobs = fetchBotJobs(bot);
-        InlineKeyboardMarkup jobKeyboard = JobKeyboardBuilder.createJobSelectionKeyboard(jobs, dateSelected);
-        String dayOfWeek = LocalDate.parse(dateSelected, DateTimeFormatter.ofPattern("dd/MM/yyyy")).getDayOfWeek().name();
-        String formattedDayOfWeek = dayOfWeek.substring(0, 1).toUpperCase() + dayOfWeek.substring(1).toLowerCase();
-        messageBatchProcessor.addTextUpdate(MessageGenerator.createEditMessageWithMarkup(
-                chatId.toString(), "📅 You selected: " + dateSelected + " (" + formattedDayOfWeek + ").\n\n🛠 Please choose a service:",
-                jobKeyboard, messageId
-        ));
+        if (hasReachedDailyAppointmentLimit(chatId, bot.getId(), dateSelected)) {
+            String[][] buttonConfig = {
+                    {"<< Back To Dates:" + Appointment.AppointmentCreationStep.BACK_TO_DATES.name()}
+            };
+            List<List<InlineKeyboardButton>> keyboard = ButtonsGenerator.createKeyboard(buttonConfig);
+            InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+            markup.setKeyboard(keyboard);
+            SendMessage confirmMsg = MessageGenerator.createSendMessageWithMarkup(
+                    chatId.toString(), "⚠️ You have already reached the maximum number of appointments on " + dateSelected + ". Please choose a different date.",
+                    markup
+            );
+            messageBatchProcessor.addMessage(confirmMsg);
+        } else {
+            List<Job> jobs = fetchBotJobs(bot);
+            InlineKeyboardMarkup jobKeyboard = JobKeyboardBuilder.createJobSelectionKeyboard(jobs, dateSelected);
+            String dayOfWeek = LocalDate.parse(dateSelected, DateTimeFormatter.ofPattern("dd/MM/yyyy")).getDayOfWeek().name();
+            String formattedDayOfWeek = dayOfWeek.substring(0, 1).toUpperCase() + dayOfWeek.substring(1).toLowerCase();
+            messageBatchProcessor.addTextUpdate(MessageGenerator.createEditMessageWithMarkup(
+                    chatId.toString(), "📅 You selected: " + dateSelected + " (" + formattedDayOfWeek + ").\n\n🛠 Please choose a service:",
+                    jobKeyboard, messageId
+            ));
+        }
+    }
+
+    private Boolean hasReachedDailyAppointmentLimit(Long chatId, Long botId, String dateSelected) {
+        List<Appointment> appointments = Optional.ofNullable(clientApi.findAppointmentsByDate(chatId, botId, dateSelected))
+                .map(Arrays::asList)
+                .orElse(Collections.emptyList());
+        int appointmentsCount = appointments.isEmpty() ? 0 : appointments.size();
+        return appointmentsCount >= MAX_NUM_OF_APPOINTMENTS_PER_DAY;
     }
 
     private void saveAppointment(String selectedDate, String selectedTime, Long chatId, Bot bot, String jobId, String jobType, String jobDuration) {

@@ -47,6 +47,8 @@ public class Appointment {
         CANCELED
     }
 
+    public static final int MAX_NUM_OF_APPOINTMENTS_PER_DAY = 2;
+
     public enum AppointmentCreationStep {
         DATE_SELECTED,
         UPDATE_DATES,

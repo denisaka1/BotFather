@@ -26,6 +26,11 @@ public class ClientController {
         return clientService.findAppointments(telegramId, botId);
     }
 
+    @GetMapping("{telegramId}/appointments_by_date")
+    public ResponseEntity<List<Appointment>> findAppointmentByDate(@PathVariable String telegramId, @RequestParam String botId, @RequestParam String date) {
+        return clientService.findAppointmentsByDate(telegramId, botId, date);
+    }
+
     @PostMapping
     public ResponseEntity<Client> createClient(@RequestBody Client client) {
         return ResponseEntity.ok(clientService.saveClient(client));

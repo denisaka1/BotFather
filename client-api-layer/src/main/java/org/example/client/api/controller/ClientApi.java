@@ -29,6 +29,13 @@ public class ClientApi {
         );
     }
 
+    public Appointment[] findAppointmentsByDate(Long userId, Long botId, String date) {
+        return apiRequestHelper.get(
+                BASE_URL + "/" + userId + "/appointments_by_date" + "?botId=" + botId + "&date=" + date,
+                Appointment[].class
+        );
+    }
+
     public Client createClient(Client client) {
         return apiRequestHelper.post(
                 BASE_URL,

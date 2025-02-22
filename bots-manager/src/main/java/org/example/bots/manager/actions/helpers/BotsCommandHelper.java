@@ -32,7 +32,6 @@ public class BotsCommandHelper {
         Long userId = callbackQuery.getFrom().getId();
         Long chatId = callbackQuery.getMessage().getChatId();
         Bot bot = businessOwnerApi.deleteBot(userId, botId);
-        // TODO: handle delete a single bot
 
         messageBatchProcessor.addMessage(
                 MessageGenerator.createSimpleTextMessage(
@@ -40,7 +39,12 @@ public class BotsCommandHelper {
                         bot.getName() + " has been deleted."
                 )
         );
-        returnToShowBotsList(callbackQuery);
+
+        if (!businessOwnerApi.getDisplayableBots(userId).isEmpty()) {
+            returnToShowBotsList(callbackQuery);
+        } else {
+            noBotsToShow(callbackQuery);
+        }
     }
 
     public void sendEditMessage(CallbackQuery callbackQuery, String botId, BotCreationState state) {
@@ -191,5 +195,33 @@ public class BotsCommandHelper {
                 return "Unknown state";
             }
         }
+    }
+
+    private void noBotsToShow(CallbackQuery callbackQuery) {
+        Integer messageId = callbackQuery.getMessage().getMessageId();
+        Long chatId = callbackQuery.getMessage().getChatId();
+
+        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
+
+        keyboard.add(backToBotsListButton());
+        keyboardMarkup.setKeyboard(keyboard);
+
+        String text = "You have deleted all your bots!";
+
+        // delete the inline keyboard
+        messageBatchProcessor.addDeleteMessage(
+                MessageGenerator.deleteMessage(
+                        chatId.toString(),
+                        messageId
+                )
+        );
+
+        messageBatchProcessor.addMessage(
+                MessageGenerator.createSimpleTextMessage(
+                        chatId,
+                        text
+                )
+        );
     }
 }

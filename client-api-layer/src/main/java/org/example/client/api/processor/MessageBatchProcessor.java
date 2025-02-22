@@ -26,14 +26,16 @@ public class MessageBatchProcessor {
     }
 
     public List<EditMessageText> getAllTextUpdates() {
-        return textUpdates.values().stream()
-                .flatMap(List::stream)
-                .toList();
+        return getAll(textUpdates);
     }
 
     public void addDeleteMessage(DeleteMessage deleteMessage) {
         Long chatId = Long.valueOf(deleteMessage.getChatId());
         deleteMessages.computeIfAbsent(chatId, k -> new ArrayList<>()).add(deleteMessage);
+    }
+
+    public List<DeleteMessage> getAllDeleteMessage() {
+        return getAll(deleteMessages);
     }
 
     public void addButtonUpdate(EditMessageReplyMarkup editMessageReplyMarkup) {
@@ -42,9 +44,7 @@ public class MessageBatchProcessor {
     }
 
     public List<EditMessageReplyMarkup> getAllButtonUpdates() {
-        return buttonUpdates.values().stream()
-                .flatMap(List::stream)
-                .toList();
+        return getAll(buttonUpdates);
     }
 
     public void addMessage(SendMessage sendMessage) {
@@ -53,9 +53,7 @@ public class MessageBatchProcessor {
     }
 
     public List<SendMessage> getAllMessages() {
-        return messages.values().stream()
-                .flatMap(List::stream)
-                .toList();
+        return getAll(messages);
     }
 
     public void clear(Long chatId) {
@@ -69,5 +67,11 @@ public class MessageBatchProcessor {
         textUpdates.clear();
         buttonUpdates.clear();
         messages.clear();
+    }
+
+    private <T> List<T> getAll(Map<Long, List<T>> map) {
+        return map.values().stream()
+                .flatMap(List::stream)
+                .toList();
     }
 }

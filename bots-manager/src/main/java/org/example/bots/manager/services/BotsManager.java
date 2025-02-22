@@ -6,6 +6,7 @@ import org.example.client.api.processor.MessageBatchProcessor;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -44,6 +45,9 @@ public class BotsManager extends TelegramLongPollingBot {
 
     public void sendMessage() {
         try {
+            for (DeleteMessage deleteMessage : messageBatchProcessor.getAllDeleteMessage())
+                execute(deleteMessage);
+
             for (SendMessage sendMessage : messageBatchProcessor.getAllMessages())
                 execute(sendMessage);
 

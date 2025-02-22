@@ -2,12 +2,16 @@ package org.example.bots.manager.services;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import org.example.bots.manager.actions.BotsSlashCommand;
-import org.example.bots.manager.actions.CreateSlashCommand;
-import org.example.bots.manager.actions.SlashCommand;
-import org.example.bots.manager.actions.StartSlashCommand;
+import org.example.bots.manager.actions.slash.BotsSlashCommand;
+import org.example.bots.manager.actions.slash.CreateSlashCommand;
+import org.example.bots.manager.actions.slash.SlashCommand;
+import org.example.bots.manager.actions.slash.StartSlashCommand;
+import org.example.bots.manager.constants.Callback;
+import org.example.client.api.controller.BotApi;
 import org.example.client.api.controller.BusinessOwnerApi;
 import org.example.client.api.processor.MessageBatchProcessor;
+import org.example.data.layer.entities.Bot;
+import org.example.data.layer.entities.BotCreationState;
 import org.example.telegram.components.inline.keyboard.MessageGenerator;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -27,6 +31,7 @@ public class ManagerMessageService {
     private final BusinessOwnerApi businessOwnerApi;
 
     private final MessageBatchProcessor messageBatchProcessor;
+    private final BotApi botApi;
 
     private String userMessage;
     private Message message;
@@ -41,6 +46,10 @@ public class ManagerMessageService {
     }
 
     public void processCallbackCommand(Update update) {
+        if (isEditBotCallback(update)) {
+            commands.replace(SlashCommand.BOTS, Boolean.TRUE);
+        }
+
         if (isAppointmentConfirmation(update)) {
             // TODO: finish appointment handling
 //            handleAppointmentMessage(update); // adjust message to correct state
@@ -54,17 +63,28 @@ public class ManagerMessageService {
         }
     }
 
+    private boolean isEditBotCallback(Update update) {
+        String callbackData = update.getCallbackQuery().getData();
+        return callbackData.startsWith(Callback.EDIT_BOT_NAME) ||
+                callbackData.startsWith(Callback.EDIT_BOT_WORKING_HOURS) ||
+                callbackData.startsWith(Callback.EDIT_BOT_TOKEN) ||
+                callbackData.startsWith(Callback.EDIT_BOT_WELCOME_MESSAGE) ||
+                callbackData.startsWith(Callback.EDIT_BOT_JOBS);
+    }
+
     @PostConstruct
     private void init() {
         commands = new HashMap<>();
         commands.put(SlashCommand.CANCEL, Boolean.FALSE);
         commands.put(SlashCommand.START, Boolean.FALSE);
         commands.put(SlashCommand.CREATE, Boolean.FALSE);
+        commands.put(SlashCommand.BOTS, Boolean.FALSE);
     }
 
     private void renderSlashCommand() {
         switch (userMessage) {
             case SlashCommand.CANCEL -> {
+                cancelPreviousSlashCommand();
                 commands.replace(SlashCommand.START, Boolean.FALSE);
                 commands.replace(SlashCommand.CREATE, Boolean.FALSE);
                 commands.replace(SlashCommand.BOTS, Boolean.FALSE);
@@ -95,6 +115,14 @@ public class ManagerMessageService {
         }
     }
 
+    private void cancelPreviousSlashCommand() {
+        if (Objects.equals(startedCommand(), SlashCommand.BOTS)) {
+            Bot bot = businessOwnerApi.getEditableBot(userId);
+            bot.setCreationState(BotCreationState.COMPLETED);
+            botApi.updateBot(bot);
+        }
+    }
+
     private void handleUserResponse() {
         if (!isSlashCommandStarted()) {
             addSimpleMessage(renderMainMenu());
@@ -105,18 +133,25 @@ public class ManagerMessageService {
             addSimpleMessage(processCreateCommand());
         } else if (Objects.equals(startedCommand(), SlashCommand.START)) {
             addSimpleMessage(processStartCommand());
+        } else if (Objects.equals(startedCommand(), SlashCommand.BOTS)) {
+            processBotsCommand();
         } else { // /cancel
             addSimpleMessage(renderMainMenu());
         }
     }
 
     private String processCreateCommand() {
-        if (!createSlashCommand.isCompleted()) {
+        if (!createSlashCommand.isCompleted(userId)) {
             return createSlashCommand.processUserResponse(message);
         }
 
         commands.replace(SlashCommand.CREATE, Boolean.FALSE);
         return renderMainMenu();
+    }
+
+    private void processBotsCommand() {
+        commands.replace(SlashCommand.BOTS, Boolean.FALSE);
+        botsSlashCommand.processUserResponse(message);
     }
 
     private String processStartCommand() {

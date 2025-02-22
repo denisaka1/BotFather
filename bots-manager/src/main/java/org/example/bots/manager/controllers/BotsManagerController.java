@@ -20,7 +20,7 @@ public class BotsManagerController {
     @PostMapping("/send_message")
     public ResponseEntity<Boolean> sendMessage(@RequestBody SendMessage message) {
         messageBatchProcessor.addMessage(message);
-        botsManager.sendMessage(message.getChatId());
+        botsManager.sendMessage();
         return ResponseEntity.ok(true); // Assume success
     }
 }

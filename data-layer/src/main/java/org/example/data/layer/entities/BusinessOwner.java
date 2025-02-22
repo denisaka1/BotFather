@@ -3,7 +3,6 @@ package org.example.data.layer.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,5 +62,6 @@ public class BusinessOwner {
 
     public void removeBot(Bot bot) {
         bots.remove(bot);
+        bot.setOwner(null);
     }
 }

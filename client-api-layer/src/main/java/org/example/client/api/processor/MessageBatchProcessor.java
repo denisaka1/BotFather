@@ -25,6 +25,12 @@ public class MessageBatchProcessor {
         textUpdates.computeIfAbsent(chatId, k -> new ArrayList<>()).add(editMessageText);
     }
 
+    public List<EditMessageText> getAllTextUpdates() {
+        return textUpdates.values().stream()
+                .flatMap(List::stream)
+                .toList();
+    }
+
     public void addDeleteMessage(DeleteMessage deleteMessage) {
         Long chatId = Long.valueOf(deleteMessage.getChatId());
         deleteMessages.computeIfAbsent(chatId, k -> new ArrayList<>()).add(deleteMessage);
@@ -35,9 +41,21 @@ public class MessageBatchProcessor {
         buttonUpdates.computeIfAbsent(chatId, k -> new ArrayList<>()).add(editMessageReplyMarkup);
     }
 
+    public List<EditMessageReplyMarkup> getAllButtonUpdates() {
+        return buttonUpdates.values().stream()
+                .flatMap(List::stream)
+                .toList();
+    }
+
     public void addMessage(SendMessage sendMessage) {
         Long chatId = Long.valueOf(sendMessage.getChatId());
         messages.computeIfAbsent(chatId, k -> new ArrayList<>()).add(sendMessage);
+    }
+
+    public List<SendMessage> getAllMessages() {
+        return messages.values().stream()
+                .flatMap(List::stream)
+                .toList();
     }
 
     public void clear(Long chatId) {
@@ -45,5 +63,11 @@ public class MessageBatchProcessor {
         buttonUpdates.remove(chatId);
         messages.remove(chatId);
         deleteMessages.remove(chatId);
+    }
+
+    public void clear() {
+        textUpdates.clear();
+        buttonUpdates.clear();
+        messages.clear();
     }
 }

@@ -1,4 +1,5 @@
 package org.example.data.layer.entities;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -28,10 +29,7 @@ public class Job {
     @JoinColumn(name = "bot_id")
     private Bot owner;
 
-    @Override
-    public String toString() {
-        StringBuilder str = new StringBuilder();
-        str.append(type).append(" duration: ").append(duration);
-        return str.toString();
+    public String info() {
+        return type + " duration: " + duration + "h";
     }
 }

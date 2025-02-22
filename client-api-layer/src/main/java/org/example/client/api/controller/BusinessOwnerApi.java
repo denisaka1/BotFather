@@ -43,6 +43,13 @@ public class BusinessOwnerApi {
         );
     }
 
+    public Bot getEditableBot(Long userId) {
+        return apiRequestHelper.get(
+                BASE_URL + "/" + userId + "/editable",
+                Bot.class
+        );
+    }
+
     public boolean isRegistered(Long userId) {
         if (!isPresent(userId)) return false;
 
@@ -53,6 +60,13 @@ public class BusinessOwnerApi {
         return apiRequestHelper.get(
                 BASE_URL + "/" + userId,
                 BusinessOwner.class
+        );
+    }
+
+    public Bot deleteBot(Long userId, String botId) {
+        return apiRequestHelper.delete(
+                BASE_URL + "/" + userId + "/bots/" + botId,
+                Bot.class
         );
     }
 
@@ -74,7 +88,6 @@ public class BusinessOwnerApi {
     public Bot createBotIfNotPresent(Long userId) {
         // Get bot that has the stating creationState, can only have 1 at any given time
         // In none present, create one
-        // TODO: fix it
         Bot[] botArray = getBots(userId);
         Bot bot = new Bot();
         for (Bot b : botArray) {

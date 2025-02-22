@@ -1,4 +1,4 @@
-package org.example.bots.manager.actions;
+package org.example.bots.manager.actions.slash;
 
 public final class SlashCommand {
     private SlashCommand() {

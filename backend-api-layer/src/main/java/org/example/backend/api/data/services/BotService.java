@@ -9,6 +9,7 @@ import org.example.data.layer.entities.WorkingHours;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -47,24 +48,28 @@ public class BotService {
         return botRepository.findById(id).orElseThrow();
     }
 
-    public Bot updateBot(Long id, Bot bot) {
-        Bot oldBot = botRepository.findById(id).orElseThrow();
-        if (bot.getName() != null) {
-            oldBot.setName(bot.getName());
+    public Bot updateBot(Long id, Bot incomingBot) {
+        Optional<Bot> optionalExistingBot = botRepository.findById(id);
+
+        if (optionalExistingBot.isPresent()) {
+            Bot existingBot = optionalExistingBot.get();
+
+            existingBot.setName(incomingBot.getName());
+            existingBot.setUsername(incomingBot.getUsername());
+            existingBot.setToken(incomingBot.getToken());
+            existingBot.setWelcomeMessage(incomingBot.getWelcomeMessage());
+            existingBot.setCreationState(incomingBot.getCreationState());
+
+            existingBot.getJobs().clear();
+            existingBot.addJobs(incomingBot.getJobs());
+
+            existingBot.getWorkingHours().clear();
+            existingBot.addWorkingHours(incomingBot.getWorkingHours());
+
+            return botRepository.save(existingBot);
+        } else {
+            return botRepository.save(incomingBot);
         }
-        if (bot.getUsername() != null) {
-            oldBot.setUsername(bot.getUsername());
-        }
-        if (bot.getToken() != null) {
-            oldBot.setToken(bot.getToken());
-        }
-        if (bot.getWelcomeMessage() != null) {
-            oldBot.setWelcomeMessage(bot.getWelcomeMessage());
-        }
-        if (bot.getCreationState() != oldBot.getCreationState()) {
-            oldBot.setCreationState(bot.getCreationState());
-        }
-        return botRepository.save(oldBot);
     }
 
     public BusinessOwner getBotOwner(Long id) {

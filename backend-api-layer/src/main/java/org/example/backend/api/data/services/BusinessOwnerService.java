@@ -71,4 +71,34 @@ public class BusinessOwnerService {
     public BusinessOwner getOwner(Long userTelegramId) {
         return businessOwnerRepository.findByUserTelegramId(userTelegramId).orElseThrow();
     }
+
+    public Bot getEditableBot(Long userTelegramId) {
+        boolean allFieldsPopulated;
+
+        for (Bot bot : findAllBots(userTelegramId)) {
+            allFieldsPopulated = bot.getUsername() != null &&
+                    bot.getName() != null &&
+                    bot.getWelcomeMessage() != null &&
+                    bot.getToken() != null &&
+                    !bot.getJobs().isEmpty() &&
+                    !bot.getWorkingHours().isEmpty();
+            if (allFieldsPopulated && !bot.getCreationState().isCompleted())
+                return bot;
+        }
+
+        return null;
+    }
+
+    public Bot deleteBot(Long userTelegramId, Long botId) {
+        BusinessOwner owner = getOwner(userTelegramId);
+        Bot botToDel = owner.getBots().stream()
+                .filter(bot -> bot.getId().equals(botId))
+                .findFirst()
+                .orElse(null);
+
+        owner.removeBot(botToDel);
+        businessOwnerRepository.save(owner);
+
+        return botToDel;
+    }
 }

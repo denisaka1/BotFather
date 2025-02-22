@@ -1,4 +1,5 @@
 package org.example.data.layer.entities;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -26,6 +27,6 @@ public class TimeRange {
     @ManyToOne
     @JoinColumn(name = "working_hours_id")
     @JsonIgnore
-    @ToString.Exclude
+//    @ToString.Exclude
     private WorkingHours workingHours;
 }

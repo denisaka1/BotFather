@@ -21,8 +21,13 @@ public class BusinessOwnerController {
         return ResponseEntity.ok(businessOwnerService.saveBot(userTelegramId, bot));
     }
 
+    @DeleteMapping("{userTelegramId}/bots/{botId}")
+    public ResponseEntity<Bot> deleteBot(@PathVariable Long userTelegramId, @PathVariable Long botId) {
+        return ResponseEntity.ok(businessOwnerService.deleteBot(userTelegramId, botId));
+    }
+
     @GetMapping("{userTelegramId}/bots")
-    public ResponseEntity<List<Bot>> findAllBots(@PathVariable Long userTelegramId){
+    public ResponseEntity<List<Bot>> findAllBots(@PathVariable Long userTelegramId) {
         return ResponseEntity.ok(businessOwnerService.findAllBots(userTelegramId));
     }
 
@@ -30,6 +35,11 @@ public class BusinessOwnerController {
     public ResponseEntity<Boolean> existsByUserTelegramId(@PathVariable Long userTelegramId) {
         boolean exists = businessOwnerService.existsByUserTelegramId(userTelegramId);
         return ResponseEntity.ok(exists);
+    }
+
+    @GetMapping("{userTelegramId}/editable")
+    public ResponseEntity<Bot> getEditableBot(@PathVariable Long userTelegramId) {
+        return ResponseEntity.ok(businessOwnerService.getEditableBot(userTelegramId));
     }
 
     @PostMapping

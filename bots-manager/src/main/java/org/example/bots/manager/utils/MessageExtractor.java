@@ -11,7 +11,8 @@ import java.util.regex.Pattern;
 
 public class MessageExtractor {
 
-    private MessageExtractor() {}
+    private MessageExtractor() {
+    }
 
     public static String[] extractBotInfoFromForwardedMsg(String input) {
         Matcher usernameMatcher = Pattern.compile("t\\.me/(\\w+)").matcher(input);
@@ -56,8 +57,8 @@ public class MessageExtractor {
             }
             WorkingHours workingHours = WorkingHours.builder()
                     .day(day)
-                    .timeRanges(timeRanges)
                     .build();
+            workingHours.addTimeRanges(timeRanges);
 
             workingHoursList.add(workingHours);
         }

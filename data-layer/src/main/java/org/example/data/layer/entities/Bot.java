@@ -1,4 +1,5 @@
 package org.example.data.layer.entities;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -46,7 +47,7 @@ public class Bot {
     private BusinessOwner owner;
 
     @OneToMany(mappedBy = "bot", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<Appointment> appointments;
+    private List<Appointment> appointments = new ArrayList<>();
 
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<Job> jobs = new ArrayList<>();
@@ -69,9 +70,19 @@ public class Bot {
         job.setOwner(null);
     }
 
+    public void addJobs(List<Job> jobs) {
+        for (Job job : jobs) {
+            addJob(job);
+        }
+    }
+
     public void addWorkingHour(WorkingHours workingHour) {
         workingHours.add(workingHour);
         workingHour.setBot(this);
+        if (workingHour.getTimeRanges() == null || workingHour.getTimeRanges().isEmpty()) {
+            return;
+        }
+
         for (TimeRange timeRange : workingHour.getTimeRanges()) {
             timeRange.setWorkingHours(workingHour);
         }
@@ -80,9 +91,16 @@ public class Bot {
     public void removeWorkingHour(WorkingHours workingHour) {
         workingHours.remove(workingHour);
         workingHour.setBot(null);
+        workingHour.getTimeRanges().clear();
     }
 
-    public String botInfo() {
+    public void addWorkingHours(List<WorkingHours> workingHours) {
+        for (WorkingHours workingHour : workingHours) {
+            addWorkingHour(workingHour);
+        }
+    }
+
+    public String info() {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("Name: ").append(name).append("\n");
         stringBuilder.append("Username: ").append(username).append("\n");
@@ -90,7 +108,7 @@ public class Bot {
 
         stringBuilder.append("Working hours:").append("\n");
         for (WorkingHours workingHour : workingHours) {
-            stringBuilder.append(workingHour);
+            stringBuilder.append(workingHour.info());
         }
         stringBuilder.append("\n");
 
@@ -99,15 +117,17 @@ public class Bot {
                 .sorted(Comparator.comparing(Job::getType))
                 .toList();
 
-        Job previousJob = sortedJobs.get(0);
-        stringBuilder.append(previousJob);
-        for (Job job : sortedJobs.subList(1, sortedJobs.size())) {
-            if (Objects.equals(previousJob.getType(), job.getType())) {
-                stringBuilder.append(", ").append(job.getDuration());
-            } else {
-                stringBuilder.append("\n").append(job);
+        if (!sortedJobs.isEmpty()) {
+            Job previousJob = sortedJobs.get(0);
+            stringBuilder.append(previousJob.info());
+            for (Job job : sortedJobs.subList(1, sortedJobs.size())) {
+                if (Objects.equals(previousJob.getType(), job.getType())) {
+                    stringBuilder.append(", ").append(job.getDuration()).append("h");
+                } else {
+                    stringBuilder.append("\n").append(job.info());
+                }
+                previousJob = job;
             }
-            previousJob = job;
         }
         stringBuilder.append("\n");
 

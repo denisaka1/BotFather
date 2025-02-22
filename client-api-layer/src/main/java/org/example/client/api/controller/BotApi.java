@@ -21,6 +21,13 @@ public class BotApi {
         );
     }
 
+    public Bot getBot(String botId) {
+        return apiRequestHelper.get(
+                BASE_URL + "/" + botId,
+                Bot.class
+        );
+    }
+
     public Bot[] getBots() {
         return apiRequestHelper.get(
                 BASE_URL,
@@ -52,7 +59,7 @@ public class BotApi {
     }
 
     public Job addJob(Long botId, Job job) {
-        return  apiRequestHelper.post(
+        return apiRequestHelper.post(
                 BASE_URL + "/" + botId + "/job",
                 job,
                 Job.class

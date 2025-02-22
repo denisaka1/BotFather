@@ -1,4 +1,4 @@
-package org.example.bots.manager.actions;
+package org.example.bots.manager.actions.slash;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

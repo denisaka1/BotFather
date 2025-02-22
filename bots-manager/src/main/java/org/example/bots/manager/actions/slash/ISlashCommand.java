@@ -1,4 +1,4 @@
-package org.example.bots.manager.actions;
+package org.example.bots.manager.actions.slash;
 
 import org.telegram.telegrambots.meta.api.objects.Message;
 

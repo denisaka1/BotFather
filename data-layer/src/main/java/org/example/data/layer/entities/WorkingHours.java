@@ -1,10 +1,9 @@
 package org.example.data.layer.entities;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.io.Serial;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +23,7 @@ public class WorkingHours {
     @Column(name = "day_of_week", nullable = false)
     private String day; // e.g., "Monday"
 
-    @OneToMany(mappedBy = "workingHours", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "workingHours", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TimeRange> timeRanges = new ArrayList<>();
 
     @ManyToOne
@@ -33,8 +32,35 @@ public class WorkingHours {
     @JsonIgnore
     private Bot bot;
 
-    @Override
-    public String toString() {
+    public void addTimeRange(TimeRange timeRange) {
+        if (timeRanges == null) {
+            timeRanges = new ArrayList<>();
+        }
+        timeRanges.add(timeRange);
+        timeRange.setWorkingHours(this);
+    }
+
+    public void removeTimeRange(TimeRange timeRange) {
+        if (timeRanges == null) return;
+        
+        timeRanges.remove(timeRange);
+        timeRange.setWorkingHours(null);
+    }
+
+    public void addTimeRanges(List<TimeRange> timeRanges) {
+        for (TimeRange timeRange : timeRanges) {
+            addTimeRange(timeRange);
+        }
+    }
+
+    public void replaceTimeRanges(List<TimeRange> timeRanges) {
+        timeRanges.clear();
+        for (TimeRange timeRange : timeRanges) {
+            addTimeRange(timeRange);
+        }
+    }
+
+    public String info() {
         if (timeRanges.isEmpty()) return "";
 
         StringBuilder stringBuilder = new StringBuilder(day + " ");

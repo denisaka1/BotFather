@@ -1,7 +1,8 @@
-package org.example.bots.manager.actions;
+package org.example.bots.manager.actions.slash;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.bots.manager.actions.helpers.CommonCommandHelper;
 import org.example.bots.manager.utils.MessageExtractor;
 import org.example.client.api.controller.BotApi;
 import org.example.client.api.controller.BusinessOwnerApi;
@@ -12,13 +13,11 @@ import org.example.data.layer.entities.BotCreationState;
 import org.example.data.layer.entities.Job;
 import org.example.data.layer.entities.WorkingHours;
 import org.example.telegram.components.validators.BotMessageValidator;
-import org.example.telegram.components.validators.StringValidator;
-import org.example.telegram.components.validators.WorkingDurationsValidator;
-import org.example.telegram.components.validators.WorkingHoursValidator;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
@@ -31,14 +30,14 @@ public class CreateSlashCommand implements ISlashCommand {
     private final BusinessOwnerApi businessOwnerApi;
     private final DynamicBotApi dynamicBotApi;
     private final MessageBatchProcessor messageBatchProcessor;
-    private Bot bot;
+    private final CommonCommandHelper commonCommandHelper;
 
     @Override
     public void execute(Message message) {
         Long userId = message.getFrom().getId();
 //        botSession = botSessionService.getBotSession(chatId);
 
-        bot = businessOwnerApi.createBotIfNotPresent(userId);
+        Bot bot = businessOwnerApi.createBotIfNotPresent(userId);
 
         messageBatchProcessor.addMessage(
                 SendMessage.builder()
@@ -48,13 +47,15 @@ public class CreateSlashCommand implements ISlashCommand {
         );
     }
 
-    public boolean isCompleted() {
-        return bot.getCreationState().isCompleted();
+    public boolean isCompleted(Long userId) {
+        return Arrays.stream(businessOwnerApi.getBots(userId))
+                .allMatch(bot -> Objects.equals(bot.getCreationState(), BotCreationState.COMPLETED));
     }
 
     public String processUserResponse(Message message) {
-//        BotCreationState currentState = botSession.getCreationState();
         String userInput = message.getText();
+        Long userId = message.getFrom().getId();
+        Bot bot = businessOwnerApi.createBotIfNotPresent(userId);
         BotCreationState currentState = bot.getCreationState();
 
         if (Objects.equals(userInput, SlashCommand.BACK)) {
@@ -65,30 +66,32 @@ public class CreateSlashCommand implements ISlashCommand {
             bot.setCreationState(previousState);
             botApi.updateBot(bot);
             return SlashCommand.RETURNING_TO_PREVIOUS_MESSAGE + previousState.getMessage();
-        } else if (!isValidInput(currentState, userInput)) {
+        } else if (!commonCommandHelper.isValidInput(currentState, userInput)) {
             return "❌ Invalid input!\n\n" + currentState.getMessage();
         }
-//            return processPreviousState(currentState, userInput);
 
-        return processState(currentState, userInput);
+        return processState(bot, userInput);
     }
 
-    private String processState(BotCreationState currentState, String userInput) {
+    private String processState(Bot bot, String userInput) {
+        BotCreationState currentState = bot.getCreationState();
         AtomicReference<String> response = new AtomicReference<>("");
+
         currentState.getNextState().ifPresentOrElse(nextState -> {
             switch (currentState) {
-                case ASK_BOT_FATHER_BOT_CREATION_MESSAGE -> setTokenAndUsername(userInput);
+                case ASK_BOT_FATHER_BOT_CREATION_MESSAGE -> setTokenAndUsername(bot, userInput);
                 case ASK_BOT_NAME -> bot.setName(userInput);
                 case ASK_WELCOME_MESSAGE -> bot.setWelcomeMessage(userInput);
-                case ASK_WORKING_HOURS -> buildAndSaveWorkingHours(userInput);
-                case ASK_JOBS -> buildAndSaveJobs(userInput);
+                case ASK_WORKING_HOURS -> buildAndSaveWorkingHours(bot, userInput);
+                case ASK_JOBS -> buildAndSaveJobs(bot, userInput);
                 default -> {
                 }
             }
             bot.setCreationState(nextState);
-            bot = botApi.updateBot(bot);
+
+            Bot savedBot = botApi.updateBot(bot);
             if (nextState == BotCreationState.COMPLETED) {
-                dynamicBotApi.registerBot(bot);
+                dynamicBotApi.registerBot(savedBot);
             }
             response.set(successMessage(currentState) + "\n\n" + nextState.getMessage());
         }, () -> {
@@ -98,16 +101,6 @@ public class CreateSlashCommand implements ISlashCommand {
 //            response.set("🎉 Your new bot has been created successfully!\nYou can now access it using the link from the first message.\n\n🙏 Thank you for creating new bot with us! Type any text to continue.");
         });
         return response.get();
-    }
-
-    private boolean isValidInput(BotCreationState state, String userMessage) {
-        return switch (state) {
-            case ASK_BOT_FATHER_BOT_CREATION_MESSAGE -> new BotMessageValidator().validate(userMessage);
-            case ASK_BOT_NAME, ASK_WELCOME_MESSAGE -> new StringValidator().validate(userMessage);
-            case ASK_WORKING_HOURS -> new WorkingHoursValidator().validate(userMessage);
-            case ASK_JOBS -> new WorkingDurationsValidator().validate(userMessage);
-            default -> true;
-        };
     }
 
     private String successMessage(BotCreationState state) {
@@ -121,23 +114,19 @@ public class CreateSlashCommand implements ISlashCommand {
         };
     }
 
-    private void setTokenAndUsername(String userInput) {
+    private void setTokenAndUsername(Bot bot, String userInput) {
         bot.setToken(BotMessageValidator.extractToken(userInput));
         bot.setUsername(BotMessageValidator.extractBotLink(userInput));
     }
 
-    private void buildAndSaveWorkingHours(String workingHoursStr) {
+    private void buildAndSaveWorkingHours(Bot bot, String workingHoursStr) {
         List<WorkingHours> workingHours = MessageExtractor.extractWorkingHours(workingHoursStr);
-        for (WorkingHours workingHour : workingHours) {
-            botApi.addWorkingHours(bot.getId(), workingHour);
-        }
+        bot.addWorkingHours(workingHours);
     }
 
-    private void buildAndSaveJobs(String workingDurationsStr) {
+    private void buildAndSaveJobs(Bot bot, String workingDurationsStr) {
         List<Job> jobs = MessageExtractor.extractJobs(workingDurationsStr);
-        for (Job job : jobs) {
-            botApi.addJob(bot.getId(), job);
-        }
+        bot.addJobs(jobs);
     }
 }
 

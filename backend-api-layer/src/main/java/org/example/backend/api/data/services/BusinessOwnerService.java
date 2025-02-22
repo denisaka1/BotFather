@@ -7,6 +7,7 @@ import org.example.data.layer.entities.Bot;
 import org.example.data.layer.entities.BusinessOwner;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -100,5 +101,19 @@ public class BusinessOwnerService {
         businessOwnerRepository.save(owner);
 
         return botToDel;
+    }
+
+    public List<Bot> getDisplayableBots(Long userTelegramId) {
+        List<Bot> bots = new ArrayList<>(
+                findAllBots(userTelegramId).stream()
+                        .filter(bot -> bot.getCreationState().isCompleted())
+                        .toList()
+        );
+
+        Bot bot = getEditableBot(userTelegramId);
+        if (bot != null)
+            bots.add(getEditableBot(userTelegramId));
+
+        return bots;
     }
 }

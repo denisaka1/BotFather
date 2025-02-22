@@ -31,6 +31,11 @@ public class BusinessOwnerController {
         return ResponseEntity.ok(businessOwnerService.findAllBots(userTelegramId));
     }
 
+    @GetMapping("{userTelegramId}/bots/display")
+    public ResponseEntity<List<Bot>> findDisplayableBots(@PathVariable Long userTelegramId) {
+        return ResponseEntity.ok(businessOwnerService.getDisplayableBots(userTelegramId));
+    }
+
     @GetMapping("{userTelegramId}/exists")
     public ResponseEntity<Boolean> existsByUserTelegramId(@PathVariable Long userTelegramId) {
         boolean exists = businessOwnerService.existsByUserTelegramId(userTelegramId);

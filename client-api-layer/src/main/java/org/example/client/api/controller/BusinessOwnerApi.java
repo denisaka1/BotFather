@@ -6,6 +6,8 @@ import org.example.data.layer.entities.Bot;
 import org.example.data.layer.entities.BusinessOwner;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @AllArgsConstructor
 @Component
 public class BusinessOwnerApi {
@@ -18,6 +20,13 @@ public class BusinessOwnerApi {
                 BASE_URL + "/" + userId + "/bots",
                 Bot[].class
         );
+    }
+
+    public List<Bot> getDisplayableBots(Long userId) {
+        return List.of(apiRequestHelper.get(
+                BASE_URL + "/" + userId + "/bots/display",
+                Bot[].class
+        ));
     }
 
     public Bot addBot(Long userId, Bot bot) {

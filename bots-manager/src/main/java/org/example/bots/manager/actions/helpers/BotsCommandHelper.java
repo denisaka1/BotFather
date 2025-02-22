@@ -162,7 +162,7 @@ public class BotsCommandHelper {
     }
 
     private Map<String, String> getBotConfigList(Long userId) {
-        List<Bot> bots = List.of(businessOwnerApi.getBots(userId));
+        List<Bot> bots = businessOwnerApi.getDisplayableBots(userId);
         Map<String, String> config = new LinkedHashMap<>();
         for (Bot bot : bots) {
             config.put("@" + bot.getUsername(), Callback.SELECT_BOT + bot.getId());

@@ -1,11 +1,12 @@
 package org.example.dynamic.bot.services;
+
 import lombok.extern.slf4j.Slf4j;
 import org.example.data.layer.entities.Bot;
-import org.example.dynamic.bot.services.DynamicBot;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -23,6 +24,19 @@ public class RegistrationService {
     }
 
     public void registerBot(Bot tmpBot) {
+        if (tmpBot == null) {
+            log.warn("Trying to register a null Bot!");
+            return;
+        }
+        if (tmpBot.getToken() == null) {
+            log.warn("Trying to register a null Token for Bot: id={}", tmpBot.getId());
+            return;
+        }
+        if (tmpBot.getUsername() == null) {
+            log.warn("Trying to register a null Username for Bot: id={}", tmpBot.getId());
+            return;
+        }
+
         if (activeBots.containsKey(tmpBot.getToken())) {
             log.info("Bot already registered: {}", tmpBot.getUsername());
             return;

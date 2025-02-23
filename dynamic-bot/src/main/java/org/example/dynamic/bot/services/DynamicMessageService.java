@@ -7,7 +7,7 @@ import org.example.client.api.processor.MessageBatchProcessor;
 import org.example.data.layer.entities.Bot;
 import org.example.data.layer.entities.Client;
 import org.example.data.layer.entities.ClientScheduleState;
-import org.example.dynamic.bot.actions.*;
+import org.example.dynamic.bot.actions.states.*;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;

@@ -1,4 +1,4 @@
-package org.example.dynamic.bot.actions;
+package org.example.dynamic.bot.actions.states;
 
 import org.example.data.layer.entities.Bot;
 import org.example.dynamic.bot.services.DynamicMessageService;

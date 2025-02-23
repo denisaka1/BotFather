@@ -1,18 +1,17 @@
-package org.example.dynamic.bot.actions;
+package org.example.dynamic.bot.actions.states;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.client.api.controller.ClientApi;
 import org.example.client.api.processor.MessageBatchProcessor;
 import org.example.data.layer.entities.Bot;
-import org.example.data.layer.entities.Client;
+import org.example.dynamic.bot.actions.helpers.AuthStateHelper;
+import org.example.dynamic.bot.actions.helpers.CommonStateHelper;
 import org.example.dynamic.bot.services.DynamicMessageService;
 import org.example.telegram.components.forms.FormStep;
 import org.example.telegram.components.forms.GenericForm;
 import org.example.telegram.components.validators.EmailValidator;
 import org.example.telegram.components.validators.PhoneNumberValidator;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
@@ -24,24 +23,19 @@ import java.util.HashMap;
 @AllArgsConstructor
 public class AuthState implements IDynamicBotState {
     private final HashMap<Long, GenericForm> userForms = new HashMap<>();
-    private final ClientApi clientApi;
+    private final AuthStateHelper authStateHelper;
+    protected final CommonStateHelper commonStateHelper;
     private final MessageBatchProcessor messageBatchProcessor;
 
     @Override
     public void handle(DynamicMessageService context, Bot bot, Message message, CallbackQuery callbackData) {
         Long userId = message.getFrom().getId();
-        GenericForm form;
-        if (userForms.containsKey(userId)) {
-            form = userForms.get(userId);
-        } else {
-            form = createForm(bot);
-            userForms.put(userId, form);
-        }
+        GenericForm form = userForms.computeIfAbsent(userId, k -> createForm(bot));
         String response = execute(form, message);
         if (form.isCompleted()) {
             context.setState(message.getFrom().getId().toString(), bot.getId(), context.getScheduleOrCancelQuestionState());
         }
-        messageBatchProcessor.addMessage(new SendMessage(message.getChatId().toString(), response));
+        messageBatchProcessor.addMessage(commonStateHelper.createSendMessage(message.getChatId(), response));
     }
 
     private GenericForm createForm(Bot bot) {
@@ -57,17 +51,10 @@ public class AuthState implements IDynamicBotState {
 
     private String execute(GenericForm userForm, Message message) {
         String response = userForm.handleResponse(message.getText().toLowerCase());
-        String clientName = message.getFrom().getFirstName();
-        String telegramId = message.getFrom().getId().toString();
-        if (message.getFrom().getLastName() != null) clientName += " " + message.getFrom().getLastName();
         if (userForm.isCompleted()) {
-            Client client = Client.builder()
-                    .name(clientName)
-                    .phoneNumber(userForm.getUserResponses().get("phoneNumber"))
-                    .email(userForm.getUserResponses().get("email"))
-                    .build();
-            Client savedClient = clientApi.updateClient(client, telegramId);
-            log.info("Client saved: {}", savedClient);
+            String clientName = authStateHelper.getFullName(message);
+            String telegramId = message.getFrom().getId().toString();
+            authStateHelper.saveClient(telegramId, clientName, userForm.getUserResponses());
         }
         return response;
     }

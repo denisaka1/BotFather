@@ -2,10 +2,7 @@ package org.example.bots.manager.services;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import org.example.bots.manager.actions.slash.BotsSlashCommand;
-import org.example.bots.manager.actions.slash.CreateSlashCommand;
-import org.example.bots.manager.actions.slash.SlashCommand;
-import org.example.bots.manager.actions.slash.StartSlashCommand;
+import org.example.bots.manager.actions.slash.*;
 import org.example.bots.manager.constants.Callback;
 import org.example.client.api.controller.BotApi;
 import org.example.client.api.controller.BusinessOwnerApi;
@@ -28,6 +25,7 @@ public class ManagerMessageService {
     private final StartSlashCommand startSlashCommand;
     private final CreateSlashCommand createSlashCommand;
     private final BotsSlashCommand botsSlashCommand;
+    private final ScheduleSlashCommand scheduleSlashCommand;
     private final BusinessOwnerApi businessOwnerApi;
 
     private final MessageBatchProcessor messageBatchProcessor;
@@ -50,6 +48,10 @@ public class ManagerMessageService {
             commands.replace(SlashCommand.BOTS, Boolean.TRUE);
         }
 
+        if (isScheduleCallback(update)) {
+            commands.replace(SlashCommand.SCHEDULE, Boolean.TRUE);
+        }
+
         if (isAppointmentConfirmation(update)) {
             // TODO: finish appointment handling
 //            handleAppointmentMessage(update); // adjust message to correct state
@@ -70,6 +72,11 @@ public class ManagerMessageService {
                 callbackData.startsWith(Callback.EDIT_BOT_TOKEN) ||
                 callbackData.startsWith(Callback.EDIT_BOT_WELCOME_MESSAGE) ||
                 callbackData.startsWith(Callback.EDIT_BOT_JOBS);
+    }
+
+    private boolean isScheduleCallback(Update update) {
+        String callbackData = update.getCallbackQuery().getData();
+        return Callback.SCHEDULE_CALLBACKS.stream().anyMatch(callbackData::startsWith);
     }
 
     @PostConstruct
@@ -111,6 +118,7 @@ public class ManagerMessageService {
                         Type any text to return to the menu.""");
             }
             case SlashCommand.BOTS -> botsSlashCommand.execute(message);
+            case SlashCommand.SCHEDULE -> scheduleSlashCommand.execute(message);
             default -> handleUserResponse();
         }
     }
@@ -196,6 +204,7 @@ public class ManagerMessageService {
                 🔹 /start - 🚀 Create a new user
                 🔹 /create - 🤖 Create a new bot
                 🔹 /bots - 📋 List all your bots
+                🔹 /schedule - 📅 Manage your appointments
                 
                 ℹ️ You can return to this menu anytime by typing /cancel. ❌
                 """, userFirstName);

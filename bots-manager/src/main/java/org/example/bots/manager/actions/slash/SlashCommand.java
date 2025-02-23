@@ -8,6 +8,7 @@ public final class SlashCommand {
     public static final String CREATE = "/create";
     public static final String START = "/start";
     public static final String BOTS = "/bots";
+    public static final String SCHEDULE = "/schedule";
     public static final String BACK = "/back";
 
     public static final String BACK_COMMAND_MESSAGE = "You can return to previous by sending " + BACK + " command\n\n";

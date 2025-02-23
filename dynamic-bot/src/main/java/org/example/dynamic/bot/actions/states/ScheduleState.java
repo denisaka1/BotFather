@@ -46,7 +46,8 @@ public class ScheduleState implements IDynamicBotState {
         Integer messageId = message.getMessageId();
         String callbackData = callback.getData();
 
-        if (callbackData.startsWith(Appointment.AppointmentCreationStep.DATE_SELECTED.name())) {
+        if (callbackData.startsWith(Appointment.AppointmentCreationStep.DATE_SELECTED.name()) ||
+                callbackData.startsWith(Appointment.AppointmentCreationStep.BACK_TO_JOBS.name())) {
             sendJobSelection(chatId, messageId, scheduleStateHelper.parseJobData(callbackData)[1], bot);
         } else if (callbackData.startsWith(Appointment.AppointmentCreationStep.UPDATE_DATES.name())) {
             updateCalendar(chatId, messageId, callbackData, bot.getWorkingHours());
@@ -58,13 +59,15 @@ public class ScheduleState implements IDynamicBotState {
             handleAppointmentCreation(chatId, messageId, bot, callbackData);
         } else if (callbackData.startsWith(Appointment.AppointmentCreationStep.UPDATE_HOURS.name())) {
             updateHourSelection(chatId, messageId, callbackData, bot);
-        } else if (callbackData.startsWith(Appointment.AppointmentCreationStep.BACK_TO_JOBS.name())) {
-            sendJobSelection(chatId, messageId, scheduleStateHelper.parseCallbackData(callbackData)[1], bot);
         } else if (Appointment.AppointmentCreationStep.BACK_TO_MENU.name().equals(callbackData)) {
-            ScheduleOrCancelQuestionState scheduleOrCancelQuestionState = context.getScheduleOrCancelQuestionState();
-            context.setState(callback.getFrom().getId().toString(), bot.getId(), scheduleOrCancelQuestionState);
-            scheduleOrCancelQuestionState.handle(context, bot, message, callback);
+            sendBackToMenu(context, bot, message, callback);
         }
+    }
+
+    private void sendBackToMenu(DynamicMessageService context, Bot bot, Message message, CallbackQuery callback) {
+        ScheduleOrCancelQuestionState scheduleOrCancelQuestionState = context.getScheduleOrCancelQuestionState();
+        context.setState(callback.getFrom().getId().toString(), bot.getId(), scheduleOrCancelQuestionState);
+        scheduleOrCancelQuestionState.handle(context, bot, message, callback);
     }
 
     private void sendHourSelection(Long chatId, Integer messageId, String callbackData, Bot bot) {

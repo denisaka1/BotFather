@@ -85,6 +85,7 @@ public class ManagerMessageService {
         commands.put(SlashCommand.START, Boolean.FALSE);
         commands.put(SlashCommand.CREATE, Boolean.FALSE);
         commands.put(SlashCommand.BOTS, Boolean.FALSE);
+        commands.put(SlashCommand.SCHEDULE, Boolean.FALSE);
     }
 
     private void renderSlashCommand() {
@@ -94,6 +95,7 @@ public class ManagerMessageService {
                 commands.replace(SlashCommand.START, Boolean.FALSE);
                 commands.replace(SlashCommand.CREATE, Boolean.FALSE);
                 commands.replace(SlashCommand.BOTS, Boolean.FALSE);
+                commands.replace(SlashCommand.SCHEDULE, Boolean.FALSE);
                 addSimpleMessage("❌ Command cancelled!" + "\n\n" + renderMainMenu());
             }
             case SlashCommand.START -> {
@@ -117,7 +119,10 @@ public class ManagerMessageService {
                         Type any text to return to the menu.""");
             }
             case SlashCommand.BOTS -> botsSlashCommand.execute(message);
-            case SlashCommand.SCHEDULE -> scheduleSlashCommand.execute(message);
+            case SlashCommand.SCHEDULE -> {
+                commands.replace(SlashCommand.SCHEDULE, Boolean.FALSE);
+                scheduleSlashCommand.execute(message);
+            }
             default -> handleUserResponse();
         }
     }

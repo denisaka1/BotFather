@@ -61,7 +61,11 @@ public class ManagerMessageService {
 //                    .text("Confirmed");
 //            dynamicBot.handleAppointmentResponse()
         } else {
-            botsSlashCommand.processCallbackResponse(update);
+            if (commands.get(SlashCommand.BOTS)) {
+                botsSlashCommand.processCallbackResponse(update);
+            } else if (commands.get(SlashCommand.SCHEDULE)) {
+                scheduleSlashCommand.processCallbackResponse(update);
+            }
         }
     }
 
@@ -86,6 +90,7 @@ public class ManagerMessageService {
         commands.put(SlashCommand.START, Boolean.FALSE);
         commands.put(SlashCommand.CREATE, Boolean.FALSE);
         commands.put(SlashCommand.BOTS, Boolean.FALSE);
+        commands.put(SlashCommand.SCHEDULE, Boolean.FALSE);
     }
 
     private void renderSlashCommand() {

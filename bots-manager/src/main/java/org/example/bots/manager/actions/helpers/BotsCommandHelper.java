@@ -64,7 +64,7 @@ public class BotsCommandHelper {
         Long chatId = callbackQuery.getMessage().getChatId();
         Integer messageId = callbackQuery.getMessage().getMessageId();
 
-        Map<String, String> config = getBotConfigList(userId);
+        Map<String, String> config = getBotConfigList(userId, false);
 
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
 
@@ -88,9 +88,13 @@ public class BotsCommandHelper {
     }
 
     public void showBotsList(Message message) {
+        showBotsList(message, false);
+    }
+
+    public void showBotsList(Message message, boolean isSchedule) {
         Long userId = message.getFrom().getId();
 
-        Map<String, String> config = getBotConfigList(userId);
+        Map<String, String> config = getBotConfigList(userId, isSchedule);
 
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
         keyboardMarkup.setKeyboard(createKeyboard(config));
@@ -165,11 +169,12 @@ public class BotsCommandHelper {
         return backToBotsListButton;
     }
 
-    private Map<String, String> getBotConfigList(Long userId) {
+    private Map<String, String> getBotConfigList(Long userId, boolean isSchedule) {
         List<Bot> bots = businessOwnerApi.getDisplayableBots(userId);
         Map<String, String> config = new LinkedHashMap<>();
         for (Bot bot : bots) {
-            config.put("@" + bot.getUsername(), Callback.SELECT_BOT + bot.getId());
+            String callback = isSchedule ? Callback.SELECT_APPOINTMENTS_BOT : Callback.SELECT_BOT;
+            config.put("@" + bot.getUsername(), callback + bot.getId());
         }
         return config;
     }

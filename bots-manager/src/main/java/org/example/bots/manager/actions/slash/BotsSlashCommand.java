@@ -38,7 +38,7 @@ public class BotsSlashCommand implements ISlashCommand {
 
     public void execute(Message message) {
         Long userId = message.getFrom().getId();
-        if (!botsExist(userId)) {
+        if (!commonCommandHelper.botsExist(userId)) {
             String text = """
                     👋 Welcome to the Bots Creator!
                     You don't have any bots created.
@@ -78,10 +78,6 @@ public class BotsSlashCommand implements ISlashCommand {
                 return;
             }
         }
-    }
-
-    private boolean botsExist(Long userId) {
-        return businessOwnerApi.isRegistered(userId) && businessOwnerApi.getBots(userId).length > 0;
     }
 
     public void processUserResponse(Message message) {

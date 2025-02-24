@@ -67,6 +67,7 @@ public class MessageBatchProcessor {
         textUpdates.clear();
         buttonUpdates.clear();
         messages.clear();
+        deleteMessages.clear();
     }
 
     private <T> List<T> getAll(Map<Long, List<T>> map) {

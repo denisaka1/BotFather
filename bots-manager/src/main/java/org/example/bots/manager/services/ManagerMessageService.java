@@ -2,6 +2,7 @@ package org.example.bots.manager.services;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.example.bots.manager.actions.AppointmentProcessor;
 import org.example.bots.manager.actions.slash.*;
 import org.example.bots.manager.constants.Callback;
 import org.example.client.api.controller.BotApi;
@@ -27,6 +28,7 @@ public class ManagerMessageService {
     private final BotsSlashCommand botsSlashCommand;
     private final ScheduleSlashCommand scheduleSlashCommand;
     private final BusinessOwnerApi businessOwnerApi;
+    private final AppointmentProcessor appointmentProcessor;
 
     private final MessageBatchProcessor messageBatchProcessor;
     private final BotApi botApi;
@@ -60,6 +62,7 @@ public class ManagerMessageService {
 //                    .chatId(update.getCallbackQuery().getMessage().getChatId())
 //                    .text("Confirmed");
 //            dynamicBot.handleAppointmentResponse()
+            appointmentProcessor.processCallbackResponse(update);
         } else {
             botsSlashCommand.processCallbackResponse(update);
         }

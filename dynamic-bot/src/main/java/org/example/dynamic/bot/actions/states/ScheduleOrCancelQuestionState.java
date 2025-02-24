@@ -31,18 +31,19 @@ public class ScheduleOrCancelQuestionState implements IDynamicBotState {
                 ScheduleState scheduleState = context.getScheduleState();
                 context.setState(callbackData.getFrom().getId().toString(), bot.getId(), scheduleState);
                 scheduleState.handle(context, bot, message);
-                return;
             } else if (Callback.CANCEL_APPOINTMENT.equals(data)) {
                 CancelAppointmentsState cancelAppointmentsState = context.getCancelAppointmentsState();
                 context.setState(callbackData.getFrom().getId().toString(), bot.getId(), cancelAppointmentsState);
                 cancelAppointmentsState.handle(context, bot, message);
-                return;
+            } else {
+                createScheduleOrCancelButtons(chatId, bot, message, true);
             }
+        } else {
+            createScheduleOrCancelButtons(chatId, bot, message, false);
         }
-        createScheduleOrCancelButtons(chatId, bot, message);
     }
 
-    private void createScheduleOrCancelButtons(String chatId, Bot bot, Message message) {
+    private void createScheduleOrCancelButtons(String chatId, Bot bot, Message message, boolean shouldEdit) {
         String text = bot.getWelcomeMessage() + "\n\n" + "What would you like to do?";
         Client currentClient = clientApi.getClient(Long.parseLong(chatId));
         String[][] buttonConfigs = currentClient.getAppointments().isEmpty()
@@ -51,8 +52,14 @@ public class ScheduleOrCancelQuestionState implements IDynamicBotState {
                 {"📅 Schedule An Appointment:" + Callback.SCHEDULE_APPOINTMENT},
                 {"❌ Cancel An Existing Appointment:" + Callback.CANCEL_APPOINTMENT}
         };
-        messageBatchProcessor.addTextUpdate(
-                MessageGenerator.createEditMessageWithMarkup(chatId, text, commonStateHelper.createInlineKeyboard(buttonConfigs), message.getMessageId())
-        );
+        if (shouldEdit) {
+            messageBatchProcessor.addTextUpdate(
+                    MessageGenerator.createEditMessageWithMarkup(chatId, text, commonStateHelper.createInlineKeyboard(buttonConfigs), message.getMessageId())
+            );
+        } else {
+            messageBatchProcessor.addMessage(
+                    MessageGenerator.createSendMessageWithMarkup(chatId, text, commonStateHelper.createInlineKeyboard(buttonConfigs))
+            );
+        }
     }
 }

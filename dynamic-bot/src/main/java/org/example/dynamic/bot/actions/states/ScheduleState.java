@@ -46,8 +46,7 @@ public class ScheduleState implements IDynamicBotState {
         Integer messageId = message.getMessageId();
         String callbackData = callback.getData();
 
-        if (callbackData.startsWith(Appointment.AppointmentCreationStep.DATE_SELECTED.name()) ||
-                callbackData.startsWith(Appointment.AppointmentCreationStep.BACK_TO_JOBS.name())) {
+        if (callbackData.startsWith(Appointment.AppointmentCreationStep.DATE_SELECTED.name())) {
             sendJobSelection(chatId, messageId, scheduleStateHelper.parseJobData(callbackData)[1], bot);
         } else if (callbackData.startsWith(Appointment.AppointmentCreationStep.UPDATE_DATES.name())) {
             updateCalendar(chatId, messageId, callbackData, bot.getWorkingHours());
@@ -60,13 +59,15 @@ public class ScheduleState implements IDynamicBotState {
         } else if (callbackData.startsWith(Appointment.AppointmentCreationStep.UPDATE_HOURS.name())) {
             updateHourSelection(chatId, messageId, callbackData, bot);
         } else if (Appointment.AppointmentCreationStep.BACK_TO_MENU.name().equals(callbackData)) {
-            sendBackToMenu(context, bot, message, callback);
+            sendBackToMenu(context, bot, message, callback, callback.getFrom().getId().toString());
+        } else if (callbackData.startsWith(Appointment.AppointmentCreationStep.BACK_TO_JOBS.name())) {
+            sendJobSelection(chatId, messageId, scheduleStateHelper.parseCallbackData(callbackData)[1], bot);
         }
     }
 
-    private void sendBackToMenu(DynamicMessageService context, Bot bot, Message message, CallbackQuery callback) {
+    private void sendBackToMenu(DynamicMessageService context, Bot bot, Message message, CallbackQuery callback, String userTelegramId) {
         ScheduleOrCancelQuestionState scheduleOrCancelQuestionState = context.getScheduleOrCancelQuestionState();
-        context.setState(callback.getFrom().getId().toString(), bot.getId(), scheduleOrCancelQuestionState);
+        context.setState(userTelegramId, bot.getId(), scheduleOrCancelQuestionState);
         scheduleOrCancelQuestionState.handle(context, bot, message, callback);
     }
 

@@ -8,6 +8,7 @@ import org.example.bots.manager.constants.Callback;
 import org.example.client.api.controller.BotApi;
 import org.example.client.api.controller.BusinessOwnerApi;
 import org.example.client.api.processor.MessageBatchProcessor;
+import org.example.data.layer.constants.AppointmentConst;
 import org.example.data.layer.entities.Bot;
 import org.example.data.layer.entities.BotCreationState;
 import org.example.telegram.components.inline.keyboard.MessageGenerator;
@@ -18,6 +19,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -55,13 +57,6 @@ public class ManagerMessageService {
         }
 
         if (isAppointmentConfirmation(update)) {
-            // TODO: finish appointment handling
-//            handleAppointmentMessage(update); // adjust message to correct state
-            // edit the markup correctly
-//            SendMessage response = SendMessage.builder()
-//                    .chatId(update.getCallbackQuery().getMessage().getChatId())
-//                    .text("Confirmed");
-//            dynamicBot.handleAppointmentResponse()
             appointmentProcessor.processCallbackResponse(update);
         } else {
             if (commands.get(SlashCommand.BOTS)) {
@@ -225,7 +220,9 @@ public class ManagerMessageService {
     }
 
     private boolean isAppointmentConfirmation(Update update) {
-        return update.getCallbackQuery().getData().startsWith("confirmAppointment") ||
-                update.getCallbackQuery().getData().startsWith("declineAppointment");
+        String callbackData = update.getCallbackQuery().getData();
+        return Stream.of(
+                AppointmentConst.CONFIRM_APPOINTMENT, AppointmentConst.DECLINE_APPOINTMENT
+        ).anyMatch(callbackData::startsWith);
     }
 }

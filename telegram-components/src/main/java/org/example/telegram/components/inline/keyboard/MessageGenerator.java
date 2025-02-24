@@ -20,7 +20,22 @@ public class MessageGenerator {
                 .build();
     }
 
+    public static EditMessageText createEditMessage(Long chatId, String text, Integer messageId) {
+        return EditMessageText.builder()
+                .chatId(chatId)
+                .text(text)
+                .messageId(messageId)
+                .build();
+    }
+
     public static DeleteMessage deleteMessage(String chatId, Integer messageId) {
+        return DeleteMessage.builder()
+                .chatId(chatId)
+                .messageId(messageId)
+                .build();
+    }
+
+    public static DeleteMessage deleteMessage(Long chatId, Integer messageId) {
         return DeleteMessage.builder()
                 .chatId(chatId)
                 .messageId(messageId)
@@ -44,6 +59,13 @@ public class MessageGenerator {
     }
 
     public static SendMessage createSimpleTextMessage(Long chatId, String text) {
+        return SendMessage.builder()
+                .text(text)
+                .chatId(chatId)
+                .build();
+    }
+
+    public static SendMessage createSimpleTextMessage(String chatId, String text) {
         return SendMessage.builder()
                 .text(text)
                 .chatId(chatId)

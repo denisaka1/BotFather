@@ -67,11 +67,7 @@ public class ManagerMessageService {
 
     private boolean isEditBotCallback(Update update) {
         String callbackData = update.getCallbackQuery().getData();
-        return callbackData.startsWith(Callback.EDIT_BOT_NAME) ||
-                callbackData.startsWith(Callback.EDIT_BOT_WORKING_HOURS) ||
-                callbackData.startsWith(Callback.EDIT_BOT_TOKEN) ||
-                callbackData.startsWith(Callback.EDIT_BOT_WELCOME_MESSAGE) ||
-                callbackData.startsWith(Callback.EDIT_BOT_JOBS);
+        return Callback.EDIT_BOTS_CALLBACKS.stream().anyMatch(callbackData::startsWith);
     }
 
     private boolean isScheduleCallback(Update update) {

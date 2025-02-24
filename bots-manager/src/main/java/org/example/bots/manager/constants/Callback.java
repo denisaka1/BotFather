@@ -1,6 +1,6 @@
 package org.example.bots.manager.constants;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public final class Callback {
     private Callback() {
@@ -14,6 +14,10 @@ public final class Callback {
     public static final String EDIT_BOT_JOBS = "edit_bot_jobs";
     public static final String DELETE_BOT = "delete_bot_";
     public static final String BACK_TO_BOTS_LIST = "back_to_bots_list";
+    public static final List<String> EDIT_BOTS_CALLBACKS = List.of(
+            EDIT_BOT_NAME, EDIT_BOT_WORKING_HOURS, EDIT_BOT_TOKEN,
+            EDIT_BOT_WELCOME_MESSAGE, EDIT_BOT_JOBS
+    );
 
     public static final String SELECT_APPOINTMENTS_BOT = "select_appointment_bot_";
     public static final String BACK_TO_APPOINTMENTS_BOT = "back_to_appointments_bot_";
@@ -24,15 +28,9 @@ public final class Callback {
     public static final String CONFIRM_APPOINTMENT = "confirm_appointment_";
     public static final String CANCEL_APPOINTMENT = "cancel_appointment_";
 
-    public static final ArrayList<String> SCHEDULE_CALLBACKS = new ArrayList<>() {{
-        add(SELECT_APPOINTMENTS_BOT);
-        add(BACK_TO_APPOINTMENTS_BOT);
-        add(SELECT_DATE);
-        add(BACK_TO_DATES);
-        add(SELECT_APPOINTMENT);
-        add(BACK_TO_APPOINTMENTS);
-        add(CONFIRM_APPOINTMENT);
-        add(CANCEL_APPOINTMENT);
-    }};
-
+    public static final List<String> SCHEDULE_CALLBACKS = List.of(
+            SELECT_APPOINTMENTS_BOT, BACK_TO_APPOINTMENTS_BOT, SELECT_DATE,
+            BACK_TO_DATES, SELECT_APPOINTMENT, BACK_TO_APPOINTMENTS,
+            CONFIRM_APPOINTMENT, CANCEL_APPOINTMENT
+    );
 }

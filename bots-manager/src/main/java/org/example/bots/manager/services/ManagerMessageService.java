@@ -2,6 +2,7 @@ package org.example.bots.manager.services;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.example.bots.manager.actions.AppointmentProcessor;
 import org.example.bots.manager.actions.slash.*;
 import org.example.bots.manager.constants.Callback;
 import org.example.client.api.controller.BotApi;
@@ -27,6 +28,7 @@ public class ManagerMessageService {
     private final BotsSlashCommand botsSlashCommand;
     private final ScheduleSlashCommand scheduleSlashCommand;
     private final BusinessOwnerApi businessOwnerApi;
+    private final AppointmentProcessor appointmentProcessor;
 
     private final MessageBatchProcessor messageBatchProcessor;
     private final BotApi botApi;
@@ -60,6 +62,7 @@ public class ManagerMessageService {
 //                    .chatId(update.getCallbackQuery().getMessage().getChatId())
 //                    .text("Confirmed");
 //            dynamicBot.handleAppointmentResponse()
+            appointmentProcessor.processCallbackResponse(update);
         } else {
             if (commands.get(SlashCommand.BOTS)) {
                 botsSlashCommand.processCallbackResponse(update);
@@ -71,11 +74,7 @@ public class ManagerMessageService {
 
     private boolean isEditBotCallback(Update update) {
         String callbackData = update.getCallbackQuery().getData();
-        return callbackData.startsWith(Callback.EDIT_BOT_NAME) ||
-                callbackData.startsWith(Callback.EDIT_BOT_WORKING_HOURS) ||
-                callbackData.startsWith(Callback.EDIT_BOT_TOKEN) ||
-                callbackData.startsWith(Callback.EDIT_BOT_WELCOME_MESSAGE) ||
-                callbackData.startsWith(Callback.EDIT_BOT_JOBS);
+        return Callback.EDIT_BOTS_CALLBACKS.stream().anyMatch(callbackData::startsWith);
     }
 
     private boolean isScheduleCallback(Update update) {
@@ -100,6 +99,7 @@ public class ManagerMessageService {
                 commands.replace(SlashCommand.START, Boolean.FALSE);
                 commands.replace(SlashCommand.CREATE, Boolean.FALSE);
                 commands.replace(SlashCommand.BOTS, Boolean.FALSE);
+                commands.replace(SlashCommand.SCHEDULE, Boolean.FALSE);
                 addSimpleMessage("❌ Command cancelled!" + "\n\n" + renderMainMenu());
             }
             case SlashCommand.START -> {
@@ -123,7 +123,10 @@ public class ManagerMessageService {
                         Type any text to return to the menu.""");
             }
             case SlashCommand.BOTS -> botsSlashCommand.execute(message);
-            case SlashCommand.SCHEDULE -> scheduleSlashCommand.execute(message);
+            case SlashCommand.SCHEDULE -> {
+                commands.replace(SlashCommand.SCHEDULE, Boolean.FALSE);
+                scheduleSlashCommand.execute(message);
+            }
             default -> handleUserResponse();
         }
     }

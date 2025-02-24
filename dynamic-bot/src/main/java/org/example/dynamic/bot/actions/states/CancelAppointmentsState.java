@@ -63,7 +63,7 @@ public class CancelAppointmentsState implements IDynamicBotState {
                 appointmentDate, appointmentTime
         );
         String[][] buttonConfig = {
-                {"<< Back To Appointments:BackToAppointments"}
+                {"<< Back To Appointments:" + Callback.BACK_TO_APPOINTMENTS}
         };
         clientApi.deleteAppointment(appointmentId, chatId.toString());
         cancelAppointmentsStateHelper.notifyManagerAboutCancelAppointment(jobDuration, jobType, appointmentDate, appointmentTime, chatId, bot.getId());

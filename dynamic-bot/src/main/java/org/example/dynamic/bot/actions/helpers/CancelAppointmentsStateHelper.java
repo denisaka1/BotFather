@@ -27,8 +27,8 @@ public class CancelAppointmentsStateHelper {
     public InlineKeyboardMarkup generateConfirmationKeyboard(String appointmentData) {
         String[][] buttonConfigs = {
                 {"Yes, cancel the appointment:" + Callback.CANCEL_APPOINTMENT + Callback.DELIMITER + appointmentData},
-                {"Nope, nevermind:No"},
-                {"<< Back to Appointments:BackToAppointments"}
+                {"Nope, nevermind:" + Callback.NOT_CANCEL},
+                {"<< Back to Appointments:" + Callback.BACK_TO_APPOINTMENTS}
         };
         return commonStateHelper.createInlineKeyboard(buttonConfigs);
     }

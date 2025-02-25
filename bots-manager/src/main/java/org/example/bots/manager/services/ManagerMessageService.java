@@ -59,10 +59,10 @@ public class ManagerMessageService {
         if (isAppointmentConfirmation(update)) {
             appointmentProcessor.processCallbackResponse(update);
         } else {
-            if (commands.get(SlashCommand.BOTS)) {
-                botsSlashCommand.processCallbackResponse(update);
-            } else if (commands.get(SlashCommand.SCHEDULE)) {
+            if (commands.get(SlashCommand.SCHEDULE)) {
                 scheduleSlashCommand.processCallbackResponse(update);
+            } else {
+                botsSlashCommand.processCallbackResponse(update);
             }
         }
     }

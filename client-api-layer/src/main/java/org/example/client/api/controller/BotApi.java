@@ -2,10 +2,7 @@ package org.example.client.api.controller;
 
 import lombok.AllArgsConstructor;
 import org.example.client.api.helper.ApiRequestHelper;
-import org.example.data.layer.entities.Bot;
-import org.example.data.layer.entities.BusinessOwner;
-import org.example.data.layer.entities.Job;
-import org.example.data.layer.entities.WorkingHours;
+import org.example.data.layer.entities.*;
 import org.springframework.stereotype.Component;
 
 @AllArgsConstructor
@@ -70,6 +67,13 @@ public class BotApi {
         return apiRequestHelper.get(
                 BASE_URL + "/" + botId + "/jobs",
                 Job[].class
+        );
+    }
+
+    public Appointment[] findAppointmentsByDate(Long botId, String date) {
+        return apiRequestHelper.get(
+                BASE_URL + "/" + botId + "/appointments_by_date" + "?date=" + date,
+                Appointment[].class
         );
     }
 }

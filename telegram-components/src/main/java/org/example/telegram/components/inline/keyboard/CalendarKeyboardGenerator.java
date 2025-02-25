@@ -1,5 +1,5 @@
 package org.example.telegram.components.inline.keyboard;
-import org.example.data.layer.entities.Appointment;
+
 import org.example.data.layer.entities.WorkingHours;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -12,7 +12,7 @@ import java.util.List;
 
 public class CalendarKeyboardGenerator {
 
-    public static InlineKeyboardMarkup generateCalendar(int year, int month, List<WorkingHours> workingHours) {
+    public static InlineKeyboardMarkup generateCalendar(int year, int month, List<WorkingHours> workingHours, String callbackSelectText, String callbackUpdateText, String callbackBackText, String callbackBackData) {
         LocalDate today = LocalDate.now();
         LocalDate lastAllowedDate = today.plusMonths(1);
         List<Integer> workingDays = parseWorkingHours(workingHours);
@@ -49,7 +49,7 @@ public class CalendarKeyboardGenerator {
             } else if (!currentDate.isAfter(lastAllowedDate) && workingDays.contains(currentDayOfWeek - 1)) {
                 row.add(InlineKeyboardButton.builder()
                         .text(String.valueOf(day))
-                        .callbackData(Appointment.AppointmentCreationStep.DATE_SELECTED.name() + ":" + String.format("%02d/%02d/%04d", day, month, year))
+                        .callbackData(callbackSelectText + String.format("%02d/%02d/%04d", day, month, year))
                         .build());
             } else {
                 row.add(InlineKeyboardButton.builder().text("❌").callbackData("noop").build());
@@ -87,18 +87,18 @@ public class CalendarKeyboardGenerator {
             int prevYear = month == 1 ? year - 1 : year;
             navRow.add(InlineKeyboardButton.builder()
                     .text("⬅️ Previous")
-                    .callbackData(Appointment.AppointmentCreationStep.UPDATE_DATES.name() + ":" + prevYear + "-" + prevMonth)
+                    .callbackData(callbackUpdateText + prevYear + "-" + prevMonth)
                     .build());
         }
 
-        navRow.add(InlineKeyboardButton.builder().text("<< Back To Menu").callbackData("BACK").build());
+        navRow.add(InlineKeyboardButton.builder().text(callbackBackText).callbackData(callbackBackData).build());
 
         if (hasNextMonthDates) {
             int nextMonth = month == 12 ? 1 : month + 1;
             int nextYear = month == 12 ? year + 1 : year;
             navRow.add(InlineKeyboardButton.builder()
                     .text("Next ➡️")
-                    .callbackData(Appointment.AppointmentCreationStep.UPDATE_DATES.name() + ":" + nextYear + "-" + nextMonth)
+                    .callbackData(callbackUpdateText + nextYear + "-" + nextMonth)
                     .build());
         }
 

@@ -1,10 +1,8 @@
 package org.example.backend.api.controllers;
+
 import lombok.AllArgsConstructor;
 import org.example.backend.api.data.services.BotService;
-import org.example.data.layer.entities.Bot;
-import org.example.data.layer.entities.BusinessOwner;
-import org.example.data.layer.entities.Job;
-import org.example.data.layer.entities.WorkingHours;
+import org.example.data.layer.entities.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,10 +16,14 @@ public class BotController {
     private final BotService botService;
 
     @GetMapping("{id}")
-    public ResponseEntity<Bot> getBot(@PathVariable Long id) { return ResponseEntity.ok(botService.getBot(id)); }
+    public ResponseEntity<Bot> getBot(@PathVariable Long id) {
+        return ResponseEntity.ok(botService.getBot(id));
+    }
 
     @GetMapping("{id}/owner")
-    public ResponseEntity<BusinessOwner> getBotOwner(@PathVariable Long id) { return ResponseEntity.ok(botService.getBotOwner(id)); }
+    public ResponseEntity<BusinessOwner> getBotOwner(@PathVariable Long id) {
+        return ResponseEntity.ok(botService.getBotOwner(id));
+    }
 
     @GetMapping
     public ResponseEntity<List<Bot>> getAllBots() {
@@ -51,5 +53,10 @@ public class BotController {
     @PostMapping("{id}/working_hour")
     public ResponseEntity<WorkingHours> createWorkingHour(@PathVariable Long id, @RequestBody WorkingHours workingHours) {
         return ResponseEntity.ok(botService.saveWorkingHour(id, workingHours));
+    }
+
+    @GetMapping("{id}/appointments_by_date")
+    public ResponseEntity<List<Appointment>> findAppointmentByDate(@PathVariable Long id, @RequestParam String date) {
+        return botService.findAppointmentsByDate(id, date);
     }
 }

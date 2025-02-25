@@ -90,7 +90,9 @@ public class ScheduleState implements IDynamicBotState {
 
     private void sendCalendar(Long chatId, int year, int month, Message message, Bot bot) {
         Bot updatedBot = botApi.getBot(bot.getId());
-        InlineKeyboardMarkup calendar = CalendarKeyboardGenerator.generateCalendar(year, month, updatedBot.getWorkingHours());
+        InlineKeyboardMarkup calendar = CalendarKeyboardGenerator.generateCalendar(year, month, updatedBot.getWorkingHours(),
+                Appointment.AppointmentCreationStep.DATE_SELECTED.name() + ":",
+                Appointment.AppointmentCreationStep.UPDATE_DATES.name() + ":", "<< Back To Menu", "BACK");
         messageBatchProcessor.addTextUpdate(MessageGenerator.createEditMessageWithMarkup(chatId.toString(), "📅 Please select a date:", calendar, message.getMessageId()));
     }
 
@@ -99,7 +101,9 @@ public class ScheduleState implements IDynamicBotState {
         int year = Integer.parseInt(parts[0]);
         int month = Integer.parseInt(parts[1]);
 
-        InlineKeyboardMarkup calendar = CalendarKeyboardGenerator.generateCalendar(year, month, workingHours);
+        InlineKeyboardMarkup calendar = CalendarKeyboardGenerator.generateCalendar(year, month, workingHours,
+                Appointment.AppointmentCreationStep.DATE_SELECTED.name() + ":", Appointment.AppointmentCreationStep.UPDATE_DATES.name() + ":",
+                "<< Back To Menu", "BACK");
         messageBatchProcessor.addButtonUpdate(MessageGenerator.createEditMessageReplyMarkup(chatId.toString(), messageId, calendar));
     }
 

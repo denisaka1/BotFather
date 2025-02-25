@@ -19,18 +19,22 @@ public final class Callback {
             EDIT_BOT_WELCOME_MESSAGE, EDIT_BOT_JOBS
     );
 
-    public static final String SELECT_APPOINTMENTS_BOT = "select_appointment_bot_";
-    public static final String BACK_TO_APPOINTMENTS_BOT = "back_to_appointments_bot_";
-    public static final String SELECT_DATE = "select_date_";
-    public static final String BACK_TO_DATES = "back_to_dates_";
-    public static final String SELECT_APPOINTMENT = "select_appointment_";
-    public static final String BACK_TO_APPOINTMENTS = "back_to_appointments_";
-    public static final String CONFIRM_APPOINTMENT = "confirm_appointment_";
-    public static final String CANCEL_APPOINTMENT = "cancel_appointment_";
+    public static final String DELIMITER_SCHEDULE_STATE = "&";
+    public static final String DELIMITER_SCHEDULE_STATE_DATES = "@";
+    public static final String SELECT_APPOINTMENTS_BOT = "select_appointment_bot" + DELIMITER_SCHEDULE_STATE;
+    public static final String BACK_TO_APPOINTMENTS_BOT = "back_to_appointments_bot" + DELIMITER_SCHEDULE_STATE;
+    public static final String SELECT_DATE = "select_date" + DELIMITER_SCHEDULE_STATE;
+    public static final String UPDATE_DATE = "update_date" + DELIMITER_SCHEDULE_STATE;
+    public static final String BACK_TO_DATES = "back_to_dates" + DELIMITER_SCHEDULE_STATE;
+    public static final String SELECT_APPOINTMENT = "select_appointment" + DELIMITER_SCHEDULE_STATE;
+    public static final String BACK_TO_APPOINTMENTS = "back_to_appointments" + DELIMITER_SCHEDULE_STATE;
+    public static final String CONFIRM_APPOINTMENT = "confirm_appointment" + DELIMITER_SCHEDULE_STATE;
+    public static final String CANCEL_APPOINTMENT = "cancel_appointment" + DELIMITER_SCHEDULE_STATE;
+    public static final String DISPLAY_CLIENT_DETAILS = "display_client_details" + DELIMITER_SCHEDULE_STATE;
 
     public static final List<String> SCHEDULE_CALLBACKS = List.of(
             SELECT_APPOINTMENTS_BOT, BACK_TO_APPOINTMENTS_BOT, SELECT_DATE,
             BACK_TO_DATES, SELECT_APPOINTMENT, BACK_TO_APPOINTMENTS,
-            CONFIRM_APPOINTMENT, CANCEL_APPOINTMENT
+            CONFIRM_APPOINTMENT, CANCEL_APPOINTMENT, UPDATE_DATE, DISPLAY_CLIENT_DETAILS
     );
 }

@@ -11,7 +11,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class AppointmentsGenerator {
-    private static final int PAGE_SIZE = 10;
+    private static final int PAGE_SIZE = 100;
     private static final String DELIMITER = "@";
 
     public static InlineKeyboardMarkup generateAppointmentsKeyboard(List<Appointment> appointments, int page) {

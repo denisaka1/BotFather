@@ -1,13 +1,15 @@
 package org.example.backend.api.data.services;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.example.backend.api.data.repositories.BotRepository;
-import org.example.data.layer.entities.Bot;
-import org.example.data.layer.entities.BusinessOwner;
-import org.example.data.layer.entities.Job;
-import org.example.data.layer.entities.WorkingHours;
+import org.example.data.layer.entities.*;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -75,5 +77,15 @@ public class BotService {
     public BusinessOwner getBotOwner(Long id) {
         Bot bot = botRepository.findById(id).orElseThrow();
         return bot.getOwner();
+    }
+
+    public ResponseEntity<List<Appointment>> findAppointmentsByDate(Long id, String date) {
+        Bot bot = botRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Bot not found with id: " + id));
+        LocalDateTime targetDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("dd/MM/yyyy")).atStartOfDay();
+        List<Appointment> appointmentsByDate = bot.getAppointments().stream()
+                .filter(appointment -> appointment.getAppointmentDate().toLocalDate().equals(targetDate.toLocalDate()))
+                .toList();
+        return ResponseEntity.ok(appointmentsByDate);
     }
 }

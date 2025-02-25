@@ -88,23 +88,33 @@ public class BotsCommandHelper {
     }
 
     public void showBotsList(Message message) {
-        showBotsList(message, false);
+        showBotsList(message.getFrom().getId(), false, null);
     }
 
-    public void showBotsList(Message message, boolean isSchedule) {
-        Long userId = message.getFrom().getId();
-
+    public void showBotsList(Long userId, boolean isSchedule, Integer messageId) {
         Map<String, String> config = getBotConfigList(userId, isSchedule);
 
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
         keyboardMarkup.setKeyboard(createKeyboard(config));
-        messageBatchProcessor.addMessage(
-                MessageGenerator.createSendMessageWithMarkup(
-                        userId.toString(),
-                        "Select a bot from the bots list:",
-                        keyboardMarkup
-                )
-        );
+        String text = "Select a bot from the bots list:";
+        if (isSchedule && messageId != null) {
+            messageBatchProcessor.addTextUpdate(
+                    MessageGenerator.createEditMessageWithMarkup(
+                            userId.toString(),
+                            text,
+                            keyboardMarkup,
+                            messageId
+                    )
+            );
+        } else {
+            messageBatchProcessor.addMessage(
+                    MessageGenerator.createSendMessageWithMarkup(
+                            userId.toString(),
+                            text,
+                            keyboardMarkup
+                    )
+            );
+        }
     }
 
     public void showActions(CallbackQuery callbackQuery, String botId) {

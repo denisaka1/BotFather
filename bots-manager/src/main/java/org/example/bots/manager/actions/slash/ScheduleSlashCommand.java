@@ -11,6 +11,8 @@ import org.example.client.api.controller.BotApi;
 import org.example.client.api.processor.MessageBatchProcessor;
 import org.example.data.layer.entities.Appointment;
 import org.example.data.layer.entities.Bot;
+import org.example.data.layer.entities.Client;
+import org.example.telegram.components.inline.keyboard.ButtonsGenerator;
 import org.example.telegram.components.inline.keyboard.CalendarKeyboardGenerator;
 import org.example.telegram.components.inline.keyboard.MessageGenerator;
 import org.springframework.stereotype.Component;
@@ -18,6 +20,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -76,7 +79,7 @@ public class ScheduleSlashCommand implements ISlashCommand {
                 sendAppointmentsList(data, chatId, message.getMessageId());
                 break;
             }
-            case Callback.SELECT_APPOINTMENT: {
+            case Callback.SELECT_APPOINTMENT, Callback.BACK_TO_APPOINTMENT: {
                 sendAppointmentsManageOptions(data, chatId, message.getMessageId());
                 break;
             }
@@ -87,6 +90,7 @@ public class ScheduleSlashCommand implements ISlashCommand {
                 break;
             }
             case Callback.DISPLAY_CLIENT_DETAILS: {
+                sendClientDetails(data, chatId, message.getMessageId());
                 break;
             }
             default:
@@ -111,12 +115,13 @@ public class ScheduleSlashCommand implements ISlashCommand {
         String[] parts = data.split(Callback.DELIMITER_SCHEDULE_STATE_DATES);
         Long botId = Long.parseLong(parts[1]);
         String date = parts[2];
+        String text = "Here it is: " + date + ".\n\nPlease select the appointment you would like to manage:";
         List<Appointment> appointments = Optional.ofNullable(botApi.findAppointmentsByDate(botId, date))
                 .map(List::of)
                 .orElse(List.of());
         InlineKeyboardMarkup appointmentsKeyboard = scheduleCommandHelper.appointmentsList(appointments, date, parts[1]);
         messageBatchProcessor.addTextUpdate(MessageGenerator.createEditMessageWithMarkup(
-                chatId.toString(), "Please select the appointment you would like to manage:", appointmentsKeyboard, messageId
+                chatId.toString(), text, appointmentsKeyboard, messageId
         ));
     }
 
@@ -125,10 +130,31 @@ public class ScheduleSlashCommand implements ISlashCommand {
         String appointmentId = parts[0];
         String date = parts[1];
         String botId = parts[2];
-        Appointment.AppointmentStatus appointmentStatus = appointmentApi.getAppointment(appointmentId).getStatus();
+        Appointment appointment = appointmentApi.getAppointment(appointmentId);
+        Appointment.AppointmentStatus appointmentStatus = appointment.getStatus();
+        String text = String.format("Here it is: %s (%s), 🕒 Date: %s at %s, Status: %s\n\n📝 What would you like to do with this appointment?",
+                appointment.getJob().getType(), appointment.getJob().getDuration() + "h",
+                date, appointment.getAppointmentDate().toLocalTime(), appointmentStatus);
         InlineKeyboardMarkup markup = scheduleCommandHelper.appointmentOptions(appointmentStatus, appointmentId, date, botId);
         messageBatchProcessor.addTextUpdate(MessageGenerator.createEditMessageWithMarkup(
-                chatId.toString(), "📝 Appointment manage options:", markup, messageId
+                chatId.toString(), text, markup, messageId
+        ));
+    }
+
+    private void sendClientDetails(String data, Long chatId, Integer messageId) {
+        String[] parts = data.split(Callback.DELIMITER_SCHEDULE_STATE_DATES);
+        String appointmentId = parts[0];
+        Client client = appointmentApi.getClient(Long.parseLong(appointmentId));
+        String text = String.format("Client Details:\n\n👤 Name: %s\n📞 Phone: %s\n📧 Email: %s",
+                client.getName(), client.getPhoneNumber(), client.getEmail());
+        String[][] buttonConfig = {
+                {"<< Back To Appointment:" + Callback.BACK_TO_APPOINTMENT + data}
+        };
+        List<List<InlineKeyboardButton>> keyboard = ButtonsGenerator.createKeyboard(buttonConfig);
+        InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+        markup.setKeyboard(keyboard);
+        messageBatchProcessor.addTextUpdate(MessageGenerator.createEditMessageWithMarkup(
+                chatId.toString(), text, markup, messageId
         ));
     }
 }

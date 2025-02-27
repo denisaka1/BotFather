@@ -31,6 +31,7 @@ public final class Callback {
     public static final String CONFIRM_APPOINTMENT = "confirm_appointment" + DELIMITER_SCHEDULE_STATE;
     public static final String CANCEL_APPOINTMENT = "cancel_appointment" + DELIMITER_SCHEDULE_STATE;
     public static final String DISPLAY_CLIENT_DETAILS = "display_client_details" + DELIMITER_SCHEDULE_STATE;
+    public static final String BACK_TO_APPOINTMENT = "back_to_appointment" + DELIMITER_SCHEDULE_STATE;
 
     public static final List<String> SCHEDULE_CALLBACKS = List.of(
             SELECT_APPOINTMENTS_BOT, BACK_TO_APPOINTMENTS_BOT, SELECT_DATE,

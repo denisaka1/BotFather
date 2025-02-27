@@ -49,7 +49,7 @@ public class ScheduleCommandHelper {
 
     public InlineKeyboardMarkup appointmentOptions(Appointment.AppointmentStatus appointmentStatus, String appointmentId, String date, String botId) {
         boolean isPending = appointmentStatus == Appointment.AppointmentStatus.PENDING;
-        String suffix = Callback.DELIMITER_SCHEDULE_STATE_DATES + appointmentId + Callback.DELIMITER_SCHEDULE_STATE_DATES
+        String suffix = appointmentId + Callback.DELIMITER_SCHEDULE_STATE_DATES
                 + date + Callback.DELIMITER_SCHEDULE_STATE_DATES + botId;
         String[][] buttonConfig = {
                 isPending

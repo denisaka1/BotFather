@@ -83,12 +83,6 @@ public class ScheduleSlashCommand implements ISlashCommand {
                 sendAppointmentsManageOptions(data, chatId, message.getMessageId());
                 break;
             }
-            case Callback.CONFIRM_APPOINTMENT: {
-                break;
-            }
-            case Callback.CANCEL_APPOINTMENT: {
-                break;
-            }
             case Callback.DISPLAY_CLIENT_DETAILS: {
                 sendClientDetails(data, chatId, message.getMessageId());
                 break;

@@ -3,6 +3,7 @@ package org.example.bots.manager.actions.helpers;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.bots.manager.constants.Callback;
+import org.example.data.layer.constants.AppointmentConst;
 import org.example.data.layer.entities.Appointment;
 import org.example.telegram.components.inline.keyboard.ButtonsGenerator;
 import org.springframework.stereotype.Component;
@@ -53,8 +54,8 @@ public class ScheduleCommandHelper {
                 + date + Callback.DELIMITER_SCHEDULE_STATE_DATES + botId;
         String[][] buttonConfig = {
                 isPending
-                        ? new String[]{"CONFIRM ✅:" + Callback.CONFIRM_APPOINTMENT + suffix, "CANCEL ❌:" + Callback.CANCEL_APPOINTMENT + suffix}
-                        : new String[]{"CANCEL ❌:" + Callback.CANCEL_APPOINTMENT + suffix},
+                        ? new String[]{"CONFIRM ✅:" + AppointmentConst.CONFIRM_APPOINTMENT + appointmentId, "CANCEL ❌:" + AppointmentConst.DECLINE_APPOINTMENT + appointmentId}
+                        : new String[]{"CANCEL ❌:" + AppointmentConst.DECLINE_APPOINTMENT + appointmentId},
                 {"🧑‍💼 Display Client Details:" + Callback.DISPLAY_CLIENT_DETAILS + suffix},
                 {"<< Back To Appointments:" + Callback.BACK_TO_APPOINTMENTS + " " + Callback.DELIMITER_SCHEDULE_STATE_DATES + botId + Callback.DELIMITER_SCHEDULE_STATE_DATES + date}
         };

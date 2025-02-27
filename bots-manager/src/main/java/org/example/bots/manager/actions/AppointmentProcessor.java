@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
+import java.time.format.DateTimeFormatter;
+
 @Component
 @RequiredArgsConstructor
 public class AppointmentProcessor {
@@ -37,11 +39,10 @@ public class AppointmentProcessor {
         Long chatId = message.getChatId();
         Integer messageId = message.getMessageId();
         // adjusts the text
-        messageBatchProcessor.addTextUpdate(
-                MessageGenerator.createEditMessage(
+        messageBatchProcessor.addMessage(
+                MessageGenerator.createSimpleTextMessage(
                         chatId,
-                        responseToOwner,
-                        messageId
+                        responseToOwner
                 )
         );
         messageBatchProcessor.addDeleteMessage(
@@ -55,7 +56,6 @@ public class AppointmentProcessor {
     private String handleAcceptedAppointment(String appointmentId) {
         Appointment appointment = appointmentApi.getAppointment(appointmentId);
         Client client = appointmentApi.getClient(appointment.getId());
-
         appointment.setStatus(Appointment.AppointmentStatus.APPROVED);
         appointmentApi.updateAppointment(appointment);
 
@@ -65,14 +65,14 @@ public class AppointmentProcessor {
                         "✅ Your appointment has been approved!"
                 )
         );
-
-        return "Appointment approved";
+        return String.format("✅ %s (%sh) Appointment scheduled for %s at %s for %s approved!",
+                appointment.getJob().getType(), appointment.getJob().getDuration(), appointment.getAppointmentDate().toLocalDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                appointment.getAppointmentDate().toLocalTime(), client.getName());
     }
 
     private String handleDeclinedAppointment(String appointmentId) {
         Appointment appointment = appointmentApi.getAppointment(appointmentId);
         Client client = appointmentApi.getClient(appointment.getId());
-
         appointment.setStatus(Appointment.AppointmentStatus.CANCELED);
         appointmentApi.updateAppointment(appointment);
 
@@ -82,7 +82,8 @@ public class AppointmentProcessor {
                         "❌ Your appointment has been declined!"
                 )
         );
-
-        return "Appointment declined!";
+        return String.format("❌ %s (%sh) Appointment scheduled for %s at %s for %s declined!",
+                appointment.getJob().getType(), appointment.getJob().getDuration(), appointment.getAppointmentDate().toLocalDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                appointment.getAppointmentDate().toLocalTime(), client.getName());
     }
 }

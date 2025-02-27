@@ -67,7 +67,6 @@ public class ScheduleState implements IDynamicBotState {
 
     private void sendBackToMenu(DynamicMessageService context, Bot bot, Message message, CallbackQuery callback, String userTelegramId) {
         ScheduleOrCancelQuestionState scheduleOrCancelQuestionState = context.getScheduleOrCancelQuestionState();
-        context.setState(userTelegramId, bot.getId(), scheduleOrCancelQuestionState);
         scheduleOrCancelQuestionState.handle(context, bot, message, callback);
     }
 

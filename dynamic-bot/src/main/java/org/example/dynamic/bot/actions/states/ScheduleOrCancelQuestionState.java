@@ -29,11 +29,9 @@ public class ScheduleOrCancelQuestionState implements IDynamicBotState {
             String data = callbackData.getData();
             if (Callback.SCHEDULE_APPOINTMENT.equals(data)) {
                 ScheduleState scheduleState = context.getScheduleState();
-                context.setState(callbackData.getFrom().getId().toString(), bot.getId(), scheduleState);
                 scheduleState.handle(context, bot, message);
-            } else if (Callback.CANCEL_APPOINTMENT.equals(data)) {
+            } else if (Callback.CANCEL_APPOINTMENT_BUTTON.equals(data)) {
                 CancelAppointmentsState cancelAppointmentsState = context.getCancelAppointmentsState();
-                context.setState(callbackData.getFrom().getId().toString(), bot.getId(), cancelAppointmentsState);
                 cancelAppointmentsState.handle(context, bot, message);
             } else {
                 createScheduleOrCancelButtons(chatId, bot, message, true);
@@ -50,7 +48,7 @@ public class ScheduleOrCancelQuestionState implements IDynamicBotState {
                 ? new String[][]{{"📅 Schedule An Appointment:" + Callback.SCHEDULE_APPOINTMENT}}
                 : new String[][]{
                 {"📅 Schedule An Appointment:" + Callback.SCHEDULE_APPOINTMENT},
-                {"❌ Cancel An Existing Appointment:" + Callback.CANCEL_APPOINTMENT}
+                {"❌ Cancel An Existing Appointment:" + Callback.CANCEL_APPOINTMENT_BUTTON}
         };
         if (shouldEdit) {
             messageBatchProcessor.addTextUpdate(

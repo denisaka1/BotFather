@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import org.example.client.api.helper.ApiRequestHelper;
 import org.example.data.layer.entities.Appointment;
 import org.example.data.layer.entities.Client;
-import org.example.data.layer.entities.ClientScheduleState;
 import org.springframework.stereotype.Component;
 
 @AllArgsConstructor
@@ -49,15 +48,6 @@ public class ClientApi {
         return apiRequestHelper.post(url, appointment, Appointment.class);
     }
 
-    public Client updateScheduleState(ClientScheduleState clientScheduleState, String userTelegramId) {
-        String url = BASE_URL + "/" + userTelegramId + "/schedule_state";
-        return apiRequestHelper.put(
-                url,
-                clientScheduleState,
-                Client.class
-        );
-    }
-
     public Appointment deleteAppointment(String appointmentId, String userTelegramId) {
         String url = BASE_URL + "/" + userTelegramId + "/appointment/" + appointmentId;
         return apiRequestHelper.put(
@@ -66,7 +56,6 @@ public class ClientApi {
                 Appointment.class
         );
     }
-
 
     public Client updateClient(Client client, String userTelegramId) {
         String url = BASE_URL + "/" + userTelegramId;

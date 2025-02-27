@@ -32,9 +32,6 @@ public class AuthState implements IDynamicBotState {
         Long userId = message.getFrom().getId();
         GenericForm form = userForms.computeIfAbsent(userId, k -> createForm(bot));
         String response = execute(form, message);
-        if (form.isCompleted()) {
-            context.setState(message.getFrom().getId().toString(), bot.getId(), context.getScheduleOrCancelQuestionState());
-        }
         messageBatchProcessor.addMessage(commonStateHelper.createSendMessage(message.getChatId(), response));
     }
 

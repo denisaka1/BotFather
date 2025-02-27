@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import org.example.backend.api.data.services.ClientService;
 import org.example.data.layer.entities.Appointment;
 import org.example.data.layer.entities.Client;
-import org.example.data.layer.entities.ClientScheduleState;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,11 +47,6 @@ public class ClientController {
     @PutMapping("{id}/appointment/{appointmentId}")
     public ResponseEntity<Appointment> deleteAppointment(@PathVariable String appointmentId, @PathVariable String id) {
         return ResponseEntity.ok(clientService.deleteAppointment(id, appointmentId));
-    }
-
-    @PutMapping("{userTelegramId}/schedule_state")
-    public ResponseEntity<Client> updateScheduleState(@PathVariable String userTelegramId, @RequestBody ClientScheduleState clientScheduleState) {
-        return ResponseEntity.ok(clientService.updateScheduleState(userTelegramId, clientScheduleState));
     }
 
     @PutMapping("{userTelegramId}")

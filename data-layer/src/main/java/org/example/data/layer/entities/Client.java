@@ -5,7 +5,6 @@ import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Getter
 @Setter
@@ -36,9 +35,6 @@ public class Client {
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Appointment> appointments;
 
-    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ClientScheduleState> scheduleStates;
-
     @PostPersist
     private void onCreate() {
         appointments = new ArrayList<>();
@@ -48,27 +44,6 @@ public class Client {
         appointments.add(appointment);
         appointment.setClient(this);
         appointment.setBot(bot);
-    }
-
-    public void addScheduleState(Long key, AppointmentScheduleState state) {
-        ClientScheduleState scheduleState = new ClientScheduleState();
-        scheduleState.setBotId(key);
-        scheduleState.setState(state);
-        scheduleState.setClient(this);
-        scheduleStates.add(scheduleState);
-    }
-
-    public void updateScheduleState(ClientScheduleState clientScheduleState) {
-        Long key = clientScheduleState.getBotId();
-        AppointmentScheduleState state = clientScheduleState.getState();
-        Optional<ClientScheduleState> existingState = scheduleStates.stream()
-                .filter(s -> s.getBotId().equals(key))
-                .findFirst();
-        if (existingState.isPresent()) {
-            existingState.get().setState(state);
-        } else {
-            addScheduleState(key, state);
-        }
     }
 
     public Appointment removeAppointment(Appointment appointment) {
@@ -83,6 +58,4 @@ public class Client {
         if (appointments == null || appointments.isEmpty()) return null;
         return appointments.get(appointments.size() - 1);
     }
-
-    public enum AppointmentScheduleState {AuthState, ScheduleOrCancelQuestionState, ScheduleState, CancelAppointmentsState}
 }

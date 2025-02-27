@@ -4,7 +4,10 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.example.backend.api.data.repositories.BotRepository;
 import org.example.backend.api.data.repositories.ClientRepository;
-import org.example.data.layer.entities.*;
+import org.example.data.layer.entities.Appointment;
+import org.example.data.layer.entities.Bot;
+import org.example.data.layer.entities.Client;
+import org.example.data.layer.entities.Job;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,13 +50,6 @@ public class ClientService {
         );
         client.addAppointment(appointment, bot);
         return clientRepository.save(client).getLastAppointment();
-    }
-
-    public Client updateScheduleState(String telegramId, ClientScheduleState clientScheduleState) {
-        Client client = clientRepository.findByTelegramId(telegramId)
-                .orElseThrow(() -> new EntityNotFoundException("Client not found with telegramId: " + telegramId));
-        client.updateScheduleState(clientScheduleState);
-        return clientRepository.save(client);
     }
 
     public Client updateClient(String userTelegramId, Client client) {

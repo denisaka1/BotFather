@@ -11,4 +11,5 @@ public class Callback {
     public static final String NOT_CANCEL = "NotCancel";
     public static final String BACK_TO_APPOINTMENTS = "BackToAppointments";
     public static final String SCHEDULE_APPOINTMENT = "ScheduleAppointment";
+    public static final String CANCEL_APPOINTMENT_BUTTON = "CancelAppointmentButton";
 }

@@ -22,6 +22,7 @@
         <module>backend-api-layer</module>
         <module>dynamic-bot</module>
         <module>bots-manager</module>
+        <module>mail-service</module>
     </modules>
 
     <url/>

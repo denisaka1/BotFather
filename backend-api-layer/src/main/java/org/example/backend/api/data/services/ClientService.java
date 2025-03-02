@@ -99,4 +99,8 @@ public class ClientService {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(appointmentsByDate);
     }
+
+    public ResponseEntity<List<Client>> findAllClients() {
+        return ResponseEntity.ok(clientRepository.findAll());
+    }
 }

@@ -65,4 +65,11 @@ public class ClientApi {
                 Client.class
         );
     }
+
+    public Client[] findAllClients() {
+        return apiRequestHelper.get(
+                BASE_URL,
+                Client[].class
+        );
+    }
 }

@@ -15,6 +15,11 @@ import java.util.List;
 public class ClientController {
     private final ClientService clientService;
 
+    @GetMapping
+    public ResponseEntity<List<Client>> findAllClients() {
+        return clientService.findAllClients();
+    }
+
     @GetMapping("{telegramId}")
     public ResponseEntity<Client> findByTelegramId(@PathVariable String telegramId) {
         return clientService.findByTelegramId(telegramId);

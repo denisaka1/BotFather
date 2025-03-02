@@ -10,6 +10,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.StringJoiner;
 
@@ -34,7 +35,7 @@ public class DailyScheduler {
                     .toList();
             if (appointments.isEmpty()) continue;
             String subject = "📅 Daily Appointments Reminder from Bots Manager";
-            String message = buildEmailContent(client, appointments);
+            String message = buildEmailContent(appointments);
             mailService.sendEmail(to, subject, message, true);
             emailsSent++;
         }
@@ -47,22 +48,23 @@ public class DailyScheduler {
         return !appointmentDate.isBefore(now) && appointmentDate.isBefore(tomorrow);
     }
 
-    private String buildEmailContent(Client client, List<Appointment> todaysAppointments) {
+    private String buildEmailContent(List<Appointment> todaysAppointments) {
         StringJoiner appointmentList = new StringJoiner("", "<ul>", "</ul>");
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
 
         todaysAppointments.forEach(appointment ->
                 appointmentList.add("<li>")
                         .add(appointment.getJob().getType())
                         .add(" (").add(String.valueOf(appointment.getJob().getDuration()))
                         .add("h) at ")
-                        .add(appointment.getAppointmentDate().toString())
+                        .add(appointment.getAppointmentDate().toLocalTime().format(timeFormatter))
                         .add("</li>"));
 
         return String.format("""
-                <h3>Hello %s!</h3>
+                <h3>Hello!</h3>
                 <p>This is your daily appointments update.</p>
                 <p>Here are your appointments for today:</p>
                 %s
-                """, client.getName(), appointmentList);
+                """, appointmentList);
     }
 }

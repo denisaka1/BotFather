@@ -18,7 +18,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
                 "org.example.dynamic.bot.config",
                 "org.example.dynamic.bot.actions",
                 "org.example.dynamic.bot.controllers",
-                "org.example.dynamic.bot.services"
+                "org.example.dynamic.bot.services",
+                "org.example.dynamic.bot.scheduler",
 
         }
 )

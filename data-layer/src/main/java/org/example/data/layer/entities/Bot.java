@@ -5,9 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 
 @Setter
 @Getter
@@ -98,39 +96,5 @@ public class Bot {
         for (WorkingHours workingHour : workingHours) {
             addWorkingHour(workingHour);
         }
-    }
-
-    public String info() {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("Name: ").append(name).append("\n");
-        stringBuilder.append("Username: ").append(username).append("\n");
-        stringBuilder.append("Welcome message:").append("\n").append(welcomeMessage).append("\n\n");
-
-        stringBuilder.append("Working hours:").append("\n");
-        for (WorkingHours workingHour : workingHours) {
-            stringBuilder.append(workingHour.info());
-        }
-        stringBuilder.append("\n");
-
-        stringBuilder.append("Jobs:").append("\n");
-        List<Job> sortedJobs = jobs.stream()
-                .sorted(Comparator.comparing(Job::getType))
-                .toList();
-
-        if (!sortedJobs.isEmpty()) {
-            Job previousJob = sortedJobs.get(0);
-            stringBuilder.append(previousJob.info());
-            for (Job job : sortedJobs.subList(1, sortedJobs.size())) {
-                if (Objects.equals(previousJob.getType(), job.getType())) {
-                    stringBuilder.append(", ").append(job.getDuration()).append("h");
-                } else {
-                    stringBuilder.append("\n").append(job.info());
-                }
-                previousJob = job;
-            }
-        }
-        stringBuilder.append("\n");
-
-        return stringBuilder.toString();
     }
 }

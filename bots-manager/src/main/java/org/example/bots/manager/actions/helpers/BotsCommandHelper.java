@@ -7,6 +7,7 @@ import org.example.client.api.controller.BusinessOwnerApi;
 import org.example.client.api.processor.MessageBatchProcessor;
 import org.example.data.layer.entities.Bot;
 import org.example.data.layer.entities.BotCreationState;
+import org.example.data.layer.helpers.BotHelper;
 import org.example.telegram.components.inline.keyboard.ButtonsGenerator;
 import org.example.telegram.components.inline.keyboard.MessageGenerator;
 import org.springframework.stereotype.Component;
@@ -136,7 +137,7 @@ public class BotsCommandHelper {
         keyboardMarkup.setKeyboard(keyboard);
 
         Bot bot = botApi.getBot(botId);
-        String text = "What would you like to do with @" + bot.getName() + "?\n" + bot.info();
+        String text = "What would you like to do with @" + bot.getName() + "?\n" + BotHelper.info(bot);
 
         messageBatchProcessor.addTextUpdate(
                 MessageGenerator.createEditMessageWithMarkup(

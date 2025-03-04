@@ -42,7 +42,7 @@ public class WorkingHours {
 
     public void removeTimeRange(TimeRange timeRange) {
         if (timeRanges == null) return;
-        
+
         timeRanges.remove(timeRange);
         timeRange.setWorkingHours(null);
     }
@@ -58,18 +58,5 @@ public class WorkingHours {
         for (TimeRange timeRange : timeRanges) {
             addTimeRange(timeRange);
         }
-    }
-
-    public String info() {
-        if (timeRanges.isEmpty()) return "";
-
-        StringBuilder stringBuilder = new StringBuilder(day + " ");
-        for (TimeRange timeRange : timeRanges) {
-            stringBuilder.append(timeRange.getStartTime()).append(" - ").append(timeRange.getEndTime()).append(", ");
-        }
-        stringBuilder.setLength(stringBuilder.length() - 2); // remove last ", "
-
-        stringBuilder.append("\n");
-        return stringBuilder.toString();
     }
 }

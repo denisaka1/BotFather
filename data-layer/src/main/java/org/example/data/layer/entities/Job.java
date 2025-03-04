@@ -28,8 +28,4 @@ public class Job {
     @JsonIgnore
     @JoinColumn(name = "bot_id")
     private Bot owner;
-
-    public String info() {
-        return type + " duration: " + duration + "h";
-    }
 }

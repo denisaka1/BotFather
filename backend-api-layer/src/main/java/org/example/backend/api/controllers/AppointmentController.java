@@ -3,6 +3,7 @@ package org.example.backend.api.controllers;
 import lombok.AllArgsConstructor;
 import org.example.backend.api.data.services.AppointmentService;
 import org.example.data.layer.entities.Appointment;
+import org.example.data.layer.entities.Bot;
 import org.example.data.layer.entities.Client;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,4 +29,8 @@ public class AppointmentController {
         return ResponseEntity.ok(appointmentService.getClient(id).orElse(null));
     }
 
+    @GetMapping("/{telegramId}/bot")
+    public ResponseEntity<Bot> getBotFromAppointmentResult(@PathVariable Long telegramId) {
+        return ResponseEntity.ok(appointmentService.getBotFromAppointmentResult(telegramId).orElse(null));
+    }
 }

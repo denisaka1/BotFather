@@ -3,6 +3,7 @@ package org.example.client.api.controller;
 import lombok.AllArgsConstructor;
 import org.example.client.api.helper.ApiRequestHelper;
 import org.example.data.layer.entities.Appointment;
+import org.example.data.layer.entities.Bot;
 import org.example.data.layer.entities.Client;
 import org.springframework.stereotype.Component;
 
@@ -31,6 +32,13 @@ public class AppointmentApi {
         return apiRequestHelper.get(
                 BASE_URL + "/" + appointmentId + "/client",
                 Client.class
+        );
+    }
+
+    public Bot getBotFromAppointmentResult(String chatId) {
+        return apiRequestHelper.get(
+                BASE_URL + "/" + chatId + "/bot",
+                Bot.class
         );
     }
 }

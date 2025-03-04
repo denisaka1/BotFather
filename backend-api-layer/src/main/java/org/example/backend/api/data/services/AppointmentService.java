@@ -3,6 +3,7 @@ package org.example.backend.api.data.services;
 import lombok.AllArgsConstructor;
 import org.example.backend.api.data.repositories.AppointmentRepository;
 import org.example.data.layer.entities.Appointment;
+import org.example.data.layer.entities.Bot;
 import org.example.data.layer.entities.Client;
 import org.springframework.stereotype.Service;
 
@@ -31,5 +32,10 @@ public class AppointmentService {
 
     public Optional<Client> getClient(Long id) {
         return getAppointment(id).map(Appointment::getClient);
+    }
+
+    public Optional<Bot> getBotFromAppointmentResult(Long telegramId) {
+        return appointmentRepository.findByOwnerResponseAndClientTelegramId(telegramId)
+                .map(Appointment::getBot);
     }
 }

@@ -2,6 +2,7 @@ package org.example.dynamic.bot.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.client.api.controller.AppointmentApi;
 import org.example.client.api.processor.MessageBatchProcessor;
 import org.example.data.layer.entities.Bot;
 import org.springframework.context.annotation.Scope;
@@ -21,6 +22,7 @@ import java.util.List;
 @Scope("prototype")
 @RequiredArgsConstructor
 public class DynamicBot extends TelegramLongPollingBot {
+    private final AppointmentApi appointmentApi;
     private Bot bot;
     private final DynamicMessageService dynamicMessageService;
     private final MessageBatchProcessor messageBatchProcessor;
@@ -46,6 +48,7 @@ public class DynamicBot extends TelegramLongPollingBot {
     }
 
     public void handleAppointmentResponse(SendMessage message) {
+        initialize(appointmentApi.getBotFromAppointmentResult(message.getChatId()));
         messageBatchProcessor.addMessage(message);
         sendMessage(message.getChatId());
     }

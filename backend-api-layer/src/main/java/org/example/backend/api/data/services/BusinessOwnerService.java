@@ -1,42 +1,34 @@
 package org.example.backend.api.data.services;
 
 import lombok.AllArgsConstructor;
-import org.example.backend.api.data.repositories.BotRepository;
 import org.example.backend.api.data.repositories.BusinessOwnerRepository;
 import org.example.data.layer.entities.Bot;
 import org.example.data.layer.entities.BusinessOwner;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
 public class BusinessOwnerService {
 
     private final BusinessOwnerRepository businessOwnerRepository;
-    private final BotRepository botRepository;
-
-    public List<BusinessOwner> findAll() {
-        return businessOwnerRepository.findAll();
-    }
 
     public BusinessOwner saveBusinessOwner(BusinessOwner businessOwner) {
         return businessOwnerRepository.save(businessOwner);
     }
 
-    public Bot saveBot(Long userTelegramId, Bot bot) {
-        BusinessOwner owner = getOwner(userTelegramId);
-//        Bot savedBot = botRepository.save(bot);
-        owner.addBot(bot);
-        businessOwnerRepository.save(owner);
-
-        return owner.getBots().get(owner.getBots().size() - 1);
+    public Optional<Bot> saveBot(Long userTelegramId, Bot bot) {
+        return getOwner(userTelegramId).map(owner -> {
+            owner.addBot(bot);
+            BusinessOwner savedOwner = businessOwnerRepository.save(owner);
+            return savedOwner.getBots().get(savedOwner.getBots().size() - 1);
+        });
     }
 
-    public List<Bot> findAllBots(Long userTelegramId) {
-        BusinessOwner owner = getOwner(userTelegramId);
-        return owner.getBots();
+    public Optional<List<Bot>> findAllBots(Long userTelegramId) {
+        return getOwner(userTelegramId).map(BusinessOwner::getBots);
     }
 
     public boolean existsByUserTelegramId(Long userTelegramId) {
@@ -44,39 +36,32 @@ public class BusinessOwnerService {
     }
 
     public BusinessOwner updateBusinessOwner(Long id, BusinessOwner businessOwner) {
-        BusinessOwner currentOwner = businessOwnerRepository.findById(id).orElseThrow();
-        if (businessOwner.getUserTelegramId() != null) {
-            currentOwner.setUserTelegramId(businessOwner.getUserTelegramId());
-        }
-        if (businessOwner.getFirstName() != null) {
-            currentOwner.setFirstName(businessOwner.getFirstName());
-        }
-        if (businessOwner.getLastName() != null) {
-            currentOwner.setLastName(businessOwner.getLastName());
-        }
-        if (businessOwner.getEmail() != null) {
-            currentOwner.setEmail(businessOwner.getEmail());
-        }
-        if (businessOwner.getPhoneNumber() != null) {
-            currentOwner.setPhoneNumber(businessOwner.getPhoneNumber());
-        }
-        if (businessOwner.getAddress() != null) {
-            currentOwner.setAddress(businessOwner.getAddress());
-        }
-        if (businessOwner.getRegistrationState() != currentOwner.getRegistrationState()) {
-            currentOwner.setRegistrationState(businessOwner.getRegistrationState());
-        }
-        return businessOwnerRepository.save(currentOwner);
+        return businessOwnerRepository.findById(id).map(owner -> {
+            Optional.ofNullable(businessOwner.getUserTelegramId()).ifPresent(owner::setUserTelegramId);
+            Optional.ofNullable(businessOwner.getFirstName()).ifPresent(owner::setFirstName);
+            Optional.ofNullable(businessOwner.getLastName()).ifPresent(owner::setLastName);
+            Optional.ofNullable(businessOwner.getEmail()).ifPresent(owner::setEmail);
+            Optional.ofNullable(businessOwner.getPhoneNumber()).ifPresent(owner::setPhoneNumber);
+            Optional.ofNullable(businessOwner.getAddress()).ifPresent(owner::setAddress);
+            if (owner.getRegistrationState() != businessOwner.getRegistrationState()) {
+                owner.setRegistrationState(businessOwner.getRegistrationState());
+            }
+            return businessOwnerRepository.save(owner);
+        }).orElse(businessOwner);
     }
 
-    public BusinessOwner getOwner(Long userTelegramId) {
-        return businessOwnerRepository.findByUserTelegramId(userTelegramId).orElseThrow();
+    public Optional<BusinessOwner> getOwner(Long userTelegramId) {
+        return businessOwnerRepository.findByUserTelegramId(userTelegramId);
     }
 
-    public Bot getEditableBot(Long userTelegramId) {
+    public Optional<Bot> getEditableBot(Long userTelegramId) {
         boolean allFieldsPopulated;
+        Optional<List<Bot>> findAllBots = findAllBots(userTelegramId);
+        if (findAllBots.isEmpty()) {
+            return Optional.empty();
+        }
 
-        for (Bot bot : findAllBots(userTelegramId)) {
+        for (Bot bot : findAllBots.get()) {
             allFieldsPopulated = bot.getUsername() != null &&
                     bot.getName() != null &&
                     bot.getWelcomeMessage() != null &&
@@ -84,36 +69,26 @@ public class BusinessOwnerService {
                     !bot.getJobs().isEmpty() &&
                     !bot.getWorkingHours().isEmpty();
             if (allFieldsPopulated && !bot.getCreationState().isCompleted())
-                return bot;
+                return Optional.of(bot);
         }
 
-        return null;
+        return Optional.empty();
     }
 
-    public Bot deleteBot(Long userTelegramId, Long botId) {
-        BusinessOwner owner = getOwner(userTelegramId);
-        Bot botToDel = owner.getBots().stream()
-                .filter(bot -> bot.getId().equals(botId))
-                .findFirst()
-                .orElse(null);
-
-        owner.removeBot(botToDel);
-        businessOwnerRepository.save(owner);
-
-        return botToDel;
+    public Optional<Bot> deleteBot(Long userTelegramId, Long botId) {
+        return businessOwnerRepository.findBotByOwnerId(userTelegramId, botId).map(bot -> {
+            BusinessOwner owner = bot.getOwner();
+            owner.removeBot(bot);
+            businessOwnerRepository.save(owner);
+            return bot;
+        });
     }
 
-    public List<Bot> getDisplayableBots(Long userTelegramId) {
-        List<Bot> bots = new ArrayList<>(
-                findAllBots(userTelegramId).stream()
-                        .filter(bot -> bot.getCreationState().isCompleted())
-                        .toList()
-        );
-
-        Bot bot = getEditableBot(userTelegramId);
-        if (bot != null)
-            bots.add(getEditableBot(userTelegramId));
-
-        return bots;
+    public Optional<List<Bot>> getDisplayableBots(Long userTelegramId) {
+        return businessOwnerRepository.findDisplayableBots(userTelegramId).map(bots -> {
+            Optional<Bot> bot = getEditableBot(userTelegramId);
+            bot.ifPresent(bots::add);
+            return bots;
+        });
     }
 }

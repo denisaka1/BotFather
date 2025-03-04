@@ -17,12 +17,12 @@ public class BotController {
 
     @GetMapping("{id}")
     public ResponseEntity<Bot> getBot(@PathVariable Long id) {
-        return ResponseEntity.ok(botService.getBot(id));
+        return botService.getBot(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("{id}/owner")
     public ResponseEntity<BusinessOwner> getBotOwner(@PathVariable Long id) {
-        return ResponseEntity.ok(botService.getBotOwner(id));
+        return botService.getBotOwner(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping
@@ -47,7 +47,7 @@ public class BotController {
 
     @GetMapping("{id}/jobs")
     public ResponseEntity<List<Job>> getJobs(@PathVariable Long id) {
-        return ResponseEntity.ok(botService.fetchJobs(id));
+        return botService.fetchJobs(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping("{id}/working_hour")
@@ -57,6 +57,6 @@ public class BotController {
 
     @GetMapping("{id}/appointments_by_date")
     public ResponseEntity<List<Appointment>> findAppointmentByDate(@PathVariable Long id, @RequestParam String date) {
-        return botService.findAppointmentsByDate(id, date);
+        return botService.findAppointmentsByDate(id, date).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 }

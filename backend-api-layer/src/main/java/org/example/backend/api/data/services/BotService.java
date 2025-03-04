@@ -1,10 +1,8 @@
 package org.example.backend.api.data.services;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.example.backend.api.data.repositories.BotRepository;
 import org.example.data.layer.entities.*;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -28,64 +26,58 @@ public class BotService {
     }
 
     public Job saveJob(Long id, Job job) {
-        Bot bot = botRepository.findById(id).orElseThrow();
-        bot.addJob(job);
-        botRepository.save(bot);
+        getBot(id).ifPresent(bot -> {
+            bot.addJob(job);
+            botRepository.save(bot);
+        });
         return job;
     }
 
     public WorkingHours saveWorkingHour(Long id, WorkingHours workingHours) {
-        Bot bot = botRepository.findById(id).orElseThrow();
-        bot.addWorkingHour(workingHours);
-        botRepository.save(bot);
-        return workingHours;
+        return getBot(id).map(bot -> {
+            bot.addWorkingHour(workingHours);
+            Bot savedBot = botRepository.save(bot);
+            return savedBot.getWorkingHours().get(savedBot.getWorkingHours().size() - 1);
+        }).orElse(workingHours);
     }
 
-    public List<Job> fetchJobs(Long id) {
-        Bot bot = botRepository.findById(id).orElseThrow();
-        return bot.getJobs();
+    public Optional<List<Job>> fetchJobs(Long id) {
+        return getBot(id).map(Bot::getJobs);
     }
 
-    public Bot getBot(Long id) {
-        return botRepository.findById(id).orElseThrow();
+    public Optional<Bot> getBot(Long id) {
+        return botRepository.findById(id);
     }
 
     public Bot updateBot(Long id, Bot incomingBot) {
-        Optional<Bot> optionalExistingBot = botRepository.findById(id);
+        Bot botToSave = getBot(id).map(bot -> {
+            bot.setName(incomingBot.getName());
+            bot.setUsername(incomingBot.getUsername());
+            bot.setToken(incomingBot.getToken());
+            bot.setWelcomeMessage(incomingBot.getWelcomeMessage());
+            bot.setCreationState(incomingBot.getCreationState());
 
-        if (optionalExistingBot.isPresent()) {
-            Bot existingBot = optionalExistingBot.get();
+            bot.getJobs().clear();
+            bot.addJobs(incomingBot.getJobs());
 
-            existingBot.setName(incomingBot.getName());
-            existingBot.setUsername(incomingBot.getUsername());
-            existingBot.setToken(incomingBot.getToken());
-            existingBot.setWelcomeMessage(incomingBot.getWelcomeMessage());
-            existingBot.setCreationState(incomingBot.getCreationState());
+            bot.getWorkingHours().clear();
+            bot.addWorkingHours(incomingBot.getWorkingHours());
+            return bot;
+        }).orElse(incomingBot);
 
-            existingBot.getJobs().clear();
-            existingBot.addJobs(incomingBot.getJobs());
-
-            existingBot.getWorkingHours().clear();
-            existingBot.addWorkingHours(incomingBot.getWorkingHours());
-
-            return botRepository.save(existingBot);
-        } else {
-            return botRepository.save(incomingBot);
-        }
+        return botRepository.save(botToSave);
     }
 
-    public BusinessOwner getBotOwner(Long id) {
-        Bot bot = botRepository.findById(id).orElseThrow();
-        return bot.getOwner();
+    public Optional<BusinessOwner> getBotOwner(Long id) {
+        return getBot(id).map(Bot::getOwner);
     }
 
-    public ResponseEntity<List<Appointment>> findAppointmentsByDate(Long id, String date) {
-        Bot bot = botRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Bot not found with id: " + id));
-        LocalDateTime targetDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("dd/MM/yyyy")).atStartOfDay();
-        List<Appointment> appointmentsByDate = bot.getAppointments().stream()
-                .filter(appointment -> appointment.getAppointmentDate().toLocalDate().equals(targetDate.toLocalDate()))
-                .toList();
-        return ResponseEntity.ok(appointmentsByDate);
+    public Optional<List<Appointment>> findAppointmentsByDate(Long id, String date) {
+        return getBot(id).map(bot -> {
+            LocalDateTime targetDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("dd/MM/yyyy")).atStartOfDay();
+            return bot.getAppointments().stream()
+                    .filter(appointment -> appointment.getAppointmentDate().toLocalDate().equals(targetDate.toLocalDate()))
+                    .toList();
+        });
     }
 }

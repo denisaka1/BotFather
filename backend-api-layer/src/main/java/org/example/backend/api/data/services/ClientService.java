@@ -2,10 +2,10 @@ package org.example.backend.api.data.services;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
-import org.example.backend.api.data.repositories.BotRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.example.backend.api.data.repositories.ClientRepository;
+import org.example.backend.api.data.repositories.JobRepository;
 import org.example.data.layer.entities.Appointment;
-import org.example.data.layer.entities.Bot;
 import org.example.data.layer.entities.Client;
 import org.example.data.layer.entities.Job;
 import org.springframework.http.ResponseEntity;
@@ -20,15 +20,14 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 @AllArgsConstructor
 public class ClientService {
     private final ClientRepository clientRepository;
-    private final BotRepository botRepository;
+    private final JobRepository jobRepository;
 
-    public ResponseEntity<Client> findByTelegramId(String telegramId) {
-        return clientRepository.findByTelegramId(telegramId)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    public Optional<Client> findByTelegramId(String telegramId) {
+        return clientRepository.findByTelegramId(telegramId);
     }
 
     public Client saveClient(Client client) {
@@ -36,34 +35,34 @@ public class ClientService {
     }
 
     @Transactional
-    public Appointment createAppointment(Long clientId, Appointment appointment, Long botId, Long jobId) {
-        Client client = clientRepository.findById(clientId)
-                .orElseThrow(() -> new EntityNotFoundException("Client not found with id: " + clientId));
-        Bot bot = botRepository.findById(botId)
-                .orElseThrow(() -> new EntityNotFoundException("Bot not found with id: " + botId));
-        Optional<Job> job = bot.getJobs().stream()
-                .filter(j -> j.getId().equals(jobId))
-                .findFirst();
-        job.ifPresentOrElse(
-                appointment::setJob,
-                () -> System.out.println("Job not found")
-        );
-        client.addAppointment(appointment, bot);
-        return clientRepository.save(client).getLastAppointment();
+    public Optional<Appointment> createAppointment(Long clientId, Appointment appointment, Long botId, Long jobId) {
+        Optional<Client> clientOpt = clientRepository.findById(clientId);
+        if (clientOpt.isEmpty()) {
+            log.warn("Failed to create appointment: Client with ID {} not found", clientId);
+            return Optional.empty();
+        }
+
+        Optional<Job> jobOpt = jobRepository.findByIdAndBotId(jobId, botId);
+        if (jobOpt.isEmpty()) {
+            log.warn("Failed to create appointment: Job with ID {} not found for Bot ID {}", jobId, botId);
+            return Optional.empty();
+        }
+
+        Client client = clientOpt.get();
+        Job job = jobOpt.get();
+        appointment.setJob(job);
+        client.addAppointment(appointment, job.getOwner());
+
+        return Optional.of(clientRepository.save(client).getLastAppointment());
     }
 
-    public Client updateClient(String userTelegramId, Client client) {
-        Client oldClient = clientRepository.findByTelegramId(userTelegramId).orElseThrow();
-        if (client.getName() != null) {
-            oldClient.setName(client.getName());
-        }
-        if (client.getEmail() != null) {
-            oldClient.setEmail(client.getEmail());
-        }
-        if (client.getPhoneNumber() != null) {
-            oldClient.setPhoneNumber(client.getPhoneNumber());
-        }
-        return clientRepository.save(oldClient);
+    public Client updateClient(String userTelegramId, Client incomingClient) {
+        return findByTelegramId(userTelegramId).map(client -> {
+            Optional.ofNullable(incomingClient.getName()).ifPresent(client::setName);
+            Optional.ofNullable(incomingClient.getEmail()).ifPresent(client::setEmail);
+            Optional.ofNullable(incomingClient.getPhoneNumber()).ifPresent(client::setPhoneNumber);
+            return clientRepository.save(client);
+        }).orElse(incomingClient);
     }
 
     public ResponseEntity<List<Appointment>> findAppointments(String telegramId, Long botId) {

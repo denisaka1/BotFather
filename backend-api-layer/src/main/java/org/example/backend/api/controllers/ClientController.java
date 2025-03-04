@@ -22,7 +22,9 @@ public class ClientController {
 
     @GetMapping("{telegramId}")
     public ResponseEntity<Client> findByTelegramId(@PathVariable String telegramId) {
-        return clientService.findByTelegramId(telegramId);
+        return clientService.findByTelegramId(telegramId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("{telegramId}/appointments")
@@ -46,7 +48,9 @@ public class ClientController {
             @RequestParam Long botId,
             @RequestParam Long jobId,
             @PathVariable Long id) {
-        return ResponseEntity.ok(clientService.createAppointment(id, appointment, botId, jobId));
+        return clientService.createAppointment(id, appointment, botId, jobId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PutMapping("{id}/appointment/{appointmentId}")

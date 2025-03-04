@@ -18,22 +18,22 @@ public class BusinessOwnerController {
 
     @PostMapping("{userTelegramId}")
     public ResponseEntity<Bot> createBot(@PathVariable Long userTelegramId, @RequestBody Bot bot) {
-        return ResponseEntity.ok(businessOwnerService.saveBot(userTelegramId, bot));
+        return businessOwnerService.saveBot(userTelegramId, bot).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("{userTelegramId}/bots/{botId}")
     public ResponseEntity<Bot> deleteBot(@PathVariable Long userTelegramId, @PathVariable Long botId) {
-        return ResponseEntity.ok(businessOwnerService.deleteBot(userTelegramId, botId));
+        return businessOwnerService.deleteBot(userTelegramId, botId).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("{userTelegramId}/bots")
     public ResponseEntity<List<Bot>> findAllBots(@PathVariable Long userTelegramId) {
-        return ResponseEntity.ok(businessOwnerService.findAllBots(userTelegramId));
+        return businessOwnerService.findAllBots(userTelegramId).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("{userTelegramId}/bots/display")
     public ResponseEntity<List<Bot>> findDisplayableBots(@PathVariable Long userTelegramId) {
-        return ResponseEntity.ok(businessOwnerService.getDisplayableBots(userTelegramId));
+        return businessOwnerService.getDisplayableBots(userTelegramId).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("{userTelegramId}/exists")
@@ -44,7 +44,7 @@ public class BusinessOwnerController {
 
     @GetMapping("{userTelegramId}/editable")
     public ResponseEntity<Bot> getEditableBot(@PathVariable Long userTelegramId) {
-        return ResponseEntity.ok(businessOwnerService.getEditableBot(userTelegramId));
+        return businessOwnerService.getEditableBot(userTelegramId).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
@@ -59,6 +59,6 @@ public class BusinessOwnerController {
 
     @GetMapping("{userTelegramId}")
     public ResponseEntity<BusinessOwner> getOwner(@PathVariable Long userTelegramId) {
-        return ResponseEntity.ok(businessOwnerService.getOwner(userTelegramId));
+        return businessOwnerService.getOwner(userTelegramId).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 }

@@ -20,12 +20,12 @@ public class AppointmentController {
 
     @GetMapping("{id}")
     public ResponseEntity<Appointment> getAppointment(@PathVariable Long id) {
-        return ResponseEntity.ok(appointmentService.getAppointment(id));
+        return ResponseEntity.ok(appointmentService.getAppointment(id).orElse(null));
     }
 
     @GetMapping("/{id}/client")
     public ResponseEntity<Client> getClient(@PathVariable Long id) {
-        return ResponseEntity.ok(appointmentService.getClient(id));
+        return ResponseEntity.ok(appointmentService.getClient(id).orElse(null));
     }
 
 }

@@ -15,23 +15,21 @@ public class AppointmentService {
 
     public Appointment updateAppointment(Long id, Appointment appointment) {
         Optional<Appointment> optionalAppointment = appointmentRepository.findById(id);
-        if (optionalAppointment.isPresent()) {
-            Appointment currentAppointment = optionalAppointment.get();
-            currentAppointment.setAppointmentDate(appointment.getAppointmentDate());
-            currentAppointment.setStatus(appointment.getStatus());
-            currentAppointment.setJob(appointment.getJob());
-            return appointmentRepository.save(currentAppointment);
-        } else {
-            return appointmentRepository.save(appointment);
-        }
+        Appointment appToSave = optionalAppointment.map(app -> {
+            app.setAppointmentDate(appointment.getAppointmentDate());
+            app.setStatus(appointment.getStatus());
+            app.setJob(appointment.getJob());
+            return app;
+        }).orElse(appointment);
+
+        return appointmentRepository.save(appToSave);
     }
 
-    public Appointment getAppointment(Long id) {
-        return appointmentRepository.findById(id).orElse(null);
+    public Optional<Appointment> getAppointment(Long id) {
+        return appointmentRepository.findById(id);
     }
 
-    public Client getClient(Long id) {
-        Appointment appointment = getAppointment(id);
-        return appointment.getClient();
+    public Optional<Client> getClient(Long id) {
+        return getAppointment(id).map(Appointment::getClient);
     }
 }

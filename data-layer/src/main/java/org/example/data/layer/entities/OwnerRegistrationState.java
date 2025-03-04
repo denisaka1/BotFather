@@ -1,12 +1,12 @@
 package org.example.data.layer.entities;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
 import java.util.Optional;
 
+@Getter
 @RequiredArgsConstructor
 public enum OwnerRegistrationState {
     ASK_PHONE("📱 What is your phone number?"),
@@ -14,28 +14,26 @@ public enum OwnerRegistrationState {
     ASK_ADDRESS("🏠 What is your address?"),
     COMPLETED("🎉 Thank you for registering! Type any text to continue.");
 
-    @Getter
     private final String message;
+    private OwnerRegistrationState previousState;
+    private OwnerRegistrationState nextState;
+
+    static {
+        ASK_PHONE.previousState = ASK_PHONE;
+        ASK_PHONE.nextState = ASK_EMAIL;
+
+        ASK_EMAIL.previousState = ASK_PHONE;
+        ASK_EMAIL.nextState = ASK_ADDRESS;
+
+        ASK_ADDRESS.previousState = ASK_EMAIL;
+        ASK_ADDRESS.nextState = COMPLETED;
+
+        COMPLETED.previousState = ASK_ADDRESS;
+        COMPLETED.nextState = COMPLETED;
+    }
 
     public boolean isCompleted() {
         return this == COMPLETED;
-    }
-
-    public Optional<OwnerRegistrationState> getNextState() {
-        return switch (this) {
-            case ASK_PHONE -> Optional.of(ASK_EMAIL);
-            case ASK_EMAIL -> Optional.of(ASK_ADDRESS);
-            case ASK_ADDRESS -> Optional.of(COMPLETED);
-            case COMPLETED -> Optional.empty();
-        };
-    }
-
-    public Optional<OwnerRegistrationState> getPreviousState() {
-        return switch (this) {
-            case ASK_PHONE, ASK_EMAIL -> Optional.of(ASK_PHONE);
-            case ASK_ADDRESS -> Optional.of(ASK_EMAIL);
-            case COMPLETED -> Optional.empty();
-        };
     }
 
     public static Optional<OwnerRegistrationState> fromString(String stateName) {

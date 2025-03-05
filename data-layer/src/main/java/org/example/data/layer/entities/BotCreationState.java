@@ -18,40 +18,72 @@ public enum BotCreationState {
             2️⃣ Send the command /newbot.
             3️⃣ Follow the instructions to choose a name and username for your bot.
             4️⃣ Copy the final message containing your bot token.
-            """),
-    ASK_BOT_NAME("📝 What is your bot name?"),
-    ASK_WELCOME_MESSAGE("💬 What should be your bot's welcome message?"),
-    ASK_WORKING_HOURS("""
-            ⏳ What are your working hours?
-            
-            ℹ️️ Please provide a list of days in the following format:
-            { Day: HH:MM - HH:MM } (24-hour format) or "None" if you don't work on that day.
-            ℹ️️ The last hour represents the latest time you are available to provide services.
-            ℹ️️ Please ensure you use full hours or half-hour intervals only.
-            
-            Example:
-            Monday: 09:30 - 17:00
-            Tuesday: 09:00 - 17:00
-            Wednesday: 09:00 - 16:00, 17:00 - 20:00
-            Thursday: 09:00 - 17:00
-            Friday: 10:00 - 14:00
-            Saturday: None
-            Sunday: None
-            """),
-    ASK_JOBS("""
-            📋 What are your working durations?
-            Please provide a list of services with their respective durations in the following format:
-            Service Name: HH:MM (or multiple time slots separated by commas)
-            
-            Example:
-            Men's haircut: 00:30
-            Women's haircut: 01:30
-            Lesson: 01:00, 02:00
-            Yoga class: 01:00
-            """),
-    COMPLETED("🎉 Your new bot has been created successfully!\nYou can now access it using the link from the first message.\n\n🙏 Thank you for creating new bot with us! Type any text to continue.");
+            """,
+            "✅ Bot creation message is verified!",
+            "What is the new token for the bot?",
+            "✅ Bot token successfully changed!"
+    ),
+    ASK_BOT_NAME(
+            "📝 What is your bot name?",
+            "✅ Bot name saved successfully!",
+            "What is the new name for the bot?",
+            "✅ Bot name changed successfully!"
+    ),
+    ASK_WELCOME_MESSAGE(
+            "💬 What should be your bot's welcome message?",
+            "✅ Welcome message saved successfully!",
+            "What is the new welcome message for the bot?",
+            "✅ Welcome message changed successfully!"
+    ),
+    ASK_WORKING_HOURS(
+            """
+                    ⏳ What are your working hours?
+                    
+                    ℹ️️ Please provide a list of days in the following format:
+                    { Day: HH:MM - HH:MM } (24-hour format) or "None" if you don't work on that day.
+                    ℹ️️ The last hour represents the latest time you are available to provide services.
+                    ℹ️️ Please ensure you use full hours or half-hour intervals only.
+                    
+                    Example:
+                    Monday: 09:30 - 17:00
+                    Tuesday: 09:00 - 17:00
+                    Wednesday: 09:00 - 16:00, 17:00 - 20:00
+                    Thursday: 09:00 - 17:00
+                    Friday: 10:00 - 14:00
+                    Saturday: None
+                    Sunday: None
+                    """,
+            "✅ Working hours are saved.",
+            "What are the new working hours for the bot?",
+            "✅ Working hours are changed."
+    ),
+    ASK_JOBS(
+            """
+                    📋 What are your working durations?
+                    Please provide a list of services with their respective durations in the following format:
+                    Service Name: HH:MM (or multiple time slots separated by commas)
+                    
+                    Example:
+                    Men's haircut: 00:30
+                    Women's haircut: 01:30
+                    Lesson: 01:00, 02:00
+                    Yoga class: 01:00
+                    """,
+            "✅ Working durations are saved.",
+            "What are the new jobs for the bot?",
+            "✅ Working durations are changed."
+    ),
+    COMPLETED(
+            "🎉 Your new bot has been created successfully!\nYou can now access it using the link from the first message.\n\n🙏 Thank you for creating new bot with us! Type any text to continue.",
+            "",
+            "",
+            ""
+    );
 
     private final String message;
+    private final String successSaveMessage;
+    private final String editMessage;
+    private final String successChangeMessage;
     private BotCreationState prevState;
     private BotCreationState nextState;
 

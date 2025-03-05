@@ -18,11 +18,10 @@ import java.util.function.BiConsumer;
 
 import static org.example.data.layer.entities.BotCreationState.*;
 
-@Getter
 @Component
 public class CreateSlashCommandHelper {
+    @Getter
     private final Map<BotCreationState, BiConsumer<Bot, String>> stateActions = new EnumMap<>(BotCreationState.class);
-    private final Map<BotCreationState, String> stateSuccessMessages = new EnumMap<>(BotCreationState.class);
 
     private final DynamicBotApi dynamicBotApi;
     private final BotApi botApi;
@@ -36,12 +35,6 @@ public class CreateSlashCommandHelper {
         stateActions.put(ASK_WELCOME_MESSAGE, Bot::setWelcomeMessage);
         stateActions.put(ASK_WORKING_HOURS, this::buildAndSaveWorkingHours);
         stateActions.put(ASK_JOBS, this::buildAndSaveJobs);
-
-        stateSuccessMessages.put(ASK_BOT_FATHER_BOT_CREATION_MESSAGE, "✅ Bot creation message is verified!");
-        stateSuccessMessages.put(ASK_BOT_NAME, "✅ Bot name saved successfully!");
-        stateSuccessMessages.put(ASK_WELCOME_MESSAGE, "✅ Welcome message saved successfully!");
-        stateSuccessMessages.put(ASK_WORKING_HOURS, "✅ Working hours are saved.");
-        stateSuccessMessages.put(ASK_JOBS, "✅ Working durations are saved.");
     }
 
     public boolean containsKey(BotCreationState state) {
@@ -58,7 +51,7 @@ public class CreateSlashCommandHelper {
             dynamicBotApi.registerBot(savedBot);
         }
 
-        return stateSuccessMessages.get(currentState) + "\n\n" + nextState.getMessage();
+        return currentState.getSuccessSaveMessage() + "\n\n" + nextState.getMessage();
     }
 
     private void setTokenAndUsername(Bot bot, String userInput) {

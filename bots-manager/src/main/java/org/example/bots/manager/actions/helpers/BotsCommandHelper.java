@@ -1,12 +1,15 @@
 package org.example.bots.manager.actions.helpers;
 
-import lombok.RequiredArgsConstructor;
+import lombok.Getter;
 import org.example.bots.manager.constants.Callback;
+import org.example.bots.manager.utils.MessageExtractor;
 import org.example.client.api.controller.BotApi;
 import org.example.client.api.controller.BusinessOwnerApi;
 import org.example.client.api.processor.MessageBatchProcessor;
 import org.example.data.layer.entities.Bot;
 import org.example.data.layer.entities.BotCreationState;
+import org.example.data.layer.entities.Job;
+import org.example.data.layer.entities.WorkingHours;
 import org.example.data.layer.helpers.BotHelper;
 import org.example.telegram.components.inline.keyboard.ButtonsGenerator;
 import org.example.telegram.components.inline.keyboard.MessageGenerator;
@@ -16,76 +19,59 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.BiConsumer;
+
+import static org.example.data.layer.entities.BotCreationState.*;
 
 @Component
-@RequiredArgsConstructor
 public class BotsCommandHelper {
 
     private final MessageBatchProcessor messageBatchProcessor;
     private final BusinessOwnerApi businessOwnerApi;
     private final BotApi botApi;
 
-    public void sendDelete(CallbackQuery callbackQuery, String botId) {
-        Long userId = callbackQuery.getFrom().getId();
-        Long chatId = callbackQuery.getMessage().getChatId();
-        Bot bot = businessOwnerApi.deleteBot(userId, botId);
+    @Getter
+    private final Map<String, BiConsumer<CallbackQuery, String>> callbackHandlers = new HashMap<>();
+    private final Map<BotCreationState, BiConsumer<Bot, String>> stateActions = new EnumMap<>(BotCreationState.class);
 
+    public BotsCommandHelper(MessageBatchProcessor messageBatchProcessor, BusinessOwnerApi businessOwnerApi, BotApi botApi) {
+        this.messageBatchProcessor = messageBatchProcessor;
+        this.businessOwnerApi = businessOwnerApi;
+        this.botApi = botApi;
+
+        callbackHandlers.put(Callback.SELECT_BOT, this::showActions);
+        callbackHandlers.put(Callback.EDIT_BOT_NAME, (query, botId) -> sendEditMessage(query, botId, ASK_BOT_NAME));
+        callbackHandlers.put(Callback.EDIT_BOT_WORKING_HOURS, (query, botId) -> sendEditMessage(query, botId, ASK_WORKING_HOURS));
+        callbackHandlers.put(Callback.EDIT_BOT_TOKEN, (query, botId) -> sendEditMessage(query, botId, ASK_BOT_FATHER_BOT_CREATION_MESSAGE));
+        callbackHandlers.put(Callback.EDIT_BOT_WELCOME_MESSAGE, (query, botId) -> sendEditMessage(query, botId, ASK_WELCOME_MESSAGE));
+        callbackHandlers.put(Callback.EDIT_BOT_JOBS, (query, botId) -> sendEditMessage(query, botId, ASK_JOBS));
+        callbackHandlers.put(Callback.DELETE_BOT, this::sendDelete);
+        callbackHandlers.put(Callback.BACK_TO_BOTS_LIST, (query, botId) -> returnToShowBotsList(query));
+
+        stateActions.put(ASK_BOT_FATHER_BOT_CREATION_MESSAGE, Bot::setToken);
+        stateActions.put(ASK_BOT_NAME, Bot::setName);
+        stateActions.put(ASK_WELCOME_MESSAGE, Bot::setWelcomeMessage);
+        stateActions.put(ASK_WORKING_HOURS, this::buildBotWorkingHours);
+        stateActions.put(ASK_JOBS, this::buildBotJobs);
+    }
+
+    public boolean containsStateKey(BotCreationState state) {
+        return stateActions.containsKey(state);
+    }
+
+    public void acceptState(BotCreationState currentState, Bot bot, Message message) {
+        String userResponse = message.getText();
+        stateActions.get(currentState).accept(bot, userResponse);
+        
+        bot.setCreationState(BotCreationState.COMPLETED);
+        botApi.updateBot(bot);
         messageBatchProcessor.addMessage(
                 MessageGenerator.createSimpleTextMessage(
-                        chatId,
-                        bot.getName() + " has been deleted."
+                        message.getChatId(),
+                        currentState.getSuccessChangeMessage()
                 )
         );
-
-        if (!businessOwnerApi.getDisplayableBots(userId).isEmpty()) {
-            returnToShowBotsList(callbackQuery);
-        } else {
-            noBotsToShow(callbackQuery);
-        }
-    }
-
-    public void sendEditMessage(CallbackQuery callbackQuery, String botId, BotCreationState state) {
-        Long chatId = callbackQuery.getMessage().getChatId();
-
-        Bot bot = botApi.getBot(botId);
-        bot.setCreationState(state);
-        botApi.updateBot(bot);
-
-        messageBatchProcessor.addMessage(
-                MessageGenerator.createSimpleTextMessage(chatId, botEditMessageByState(state))
-        );
-    }
-
-    public void returnToShowBotsList(CallbackQuery callbackQuery) {
-        Long userId = callbackQuery.getFrom().getId();
-        Long chatId = callbackQuery.getMessage().getChatId();
-        Integer messageId = callbackQuery.getMessage().getMessageId();
-
-        Map<String, String> config = getBotConfigList(userId, false);
-
-        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
-
-        if (config.isEmpty()) {
-            // TODO: delete the buttons message
-            // Send:
-//            👋 Welcome to the Bots Creator!
-//                    You don't have any bots created.
-//            You need to register using the /create command to create a new bot.
-//                    Type any text to return to the menu.
-        } else {
-            keyboardMarkup.setKeyboard(createKeyboard(config));
-            messageBatchProcessor.addTextUpdate(
-                    MessageGenerator.createEditMessageWithMarkup(
-                            chatId.toString(),
-                            "Select a bot from the bots list:",
-                            keyboardMarkup,
-                            messageId)
-            );
-        }
     }
 
     public void showBotsList(Message message) {
@@ -118,7 +104,70 @@ public class BotsCommandHelper {
         }
     }
 
-    public void showActions(CallbackQuery callbackQuery, String botId) {
+    public String invalidEditQuestionMessage(BotCreationState state) {
+        return "❌ Invalid input!\n\n" + botEditMessageByState(state);
+    }
+
+    private void sendDelete(CallbackQuery callbackQuery, String botId) {
+        Long userId = callbackQuery.getFrom().getId();
+        Long chatId = callbackQuery.getMessage().getChatId();
+        Bot bot = businessOwnerApi.deleteBot(userId, botId);
+
+        messageBatchProcessor.addMessage(
+                MessageGenerator.createSimpleTextMessage(
+                        chatId,
+                        bot.getName() + " has been deleted."
+                )
+        );
+
+        if (!businessOwnerApi.getDisplayableBots(userId).isEmpty()) {
+            returnToShowBotsList(callbackQuery);
+        } else {
+            noBotsToShow(callbackQuery);
+        }
+    }
+
+    private void sendEditMessage(CallbackQuery callbackQuery, String botId, BotCreationState state) {
+        Long chatId = callbackQuery.getMessage().getChatId();
+
+        Bot bot = botApi.getBot(botId);
+        bot.setCreationState(state);
+        botApi.updateBot(bot);
+
+        messageBatchProcessor.addMessage(
+                MessageGenerator.createSimpleTextMessage(chatId, botEditMessageByState(state))
+        );
+    }
+
+    private void returnToShowBotsList(CallbackQuery callbackQuery) {
+        Long userId = callbackQuery.getFrom().getId();
+        Long chatId = callbackQuery.getMessage().getChatId();
+        Integer messageId = callbackQuery.getMessage().getMessageId();
+
+        Map<String, String> config = getBotConfigList(userId, false);
+
+        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
+
+        if (config.isEmpty()) {
+            // TODO: delete the buttons message
+            // Send:
+//            👋 Welcome to the Bots Creator!
+//                    You don't have any bots created.
+//            You need to register using the /create command to create a new bot.
+//                    Type any text to return to the menu.
+        } else {
+            keyboardMarkup.setKeyboard(createKeyboard(config));
+            messageBatchProcessor.addTextUpdate(
+                    MessageGenerator.createEditMessageWithMarkup(
+                            chatId.toString(),
+                            "Select a bot from the bots list:",
+                            keyboardMarkup,
+                            messageId)
+            );
+        }
+    }
+
+    private void showActions(CallbackQuery callbackQuery, String botId) {
         Integer messageId = callbackQuery.getMessage().getMessageId();
         Long chatId = callbackQuery.getMessage().getChatId();
 
@@ -146,10 +195,6 @@ public class BotsCommandHelper {
                         keyboardMarkup,
                         messageId)
         );
-    }
-
-    public String invalidEditQuestionMessage(BotCreationState state) {
-        return "❌ Invalid input!\n\n" + botEditMessageByState(state);
     }
 
     private List<List<InlineKeyboardButton>> createKeyboard(Map<String, String> buttonConfigs) {
@@ -191,26 +236,7 @@ public class BotsCommandHelper {
     }
 
     private String botEditMessageByState(BotCreationState botCreationState) {
-        switch (botCreationState) {
-            case ASK_BOT_FATHER_BOT_CREATION_MESSAGE -> {
-                return "What is the new token for the bot?";
-            }
-            case ASK_BOT_NAME -> {
-                return "What is the new name for the bot?";
-            }
-            case ASK_WELCOME_MESSAGE -> {
-                return "What is the new welcome message for the bot?";
-            }
-            case ASK_WORKING_HOURS -> {
-                return "What are the new working hours for the bot?";
-            }
-            case ASK_JOBS -> {
-                return "What are the new jobs for the bot?";
-            }
-            default -> {
-                return "Unknown state";
-            }
-        }
+        return botCreationState.getEditMessage();
     }
 
     private void noBotsToShow(CallbackQuery callbackQuery) {
@@ -239,5 +265,15 @@ public class BotsCommandHelper {
                         text
                 )
         );
+    }
+
+    private void buildBotWorkingHours(Bot bot, String userResponse) {
+        List<WorkingHours> workingHours = MessageExtractor.extractWorkingHours(userResponse);
+        bot.setWorkingHours(workingHours);
+    }
+
+    private void buildBotJobs(Bot bot, String userResponse) {
+        List<Job> jobs = MessageExtractor.extractJobs(userResponse);
+        bot.setJobs(jobs);
     }
 }
